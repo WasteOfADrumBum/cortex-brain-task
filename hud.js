@@ -103,6 +103,8 @@ const HUD = (() => {
   function gauge(host, { label, max, steps = 5 }) {
     const wrap = document.createElement("div");
     wrap.className = "gauge";
+    wrap.setAttribute("role", "img");
+    wrap.setAttribute("aria-label", `${label}: no data`);
     const svg = el("svg", { viewBox: "0 0 200 150", "aria-hidden": "true" });
     wrap.appendChild(svg);
     el("path", { class: "g-track", d: arc(100, 100, 78, SWEEP0, SWEEP1) }, svg);
@@ -121,6 +123,7 @@ const HUD = (() => {
 
     const readout = document.createElement("div");
     readout.className = "gauge-readout";
+    readout.setAttribute("aria-hidden", "true");
     readout.innerHTML = `<div class="gauge-value">--</div><div class="gauge-label"></div><div class="gauge-note"></div>`;
     readout.querySelector(".gauge-label").textContent = label;
     wrap.appendChild(readout);
@@ -150,6 +153,7 @@ const HUD = (() => {
         vEl.textContent = text ?? (value == null ? "--" : String(value));
         vEl.className = `gauge-value tone-${tone}`;
         readout.querySelector(".gauge-note").textContent = note;
+        wrap.setAttribute("aria-label", `${label}: ${value == null ? "no data" : vEl.textContent}${note ? `, ${note}` : ""}`);
       },
     };
   }
@@ -158,6 +162,8 @@ const HUD = (() => {
   function ring(host, label) {
     const wrap = document.createElement("div");
     wrap.className = "ring";
+    wrap.setAttribute("role", "img");
+    wrap.setAttribute("aria-label", `${label}: no data`);
     const svg = el("svg", { viewBox: "0 0 60 60", "aria-hidden": "true" });
     const R = 25, LEN = 2 * Math.PI * R;
     el("circle", { class: "r-track", cx: 30, cy: 30, r: R }, svg);
@@ -165,6 +171,7 @@ const HUD = (() => {
     wrap.appendChild(svg);
     const text = document.createElement("div");
     text.className = "ring-text";
+    text.setAttribute("aria-hidden", "true");
     text.innerHTML = "<b>--</b><span></span>";
     text.querySelector("span").textContent = label;
     wrap.appendChild(text);
@@ -174,6 +181,7 @@ const HUD = (() => {
         const f = Math.max(0, Math.min(1, fraction));
         v.setAttribute("stroke-dashoffset", (LEN * (1 - f)).toFixed(2));
         text.querySelector("b").textContent = `${Math.floor(f * 100)}%`;
+        wrap.setAttribute("aria-label", `${label}: ${Math.floor(f * 100)}% elapsed`);
       },
     };
   }

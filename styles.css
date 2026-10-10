@@ -10,7 +10,7 @@
   --cyan-soft: #8fe9ff;
   --cyan-deep: #1384b0;
   --text: #dcf4ff;
-  --muted: #8eb4c6;
+  --muted: #a9c8d6;
   --amber: #ffb547;
   --green: #4dffa6;
   --red: #ff6b78;
@@ -317,7 +317,7 @@ button, input { font: inherit; color: inherit; }
   flex: 1; min-width: 0; min-height: 42px; padding: 8px 12px;
   background: rgba(2, 8, 14, 0.7); border: 1px solid var(--line-strong); border-radius: var(--radius);
 }
-.search input::placeholder { color: #7097aa; }
+.search input::placeholder { color: #93b4c4; }
 .files { display: flex; flex-direction: column; max-height: 420px; overflow-y: auto; scrollbar-color: var(--cyan-deep) transparent; }
 .files li + li { border-top: 1px solid rgba(67, 217, 255, 0.1); }
 .file-btn {
@@ -330,7 +330,7 @@ button, input { font: inherit; color: inherit; }
 .file-time { font-family: var(--font-mono); font-size: 12px; color: var(--muted); white-space: nowrap; }
 .tag {
   display: inline-block; min-width: 64px; padding: 2px 6px; border-radius: 3px; text-align: center;
-  font-family: var(--font-display); font-size: 9px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase;
+  font-family: var(--font-display); font-size: 10px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase;
   border: 1px solid currentColor;
 }
 .tag-inbox { color: var(--amber); }
@@ -338,7 +338,7 @@ button, input { font: inherit; color: inherit; }
 .tag-index { color: var(--green); }
 .tag-profile { color: var(--violet); }
 .tag-digest { color: #7cf0d4; }
-.tag-retired { color: var(--muted); }
+.tag-retired { color: #c3d6df; }
 .files .empty { padding: 18px 6px; color: var(--muted); }
 
 /* ---------- Date tile + ring clock ---------- */
@@ -349,7 +349,7 @@ button, input { font: inherit; color: inherit; }
   text-shadow: 0 0 18px rgba(67, 217, 255, 0.45);
 }
 .date-month {
-  margin-top: 8px; padding: 2px 10px; background: var(--cyan-deep); color: #fff;
+  margin-top: 8px; padding: 2px 10px; background: #0b5f80; color: #fff;
   font-family: var(--font-display); font-size: 13px; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase;
 }
 .date-weekday { margin-top: 4px; font-family: var(--font-display); font-size: 12px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted); }
