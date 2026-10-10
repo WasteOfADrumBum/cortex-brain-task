@@ -1,6 +1,8 @@
 # Cortex
 
-A heads-up display for the Second Brain in Google Drive. Plain HTML, CSS and JavaScript with no build step, so it runs on any static host (Vercel here). It only ever asks for read-only Drive access (`drive.readonly`) and nothing depends on a home PC.
+A heads-up display for the Second Brain in Google Drive. Plain HTML, CSS and JavaScript with no build step, plus two small Vercel functions for the planner. The dashboard only ever asks for read-only Drive access (`drive.readonly`) and nothing depends on a home PC.
+
+Two views, switched from the top bar: **Dashboard** (`index.html`) and **Planner** (`planner.html`).
 
 ## What's on the HUD
 
@@ -16,6 +18,25 @@ A heads-up display for the Second Brain in Google Drive. Plain HTML, CSS and Jav
 - **Systems**: Drive link status, weather feed, network, and battery where the browser reports it.
 - **Preview**: shows the whole HUD with sample data, so you can see it before Drive is linked. Add `?demo=1` to the URL to open in Preview.
 
+## Planner (At a glance)
+
+One screen with your Todoist tasks, today hour by hour (6 AM to 10 PM) with open time blocks, the week Sunday to Saturday on the same hours, and the month with event titles only.
+
+- **Critical this week**: overdue, or P1/P2 due within 7 days
+- **Quick pickups**: Todoist duration 30 min or less, or label `quick`
+- **Big tasks**: duration 60 min or more, or label `deep`
+- **Everything else**: collapsed list, so nothing disappears
+
+Set a Todoist **duration** on every task (or ask your AI tools to) so the quick/big split is automatic. Until the API is set up, the planner shows sample data.
+
+Set these in Vercel (Project → Settings → Environment Variables); `.env.example` explains each one:
+
+- `TODOIST_TOKEN`: Todoist → Settings → Integrations → Developer → API token
+- `GCAL_ICS_URLS`: each Google Calendar's "Secret address in iCal format", comma-separated. Anyone with one of these URLs can read that calendar.
+- `DASH_KEY`: any long random string. The planner asks for it once per device and remembers it there.
+
+Google's iCal feed can lag your live calendar by minutes to a few hours.
+
 A website can't read a computer's CPU, RAM, disk or Wi-Fi strength, so those desktop-widget gauges are replaced by the brain telemetry above.
 
 ## Files
@@ -30,10 +51,14 @@ A website can't read a computer's CPU, RAM, disk or Wi-Fi strength, so those des
 | `drive.js` | Read-only Google Drive access |
 | `weather.js` | Weather from Open-Meteo |
 | `favicon.svg` | Tab icon |
+| `planner.html`, `planner.css`, `planner.js` | Planner view |
+| `api/tasks.js` | Todoist tasks for the planner (needs `DASH_KEY`) |
+| `api/calendar.js` | Google Calendar events from iCal feeds (needs `DASH_KEY`) |
+| `.env.example` | The three planner settings to set in Vercel |
 
 ## Setup
 
-1. **Host it.** In Vercel, connect the `cortex-brain` project to this repository (Settings → Git). No build command or output directory is needed.
+1. **Host it.** In Vercel, connect the `cortex-brain` project to this repository (Settings → Git). No build command or output directory is needed; Vercel installs `ical-expander` for the calendar function from `package.json`.
 2. **Create a Google OAuth client** at console.cloud.google.com:
    1. Create a project, then enable the **Google Drive API**.
    2. Under Google Auth Platform, set up the consent screen (External), add yourself as a test user, and add the `.../auth/drive.readonly` scope.
