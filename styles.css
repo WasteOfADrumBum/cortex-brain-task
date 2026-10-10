@@ -98,6 +98,14 @@ button, input { font: inherit; color: inherit; }
 .sys-status[data-state="demo"] .dot { background: var(--violet); box-shadow: 0 0 10px var(--violet); }
 
 .top-actions { display: flex; gap: 10px; }
+.views ul { display: flex; gap: 4px; padding: 3px; border: 1px solid var(--line); border-radius: 999px; background: rgba(8, 22, 36, 0.8); }
+.views a {
+  display: inline-flex; align-items: center; min-height: 38px; padding: 6px 16px; border-radius: 999px;
+  color: var(--muted); text-decoration: none;
+  font-family: var(--font-display); font-size: 12px; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase;
+}
+.views a:hover { color: var(--text); background: rgba(67, 217, 255, 0.1); }
+.views a[aria-current="page"] { background: var(--cyan); color: #001520; }
 .btn {
   min-height: 40px; padding: 8px 16px; border-radius: var(--radius);
   border: 1px solid var(--line-strong); background: transparent; cursor: pointer;
@@ -148,6 +156,10 @@ button, input { font: inherit; color: inherit; }
   .date-panel { order: 10; }
   .systems-panel { order: 11; }
   .brand-sub { display: none; }
+  .views { order: 3; width: 100%; }
+  .views ul { justify-content: center; }
+  .views li { flex: 1; }
+  .views a { width: 100%; justify-content: center; }
   .top-actions { width: 100%; }
   .top-actions .btn { flex: 1; }
   .ticker { position: static; gap: 6px 16px; }

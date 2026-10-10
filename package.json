@@ -1,0 +1,12 @@
+{
+  "name": "cortex-brain-task",
+  "private": true,
+  "type": "module",
+  "description": "Cortex HUD: static pages plus two Vercel functions for the planner.",
+  "engines": {
+    "node": "22.x"
+  },
+  "dependencies": {
+    "ical-expander": "^3.2.0"
+  }
+}

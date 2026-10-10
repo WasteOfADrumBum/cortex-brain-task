@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>At a glance · Cortex</title>
+  <meta name="description" content="Cortex planner: Todoist tasks, today, this week and this month at a glance.">
+  <meta name="theme-color" content="#04080e">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;800&family=Rajdhani:wght@500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="planner.css">
+</head>
+<body class="planner-page">
+  <a class="skip-link" href="#main">Skip to planner</a>
+  <div class="backdrop" aria-hidden="true"></div>
+
+  <header class="topbar">
+    <div class="brand">
+      <svg class="brand-mark" viewBox="0 0 48 48" aria-hidden="true">
+        <circle cx="24" cy="24" r="21" class="bm-outer"/>
+        <circle cx="24" cy="24" r="14" class="bm-mid"/>
+        <circle cx="24" cy="24" r="6" class="bm-core"/>
+      </svg>
+      <div>
+        <p class="brand-name">Cortex</p>
+        <p class="brand-sub">Second Brain Command</p>
+      </div>
+    </div>
+    <nav class="views" aria-label="Views">
+      <ul>
+        <li><a href="index.html">Dashboard</a></li>
+        <li><a href="planner.html" aria-current="page">Planner</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main class="wrap" id="main">
+    <header class="top">
+      <div>
+        <h1>At a glance</h1>
+        <p class="date" id="today-date"></p>
+      </div>
+      <nav class="jump" aria-label="Sections">
+        <ul>
+          <li><a href="#tasks">To do</a></li>
+          <li><a href="#day">Today</a></li>
+          <li><a href="#week">This week</a></li>
+          <li><a href="#month">This month</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <p id="status" role="status" aria-live="polite">Loading your tasks and calendar.</p>
+    <form id="keyform" aria-describedby="status">
+      <label>Dashboard key<input id="keyinput" type="password" autocomplete="current-password" required></label>
+      <button type="submit" class="btn btn-primary">Unlock</button>
+    </form>
+
+    <div class="layout">
+      <section class="panel" id="tasks" aria-labelledby="tasks-h" tabindex="-1">
+        <header><h2 id="tasks-h">To do</h2><p class="sub" id="tasks-sub"></p></header>
+        <div id="task-groups"></div>
+      </section>
+
+      <section class="panel" id="day" aria-labelledby="day-h" tabindex="-1">
+        <header><h2 id="day-h">Today</h2><p class="sub" id="open-sum"></p></header>
+        <ul class="allday" id="day-allday" aria-label="All-day events today"></ul>
+        <div class="scroll" id="day-scroll" tabindex="0" role="region" aria-label="Today, 6 AM to 10 PM"></div>
+        <p class="outside" id="day-outside"></p>
+      </section>
+
+      <section class="panel full" id="week" aria-labelledby="week-h" tabindex="-1">
+        <header><h2 id="week-h">This week</h2><p class="sub" id="week-range"></p></header>
+        <div class="scroll" id="week-scroll" tabindex="0" role="region" aria-label="This week, Sunday to Saturday, 6 AM to 10 PM"></div>
+      </section>
+
+      <section class="panel full" id="month" aria-labelledby="month-h" tabindex="-1">
+        <header><h2 id="month-h">This month</h2></header>
+        <div class="mwrap" id="month-grid" tabindex="0" role="region" aria-label="Month calendar"></div>
+      </section>
+    </div>
+  </main>
+
+  <footer class="ticker">
+    <span>Cortex v2.0</span>
+    <span>Planner · Todoist + Google Calendar</span>
+    <span>Refreshes every 10 minutes</span>
+  </footer>
+
+  <script src="planner.js"></script>
+</body>
+</html>
