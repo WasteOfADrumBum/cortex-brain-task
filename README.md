@@ -4,7 +4,7 @@ A heads-up display for the Second Brain in Google Drive. Plain HTML, CSS and Jav
 
 ## What's on the HUD
 
-- **Brain core**: total files in the Second Brain, with an orbit of area buttons (Inbox, Notes, Digests, Index, Profile, Retired) that filter the file list. The glowing band shows sweep health.
+- **Brain core**: active files in the Second Brain (retired versions are counted separately), with an orbit of area buttons (Inbox, Notes, Digests, Index, Profile, Retired) that filter the file list. The glowing band shows sweep health.
 - **Brain telemetry gauges**: inbox load, files created this week, days since the last weekly digest, and overall brain health.
 - **Activity**: files changed per day over the last 30 days.
 - **Recent files**: search by name as you type, or press Enter to search inside notes. Open any text note or Google Doc in a reader without leaving Cortex.

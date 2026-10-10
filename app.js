@@ -165,7 +165,7 @@
       b.innerHTML = '<span class="l"></span><span class="n"></span>';
       b.querySelector(".l").textContent = a.label;
       b.querySelector(".n").textContent = counts ? counts[a.key] : "--";
-      b.setAttribute("aria-label", `${a.label}: ${counts ? counts[a.key] : "no data"} files`);
+      b.setAttribute("aria-label", counts ? `${a.label}: ${counts[a.key]} ${counts[a.key] === 1 ? "file" : "files"}` : `${a.label}: no data`);
       b.addEventListener("click", () => {
         state.area = state.area === a.key ? null : a.key;
         state.contentHits = null;
@@ -196,7 +196,9 @@
     const counts = Object.fromEntries(AREAS.map((a) => [a.key, 0]));
     files.forEach((f) => counts[f.area]++);
     const weekAgo = Date.now() - 7 * DAY;
-    const newThisWeek = files.filter((f) => new Date(f.createdTime) > weekAgo).length;
+    // Retired versions are archives: they keep their own count but don't count as active files.
+    const active = files.filter((f) => f.area !== "retired");
+    const newThisWeek = active.filter((f) => new Date(f.createdTime) > weekAgo).length;
     const digests = files.filter((f) => f.area === "digest").sort((a, b) => new Date(b.createdTime) - new Date(a.createdTime));
     const lastSweep = digests[0] ? new Date(digests[0].createdTime) : null;
     const daysSince = lastSweep ? Math.floor((Date.now() - lastSweep) / DAY) : null;
@@ -204,7 +206,7 @@
     let health = null;
     if (daysSince != null) health = daysSince <= interval ? 100 : Math.max(0, Math.round(100 - ((daysSince - interval) / (interval * 2)) * 100));
     const index = files.find((f) => f.area === "index");
-    return { counts, total: files.length, newThisWeek, daysSince, health, index };
+    return { counts, total: active.length, newThisWeek, daysSince, health, index };
   }
 
   function renderGauges(s) {
