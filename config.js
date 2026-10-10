@@ -2,7 +2,7 @@
 window.CORTEX_CONFIG = {
   // Google OAuth "Web application" client ID (ends in .apps.googleusercontent.com).
   // Its Authorized JavaScript origin must be the exact site URL, e.g. https://cortex-brain-task-forge3.vercel.app
-  googleClientId: "",
+  googleClientId: "1026246530998-ohni0qethq13jor9hreup0v81hlmkptr.apps.googleusercontent.com",
 
   // The "Second Brain" folder in Google Drive.
   brainFolderId: "1IztK9-y6uuh6QQEH3y927MlVjYXeMUgo",
