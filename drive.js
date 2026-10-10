@@ -5,10 +5,37 @@ const Drive = (() => {
   const FIELDS = "nextPageToken,files(id,name,mimeType,createdTime,modifiedTime,webViewLink,parents)";
   const FOLDER = "application/vnd.google-apps.folder";
 
+  // The access token is kept in this browser until it expires (about an hour) so a reload
+  // doesn't drop the link. It is read-only and never leaves this origin except to Google.
+  const SESSION_KEY = "cortex.drive.session";
+  const LINKED_KEY = "cortex.drive.linked";
+
   let tokenClient = null;
   let token = null;
   let expiresAt = 0;
   let onChange = () => {};
+
+  const store = {
+    get(k) { try { return localStorage.getItem(k); } catch { return null; } },
+    set(k, v) { try { localStorage.setItem(k, v); } catch { /* storage unavailable */ } },
+    del(k) { try { localStorage.removeItem(k); } catch { /* storage unavailable */ } },
+  };
+  function saveSession() {
+    store.set(SESSION_KEY, JSON.stringify({ token, expiresAt }));
+    store.set(LINKED_KEY, "1");
+  }
+  function restoreSession() {
+    try {
+      const s = JSON.parse(store.get(SESSION_KEY) || "null");
+      if (s?.token && Date.now() < s.expiresAt - 60000) { token = s.token; expiresAt = s.expiresAt; return true; }
+    } catch { /* corrupt entry */ }
+    store.del(SESSION_KEY);
+    return false;
+  }
+  function dropToken() {
+    token = null;
+    store.del(SESSION_KEY);
+  }
 
   function configured() {
     return Boolean((window.CORTEX_CONFIG.googleClientId || "").trim());
@@ -33,33 +60,37 @@ const Drive = (() => {
       client_id: window.CORTEX_CONFIG.googleClientId.trim(),
       scope: SCOPE,
       callback: (resp) => {
-        if (resp.error) { token = null; onChange("error", resp.error_description || resp.error); return; }
+        if (resp.error) { dropToken(); onChange("error", resp.error_description || resp.error); return; }
         token = resp.access_token;
         expiresAt = Date.now() + (Number(resp.expires_in) || 3600) * 1000;
+        saveSession();
         onChange("linked");
       },
       error_callback: (err) => onChange("error", err?.message || "Sign-in was closed before it finished."),
     });
-    return "ready";
+    if (restoreSession()) return "linked";
+    return store.get(LINKED_KEY) ? "expired" : "ready";
   }
 
   function signIn() {
     if (!tokenClient) return;
-    tokenClient.requestAccessToken({ prompt: token ? "" : "consent" });
+    // After the first consent, skip the consent screen and just confirm the account.
+    tokenClient.requestAccessToken({ prompt: store.get(LINKED_KEY) ? "" : "consent" });
   }
 
   function signOut() {
     if (token && window.google?.accounts?.oauth2) google.accounts.oauth2.revoke(token, () => {});
-    token = null;
+    dropToken();
+    store.del(LINKED_KEY);
     onChange("signed-out");
   }
 
   const linked = () => Boolean(token) && Date.now() < expiresAt - 30000;
 
   async function request(url, asText = false) {
-    if (!linked()) { token = null; onChange("expired"); throw new Error("Drive session expired. Link Drive again."); }
+    if (!linked()) { dropToken(); onChange("expired"); throw new Error("Drive session expired. Link Drive again."); }
     const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
-    if (res.status === 401) { token = null; onChange("expired"); throw new Error("Drive session expired. Link Drive again."); }
+    if (res.status === 401) { dropToken(); onChange("expired"); throw new Error("Drive session expired. Link Drive again."); }
     if (!res.ok) throw new Error(`Drive returned ${res.status}.`);
     return asText ? res.text() : res.json();
   }
