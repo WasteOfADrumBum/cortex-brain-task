@@ -538,6 +538,7 @@
   Drive.init(onDriveChange).then((r) => {
     state.drive = r;
     if (r === "unconfigured") notice("Add your Google OAuth client ID to config.js to link Drive. Until then, press Preview to see Cortex with sample data.");
+    if (r === "linked" && state.mode !== "demo") { syncDrive(); return; }
     renderAll();
   }).catch((err) => {
     state.drive = "error";
