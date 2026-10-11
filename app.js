@@ -539,12 +539,38 @@
     return files.map((f) => ({ ...f, area: areaOf(f) }));
   }
 
+  // ---------- Panel numbers ----------
+  // Number panels in the order they appear: by column on wider screens, top to bottom on phones
+  // (where the columns dissolve and CSS order rearranges the panels).
+  function numberPanels() {
+    const cols = [...document.querySelectorAll(".hud > .col")];
+    const stacked = cols.some((c) => getComputedStyle(c).display === "contents");
+    const top = (el) => el.getBoundingClientRect().top;
+    const panels = stacked
+      ? [...document.querySelectorAll(".hud .panel")].sort((x, y) => top(x) - top(y))
+      : cols
+          .sort((x, y) => top(x) - top(y) || x.getBoundingClientRect().left - y.getBoundingClientRect().left)
+          .flatMap((c) => [...c.querySelectorAll(".panel")]);
+    let n = 0;
+    for (const panel of panels) {
+      const code = panel.querySelector(".panel-title .code");
+      if (code) code.textContent = String(++n).padStart(2, "0");
+    }
+  }
+  let numberQueued = false;
+  window.addEventListener("resize", () => {
+    if (numberQueued) return;
+    numberQueued = true;
+    requestAnimationFrame(() => { numberQueued = false; numberPanels(); });
+  });
+
   // ---------- Boot ----------
   renderLaunchers();
   renderSchedule();
   tick();
   setInterval(tick, 1000);
   renderAll();
+  numberPanels();
 
   const wxHost = $("weather");
   Weather.bind($("weather-form"), $("weather-city"), $("weather-geo"), wxHost, renderSystems);
