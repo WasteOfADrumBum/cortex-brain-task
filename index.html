@@ -16,34 +16,8 @@
   <a class="skip-link" href="#main">Skip to dashboard</a>
   <div class="backdrop" aria-hidden="true"></div>
 
-  <header class="topbar">
-    <div class="brand">
-      <svg class="brand-mark" viewBox="0 0 48 48" aria-hidden="true">
-        <circle cx="24" cy="24" r="21" class="bm-outer"/>
-        <circle cx="24" cy="24" r="14" class="bm-mid"/>
-        <circle cx="24" cy="24" r="6" class="bm-core"/>
-      </svg>
-      <div>
-        <p class="brand-name">Cortex</p>
-        <p class="brand-sub">Second Brain Command</p>
-      </div>
-    </div>
-    <nav class="views" aria-label="Views">
-      <ul>
-        <li><a href="index.html" aria-current="page">Dashboard</a></li>
-        <li><a href="planner.html">Planner</a></li>
-      </ul>
-    </nav>
-    <p class="sys-status" id="sys-status" role="status"><span class="dot" aria-hidden="true"></span><span class="label">Standby</span></p>
-    <button type="button" class="menu-btn" id="menu-btn" aria-expanded="false" aria-controls="top-actions" aria-label="Menu">
-      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
-    </button>
-    <div class="top-actions" id="top-actions">
-      <p class="menu-status" id="menu-status" aria-hidden="true"></p>
-      <button type="button" class="btn btn-ghost" id="btn-demo" aria-pressed="false">Preview</button>
-      <button type="button" class="btn btn-primary" id="btn-auth">Link Drive</button>
-    </div>
-  </header>
+  <!-- Filled in by header.js so every page shares one top bar. -->
+  <header class="topbar" data-page="dashboard"></header>
 
   <p class="notice" id="notice" role="alert" hidden></p>
 
@@ -168,6 +142,7 @@
   </dialog>
 
   <script src="config.js"></script>
+  <script src="header.js"></script>
   <script src="hud.js"></script>
   <script src="drive.js"></script>
   <script src="weather.js"></script>

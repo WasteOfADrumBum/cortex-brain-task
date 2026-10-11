@@ -44,6 +44,7 @@ async function load() {
     ({ tasks: TASKS, events: EVENTS } = sample(today));
     status(k ? 'That dashboard key was not accepted. Check it matches DASH_KEY in Vercel. Showing sample data until then.'
       : 'Enter your dashboard key to load your tasks and calendar. Showing sample data until then.', true);
+    CortexHeader.setStatus('warn', 'Key needed');
     render();
     return;
   }
@@ -52,9 +53,11 @@ async function load() {
   if (t.error || c.error) {
     ({ tasks: TASKS, events: EVENTS } = sample(today));
     status(`Showing sample data. ${[t.error, c.error].filter(Boolean).join(' ')}`, true);
+    CortexHeader.setStatus('warn', 'Sample data');
   } else {
     TASKS = t.data.tasks || []; EVENTS = c.data.events || [];
     status(`Updated ${fmtTime(new Date())}. Refreshes every 10 minutes.`);
+    CortexHeader.setStatus('ok', 'Planner live');
   }
   render();
 }
@@ -282,5 +285,22 @@ setInterval(() => {
   const today = sod(new Date());
   document.querySelectorAll('[data-now]').forEach(el => { const m = nowMin(today); if (m !== null) el.style.top = `${Math.min(Math.max(m, 0), SPAN) * PX}px`; });
 }, 60000);
+/* ---------- Drive link in the shared header (same session as the dashboard) ---------- */
+let driveState = 'unconfigured';
+function renderDrive() {
+  const auth = $('btn-auth');
+  auth.textContent = driveState === 'linked' ? 'Sign out' : driveState === 'expired' ? 'Relink Drive' : 'Link Drive';
+  auth.disabled = !['ready', 'linked', 'expired', 'error'].includes(driveState);
+  $('btn-demo').hidden = driveState === 'linked';
+}
+$('btn-auth').addEventListener('click', () => (driveState === 'linked' ? Drive.signOut() : Drive.signIn()));
+// Preview is the dashboard's sample mode; the planner already shows sample data until its routes are set up.
+$('btn-demo').addEventListener('click', () => { location.href = 'index.html?demo=1'; });
+Drive.init(event => { driveState = event === 'signed-out' ? 'ready' : event; renderDrive(); })
+  .then(r => { driveState = r; renderDrive(); })
+  .catch(() => { driveState = 'error'; renderDrive(); });
+renderDrive();
+
+CortexHeader.setStatus('', 'Loading');
 setInterval(load, 10 * 60000);
 load();
