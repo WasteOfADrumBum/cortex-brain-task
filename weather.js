@@ -94,8 +94,9 @@ const Weather = (() => {
     const days = [1, 2, 3].map((i) => {
       const date = new Date(`${d.time[i]}T12:00:00`);
       const name = i === 1 ? "Tomorrow" : date.toLocaleDateString([], { weekday: "long" });
+      const short = i === 1 ? "Tmrw" : date.toLocaleDateString([], { weekday: "short" });
       const [dc] = CODES[d.weather_code[i]] || ["Unknown"];
-      return { name, hi: Math.round(d.temperature_2m_max[i]), lo: Math.round(d.temperature_2m_min[i]), cond: dc, rain: d.precipitation_probability_max?.[i] ?? 0 };
+      return { name, short, hi: Math.round(d.temperature_2m_max[i]), lo: Math.round(d.temperature_2m_min[i]), cond: dc, rain: d.precipitation_probability_max?.[i] ?? 0 };
     });
 
     host.innerHTML = `
@@ -121,11 +122,15 @@ const Weather = (() => {
     for (const day of days) {
       const div = document.createElement("div");
       div.className = "wx-day";
-      div.innerHTML = `<h3></h3><p class="hi-lo"></p><p class="c"></p>`;
-      div.querySelector("h3").textContent = day.name;
-      div.querySelector(".hi-lo").textContent = `${day.hi}° / ${day.lo}°`;
+      div.innerHTML = `<h3><abbr></abbr></h3><p class="hi-lo"></p><p class="c"></p><p class="rain"></p>`;
+      // Short day names keep all three cards on the same lines on phones.
+      div.querySelector("abbr").textContent = day.short;
+      div.querySelector("abbr").title = day.name;
+      div.querySelector("h3").setAttribute("aria-label", day.name);
+      div.querySelector(".hi-lo").textContent = `${day.hi}°/${day.lo}°`;
       div.querySelector(".hi-lo").setAttribute("aria-label", `High ${day.hi} degrees, low ${day.lo} degrees`);
-      div.querySelector(".c").textContent = `${day.cond}, ${day.rain}% rain`;
+      div.querySelector(".c").textContent = day.cond;
+      div.querySelector(".rain").textContent = `${day.rain}% rain`;
       fc.appendChild(div);
     }
   }

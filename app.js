@@ -75,13 +75,12 @@
     const suffix = h24 ? "" : h < 12 ? "AM" : "PM";
     $("clock-hm").textContent = `${hh}:${mm}`;
     $("clock-ampm").textContent = suffix;
-    $("clock-sec").textContent = String(now.getSeconds()).padStart(2, "0");
     $("clock").setAttribute("datetime", now.toISOString());
     $("clock-date").textContent = now.toLocaleDateString([], { weekday: "long", month: "long", day: "numeric", year: "numeric" });
     $("date-day").textContent = now.getDate();
     $("date-month").textContent = now.toLocaleDateString([], { month: "long" });
     $("date-weekday").textContent = now.toLocaleDateString([], { weekday: "long" });
-    ringClock.set(now, `${hh}:${mm}`, suffix);
+    ringClock.set(now);
 
     const sod = startOfDay(now);
     const dow = (now.getDay() + 6) % 7; // Monday = 0
