@@ -17,25 +17,8 @@
   <a class="skip-link" href="#main">Skip to planner</a>
   <div class="backdrop" aria-hidden="true"></div>
 
-  <header class="topbar">
-    <div class="brand">
-      <svg class="brand-mark" viewBox="0 0 48 48" aria-hidden="true">
-        <circle cx="24" cy="24" r="21" class="bm-outer"/>
-        <circle cx="24" cy="24" r="14" class="bm-mid"/>
-        <circle cx="24" cy="24" r="6" class="bm-core"/>
-      </svg>
-      <div>
-        <p class="brand-name">Cortex</p>
-        <p class="brand-sub">Second Brain Command</p>
-      </div>
-    </div>
-    <nav class="views" aria-label="Views">
-      <ul>
-        <li><a href="index.html">Dashboard</a></li>
-        <li><a href="planner.html" aria-current="page">Planner</a></li>
-      </ul>
-    </nav>
-  </header>
+  <!-- Filled in by header.js so every page shares one top bar. -->
+  <header class="topbar" data-page="planner"></header>
 
   <main class="wrap" id="main">
     <header class="top">
@@ -90,6 +73,10 @@
     <span>Refreshes every 10 minutes</span>
   </footer>
 
+  <script src="config.js"></script>
+  <script src="header.js"></script>
+  <script src="drive.js"></script>
   <script src="planner.js"></script>
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
 </body>
 </html>

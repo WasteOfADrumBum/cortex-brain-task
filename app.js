@@ -409,7 +409,6 @@
 
   // ---------- Status + top bar ----------
   function renderStatus(stats) {
-    const el = $("sys-status");
     let s = ["", "Standby"];
     if (state.mode === "demo") s = ["demo", "Preview data"];
     else if (state.drive === "unconfigured") s = ["warn", "Setup needed"];
@@ -420,8 +419,7 @@
       else if (stats.health >= 80) s = ["ok", "System optimal"];
       else s = ["warn", "Sweep overdue"];
     }
-    el.dataset.state = s[0];
-    el.querySelector(".label").textContent = s[1];
+    CortexHeader.setStatus(s[0], s[1]);
 
     const auth = $("btn-auth");
     auth.textContent = state.drive === "linked" ? "Sign out" : state.drive === "expired" ? "Relink Drive" : "Link Drive";
@@ -429,7 +427,6 @@
     $("btn-demo").setAttribute("aria-pressed", String(state.mode === "demo"));
     // Preview is only for trying Cortex before Drive is linked.
     $("btn-demo").hidden = state.drive === "linked" && state.mode !== "demo";
-    $("menu-status").textContent = `Status: ${s[1]}`;
     $("ticker-sync").textContent = state.lastSync ? `Last sync: ${state.lastSync.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}` : "Last sync: never";
   }
 
@@ -472,27 +469,6 @@
     if (event === "error") { state.drive = "error"; state.error = detail; notice(`Google sign-in: ${detail}`); }
     renderAll();
   }
-
-  // ---------- Phone menu ----------
-  const topbar = document.querySelector(".topbar");
-  const menuBtn = $("menu-btn");
-  function setMenu(open, { focus = false } = {}) {
-    topbar.classList.toggle("menu-open", open);
-    menuBtn.setAttribute("aria-expanded", String(open));
-    if (open) topbar.querySelector(".top-actions button:not([hidden])")?.focus();
-    else if (focus) menuBtn.focus();
-  }
-  menuBtn.addEventListener("click", () => setMenu(menuBtn.getAttribute("aria-expanded") !== "true"));
-  document.addEventListener("keydown", (e) => {
-    if (e.key === "Escape" && topbar.classList.contains("menu-open")) setMenu(false, { focus: true });
-  });
-  document.addEventListener("click", (e) => {
-    if (topbar.classList.contains("menu-open") && !topbar.contains(e.target)) setMenu(false);
-  });
-  $("top-actions").addEventListener("click", (e) => { if (e.target.closest("button")) setMenu(false, { focus: true }); });
-  $("top-actions").addEventListener("focusout", (e) => {
-    if (topbar.classList.contains("menu-open") && e.relatedTarget && !topbar.contains(e.relatedTarget)) setMenu(false);
-  });
 
   $("btn-auth").addEventListener("click", () => {
     if (state.drive === "linked") Drive.signOut();
