@@ -32,6 +32,18 @@ nav.jump a {
   background: rgba(8, 22, 36, 0.8); font-family: var(--font-display); font-size: 11px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase;
 }
 nav.jump a:hover { border-color: var(--cyan); background: rgba(67, 217, 255, 0.1); }
+/* Phones: the four section links share one row as a segmented bar. Long labels wrap inside their segment. */
+@media (max-width: 600px) {
+  nav.jump { width: 100%; }
+  nav.jump ul {
+    display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 3px; padding: 3px;
+    border: 1px solid var(--line-strong); border-radius: 999px; background: rgba(8, 22, 36, 0.8);
+  }
+  nav.jump a {
+    display: flex; justify-content: center; text-align: center; width: 100%; min-height: 44px; padding: 4px 6px;
+    border: 0; border-radius: 999px; background: transparent; font-size: 10px; letter-spacing: 0.06em; line-height: 1.15;
+  }
+}
 
 #status { margin: 0 0 16px; color: var(--muted); font-family: var(--font-mono); font-size: 13px; }
 #status.note { color: #ffe2b5; background: rgba(255, 181, 71, 0.08); border: 1px solid rgba(255, 181, 71, 0.45); padding: 10px 14px; border-radius: var(--radius); font-family: var(--font-ui); font-size: 16px; }
