@@ -9,9 +9,9 @@ window.CORTEX_CONFIG = {
 
   // Default weather location. You can change it on the dashboard; that choice is saved in this browser.
   weather: {
-    name: "New York, NY",
-    lat: 40.7128,
-    lon: -74.006,
+    name: "Trinity, NC 27370",
+    lat: 35.8929,
+    lon: -79.9917,
     units: "fahrenheit", // "fahrenheit" or "celsius"
   },
 

@@ -140,6 +140,12 @@ const Drive = (() => {
     return { files, folders };
   }
 
+  // Account storage (all of Drive, Gmail and Photos). about.get works with drive.readonly.
+  async function storage() {
+    const { storageQuota: q } = await request(`${API}/about?fields=storageQuota`);
+    return { used: Number(q.usage) || 0, limit: q.limit ? Number(q.limit) : null, trash: Number(q.usageInDriveTrash) || 0 };
+  }
+
   async function searchContent(text, folderIds) {
     const parents = folderIds.slice(0, 40).map((id) => `'${quote(id)}' in parents`).join(" or ");
     return list(`fullText contains '${quote(text)}' and trashed = false and (${parents})`);
@@ -154,5 +160,5 @@ const Drive = (() => {
     return request(`${API}/files/${encodeURIComponent(file.id)}?alt=media&supportsAllDrives=true`, true);
   }
 
-  return { init, signIn, signOut, linked, loadBrain, searchContent, readFile, configured };
+  return { init, signIn, signOut, linked, loadBrain, storage, searchContent, readFile, configured };
 })();
