@@ -114,21 +114,53 @@ function taskLi(t, today) {
   const url = t.url || `https://app.todoist.com/app/task/${encodeURIComponent(t.id)}`;
   return `<li class="task"><a href="${esc(url)}" target="_blank" rel="noopener">${esc(t.content)}<span class="sr"> (opens Todoist)</span></a><p class="meta">${meta}</p></li>`;
 }
+const LIST_CAP = 5; // lists longer than this scroll inside their own box
+function taskList(key, label, items, today) {
+  const ul = `<ul class="tasks">${items.map(t => taskLi(t, today)).join('')}</ul>`;
+  if (items.length <= LIST_CAP) return ul;
+  return `<div class="task-scroll fade" data-list="${key}" tabindex="0" role="region" aria-label="${label}, ${items.length} tasks, scrollable">${ul}</div>
+    <p class="more-cue" aria-hidden="true"></p>`;
+}
+// Size each scroller to show the first five tasks plus a sliver of the sixth, then keep the "N more" cue current.
+function fitTaskLists() {
+  document.querySelectorAll('.task-scroll').forEach(box => {
+    const li = box.querySelectorAll('li');
+    if (!box.offsetParent) return; // inside a closed <details>, measured again on toggle
+    if (li.length > LIST_CAP) box.style.maxHeight = `${li[LIST_CAP].offsetTop - li[0].offsetTop + 28}px`;
+    taskCue(box);
+  });
+}
+function taskCue(box) {
+  const bottom = box.scrollTop + box.clientHeight, li = box.querySelectorAll('li');
+  const below = [...li].filter(el => el.offsetTop + el.offsetHeight / 2 > bottom).length;
+  box.classList.toggle('fade', below > 0);
+  const cue = box.nextElementSibling;
+  if (cue) cue.textContent = below ? `${below} more below, scroll the list` : 'End of list';
+}
 function renderTasks(today) {
   const g = prepTasks(today);
+  const keep = {}, open = document.querySelector('#task-groups details')?.open;
+  document.querySelectorAll('.task-scroll').forEach(b => { keep[b.dataset.list] = b.scrollTop; });
   const group = (cls, title, hint, items, emptyMsg) => `
     <section class="group ${cls}" aria-labelledby="g-${cls}">
       <h3 id="g-${cls}">${title} <span class="count">${items.length}</span></h3>
       <p class="hint">${hint}</p>
-      ${items.length ? `<ul class="tasks">${items.map(t => taskLi(t, today)).join('')}</ul>` : `<p class="empty">${emptyMsg}</p>`}
+      ${items.length ? taskList(cls, title, items, today) : `<p class="empty">${emptyMsg}</p>`}
     </section>`;
   $('task-groups').innerHTML =
     group('crit', 'Critical this week', 'Overdue, or P1 and P2 due in the next 7 days', g.crit, 'Nothing critical. Pick up something below.') +
     group('quick', 'Quick pickups', '30 minutes or less', g.quick, 'No quick tasks right now.') +
     group('big', 'Big tasks', 'An hour or more, best for a long open block', g.big, 'No big tasks right now.') +
-    (g.other.length ? `<section class="group" aria-label="Everything else"><details><summary>Everything else (${g.other.length})</summary><ul class="tasks">${g.other.map(t => taskLi(t, today)).join('')}</ul></details></section>` : '');
+    (g.other.length ? `<section class="group" aria-label="Everything else"><details${open ? ' open' : ''}><summary>Everything else (${g.other.length})</summary>${taskList('other', 'Everything else', g.other, today)}</details></section>` : '');
   $('tasks-sub').textContent = `${TASKS.length} open`;
+  document.querySelectorAll('.task-scroll').forEach(b => {
+    b.scrollTop = keep[b.dataset.list] || 0;
+    b.addEventListener('scroll', () => taskCue(b), { passive: true });
+  });
+  fitTaskLists();
+  document.querySelector('#task-groups details')?.addEventListener('toggle', fitTaskLists);
 }
+addEventListener('resize', () => fitTaskLists());
 
 /* ---------- events ---------- */
 function normEvents() {
