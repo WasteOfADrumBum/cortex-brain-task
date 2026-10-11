@@ -21,6 +21,7 @@
   --font-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Consolas, monospace;
   --radius: 6px;
   --gap: 16px;
+  --ticker-h: 34px;
   color-scheme: dark;
 }
 
@@ -98,6 +99,8 @@ button, input { font: inherit; color: inherit; }
 .sys-status[data-state="demo"] .dot { background: var(--violet); box-shadow: 0 0 10px var(--violet); }
 
 .top-actions { display: flex; gap: 10px; }
+.menu-btn, .menu-status { display: none; }
+[hidden] { display: none !important; }
 .views ul { display: flex; gap: 4px; padding: 3px; border: 1px solid var(--line); border-radius: 999px; background: rgba(8, 22, 36, 0.8); }
 .views a {
   display: inline-flex; align-items: center; min-height: 38px; padding: 6px 16px; border-radius: 999px;
@@ -156,13 +159,6 @@ button, input { font: inherit; color: inherit; }
   .date-panel { order: 10; }
   .systems-panel { order: 11; }
   .brand-sub { display: none; }
-  .views { order: 3; width: 100%; }
-  .views ul { justify-content: center; }
-  .views li { flex: 1; }
-  .views a { width: 100%; justify-content: center; }
-  .top-actions { width: 100%; }
-  .top-actions .btn { flex: 1; }
-  .ticker { position: static; gap: 6px 16px; }
   .hud { padding-bottom: var(--gap); }
 }
 
@@ -416,10 +412,12 @@ button, input { font: inherit; color: inherit; }
 .sys-meter span { display: block; height: 100%; background: linear-gradient(90deg, var(--cyan-deep), var(--cyan)); }
 
 /* ---------- Footer ticker ---------- */
+/* The ticker is fixed, so reserve its height at the bottom of every page. */
+body { padding-bottom: calc(var(--ticker-h) + env(safe-area-inset-bottom)); }
 .ticker {
   position: fixed; left: 0; right: 0; bottom: 0; z-index: 9;
   display: flex; gap: 28px; justify-content: center; flex-wrap: wrap;
-  padding: 8px 16px; border-top: 1px solid var(--line);
+  padding: 8px 16px calc(8px + env(safe-area-inset-bottom)); border-top: 1px solid var(--line);
   background: rgba(3, 8, 14, 0.92);
   font-family: var(--font-mono); font-size: 12px; color: var(--muted); letter-spacing: 0.06em;
 }
@@ -442,6 +440,46 @@ button, input { font: inherit; color: inherit; }
 .viewer-body ul { list-style: disc; padding-left: 22px; margin: 0 0 10px; }
 .viewer-body pre { white-space: pre-wrap; font-family: var(--font-mono); font-size: 14px; }
 .viewer-foot { padding: 0 18px 18px; }
+
+/* ---------- Top bar on phones ---------- */
+/* One compact row (logo, views, status light, menu). Desktop is unchanged. */
+@media (max-width: 760px) {
+  .topbar { flex-wrap: nowrap; gap: 10px; padding: 8px 16px; }
+  .brand { gap: 8px; margin-right: auto; flex: none; }
+  .brand-mark { width: 32px; height: 32px; }
+  .brand-name { font-size: 17px; letter-spacing: 0.16em; }
+  .views a { min-height: 36px; padding: 4px 12px; font-size: 11px; letter-spacing: 0.12em; }
+  .sys-status { padding: 0; border: 0; background: none; width: 24px; height: 44px; justify-content: center; flex: none; }
+  .sys-status .label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  .menu-btn {
+    display: grid; place-items: center; flex: none; width: 44px; height: 44px;
+    border: 1px solid var(--line-strong); border-radius: var(--radius); background: rgba(8, 22, 36, 0.8); cursor: pointer;
+  }
+  .menu-btn svg { width: 22px; height: 22px; fill: none; stroke: var(--cyan-soft); stroke-width: 2; stroke-linecap: round; }
+  .menu-btn[aria-expanded="true"] { background: rgba(67, 217, 255, 0.16); border-color: var(--cyan); }
+  .top-actions {
+    display: none; position: absolute; top: calc(100% + 6px); right: 16px; width: min(280px, calc(100vw - 32px));
+    flex-direction: column; gap: 8px; padding: 12px;
+    background: var(--panel-solid); border: 1px solid var(--line-strong); border-radius: var(--radius);
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.55), var(--glow);
+  }
+  .topbar.menu-open .top-actions { display: flex; }
+  .top-actions .btn { width: 100%; min-height: 44px; }
+  .menu-status { display: block; font-family: var(--font-display); font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted); padding: 2px 2px 6px; border-bottom: 1px solid var(--line); }
+  /* Footer: one short line. */
+  :root { --ticker-h: 28px; }
+  .ticker { flex-wrap: nowrap; gap: 14px; padding: 6px 12px calc(6px + env(safe-area-inset-bottom)); font-size: 11px; letter-spacing: 0.02em; white-space: nowrap; }
+  .ticker span:nth-child(2) { display: none; }
+}
+@media (max-width: 400px) {
+  .topbar { gap: 8px; padding: 8px 12px; }
+  .brand-name { display: none; }
+  .views a { padding: 4px 8px; font-size: 10px; letter-spacing: 0.04em; }
+}
+@media (max-width: 340px) {
+  .topbar { gap: 6px; }
+  .views a { padding: 4px 6px; }
+}
 
 /* ---------- Motion preferences ---------- */
 @media (prefers-reduced-motion: reduce) {
