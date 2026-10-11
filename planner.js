@@ -56,7 +56,10 @@ async function load() {
     CortexHeader.setStatus('warn', 'Sample data');
   } else {
     TASKS = t.data.tasks || []; EVENTS = c.data.events || [];
-    status(`Updated ${fmtTime(new Date())}. Refreshes every 10 minutes.`);
+    // Some calendar feeds can fail while others load: show what loaded and name the skipped ones.
+    const skipped = c.data.errors || [];
+    status(`Updated ${fmtTime(new Date())}. Refreshes every 10 minutes.${skipped.length
+      ? ` Skipped ${skipped.length === 1 ? 'a calendar feed' : `${skipped.length} calendar feeds`}: ${skipped.join('. ')}.` : ''}`, skipped.length > 0);
     CortexHeader.setStatus('ok', 'Planner live');
   }
   render();
