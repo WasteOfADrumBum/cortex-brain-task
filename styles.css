@@ -149,8 +149,9 @@ button, input { font: inherit; color: inherit; }
   .col { display: contents; }
   .date-panel { order: 1; }
   .core-wrap { order: 2; }
-  .gauges-panel { order: 3; }
-  .files-panel { order: 4; }
+  /* Recent files sit right under the folder chips so filtering visibly changes the list. */
+  .files-panel { order: 3; }
+  .gauges-panel { order: 4; }
   .weather-panel { order: 5; }
   .schedule-panel { order: 6; }
   .launch-panel { order: 7; }

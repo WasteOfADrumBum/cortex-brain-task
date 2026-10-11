@@ -22,6 +22,7 @@
     query: "",
     contentHits: null,
     lastSync: null,
+    storage: null, // { used, limit, trash } in bytes
     error: "",
   };
 
@@ -362,6 +363,14 @@
   window.addEventListener("offline", renderSystems);
   navigator.connection?.addEventListener?.("change", renderSystems);
 
+  // Binary units, matching how Google shows storage (a 15 GB plan is 15 × 1024³ bytes).
+  function bytes(n) {
+    const units = ["B", "KB", "MB", "GB", "TB"];
+    let i = 0;
+    while (n >= 1024 && i < units.length - 1) { n /= 1024; i++; }
+    return `${n >= 100 || i === 0 ? Math.round(n) : +n.toFixed(1)} ${units[i]}`;
+  }
+
   function renderSystems() {
     const rows = [];
     const driveRow = {
@@ -374,6 +383,14 @@
     }[state.drive];
     if (state.mode === "demo") rows.push(["warn", "Google Drive", "Preview mode: showing sample data"]);
     else rows.push(driveRow);
+    const st = state.mode === "demo" ? { used: 4.2 * 2 ** 30, limit: 15 * 2 ** 30 } : state.mode === "live" ? state.storage : null;
+    if (st) {
+      const pct = st.limit ? st.used / st.limit : null;
+      const detail = st.limit
+        ? `${bytes(st.used)} of ${bytes(st.limit)} used (${Math.round(pct * 100)}%) · ${bytes(Math.max(0, st.limit - st.used))} free`
+        : `${bytes(st.used)} used · no storage limit`;
+      rows.push([pct == null || pct < 0.8 ? "ok" : pct < 0.95 ? "warn" : "bad", "Drive storage", detail, pct]);
+    }
     const wx = Weather.status();
     rows.push([wx.ok ? "ok" : "warn", "Weather feed", wx.text]);
     const c = navigator.connection;
@@ -450,7 +467,11 @@
   async function syncDrive() {
     try {
       $("core-sub").textContent = "Syncing…";
-      const { files, folders } = await Drive.loadBrain(CFG.brainFolderId);
+      const [{ files, folders }, storage] = await Promise.all([
+        Drive.loadBrain(CFG.brainFolderId),
+        Drive.storage().catch(() => null), // storage is a nice-to-have; never fail the sync over it
+      ]);
+      state.storage = storage;
       state.files = files.map((f) => ({ ...f, area: areaOf(f) }));
       state.folders = folders;
       state.mode = "live";
@@ -464,7 +485,7 @@
 
   function onDriveChange(event, detail) {
     if (event === "linked") { state.drive = "linked"; syncDrive(); return; }
-    if (event === "signed-out") { state.drive = "ready"; if (state.mode === "live") { state.mode = "idle"; state.files = []; } }
+    if (event === "signed-out") { state.drive = "ready"; if (state.mode === "live") { state.mode = "idle"; state.files = []; } state.storage = null; }
     if (event === "expired") state.drive = "expired";
     if (event === "error") { state.drive = "error"; state.error = detail; notice(`Google sign-in: ${detail}`); }
     renderAll();
