@@ -81,6 +81,19 @@ nav.jump a:hover { border-color: var(--cyan); background: rgba(67, 217, 255, 0.1
 .planner-page .empty { color: var(--muted); font-size: 15px; }
 .planner-page details summary { cursor: pointer; min-height: 32px; display: flex; align-items: center; font-family: var(--font-display); font-size: 12px; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; color: var(--cyan-soft); }
 .planner-page details[open] summary { margin-bottom: 8px; }
+/* Long lists scroll inside their own box: first five tasks show, the sixth peeks out under a fade. */
+.task-scroll {
+  overflow-y: auto; overscroll-behavior: contain; position: relative; max-height: 26rem;
+  padding-right: 6px; border-radius: 4px; scrollbar-color: var(--cyan-deep) transparent;
+}
+/* Fade is an overlay, not a mask, so the focus ring is never clipped. */
+.task-scroll::after {
+  content: ""; position: sticky; bottom: 0; display: block; height: 44px; margin-top: -44px;
+  background: linear-gradient(rgba(6, 16, 26, 0), var(--panel-solid)); pointer-events: none; opacity: 0;
+}
+.task-scroll.fade::after { opacity: 1; }
+.task-scroll:focus-visible { outline-offset: 2px; }
+.more-cue { margin-top: 6px; color: var(--muted); font-family: var(--font-mono); font-size: 12px; }
 
 /* ---------- Timelines ---------- */
 .scroll {
