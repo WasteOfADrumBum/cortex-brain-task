@@ -35,7 +35,11 @@
       </ul>
     </nav>
     <p class="sys-status" id="sys-status" role="status"><span class="dot" aria-hidden="true"></span><span class="label">Standby</span></p>
-    <div class="top-actions">
+    <button type="button" class="menu-btn" id="menu-btn" aria-expanded="false" aria-controls="top-actions" aria-label="Menu">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+    </button>
+    <div class="top-actions" id="top-actions">
+      <p class="menu-status" id="menu-status" aria-hidden="true"></p>
       <button type="button" class="btn btn-ghost" id="btn-demo" aria-pressed="false">Preview</button>
       <button type="button" class="btn btn-primary" id="btn-auth">Link Drive</button>
     </div>
