@@ -188,7 +188,9 @@ const HUD = (() => {
 
   // ---------- Ring clock ----------
   function ringClock(host) {
-    const svg = el("svg", { viewBox: "0 0 140 140" }, host);
+    // The time itself is HTML layered over the ring (see .ring-face), so it can use the display font.
+    const svg = el("svg", { viewBox: "0 0 140 140", "aria-hidden": "true" });
+    host.prepend(svg);
     el("circle", { class: "rc-track", cx: 70, cy: 70, r: 62 }, svg);
     for (let i = 0; i < 12; i++) {
       const [x0, y0] = point(70, 70, 52, i * 30);
@@ -197,15 +199,11 @@ const HUD = (() => {
     }
     const sec = el("path", { class: "rc-sec" }, svg);
     const min = el("path", { class: "rc-min" }, svg);
-    const time = el("text", { class: "rc-time", x: 70, y: 74 }, svg);
-    const ampm = el("text", { class: "rc-ampm", x: 70, y: 90 }, svg);
     return {
-      set(date, hm, suffix) {
+      set(date) {
         const s = date.getSeconds() + date.getMilliseconds() / 1000;
         sec.setAttribute("d", arc(70, 70, 62, 0, Math.max(0.5, s * 6)));
         min.setAttribute("d", arc(70, 70, 56, 0, Math.max(0.5, (date.getMinutes() + s / 60) * 6)));
-        time.textContent = hm;
-        ampm.textContent = suffix;
       },
     };
   }

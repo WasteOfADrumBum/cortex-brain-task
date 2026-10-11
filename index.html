@@ -50,19 +50,6 @@
   <main id="main" class="hud">
     <!-- Left column -->
     <div class="col col-left">
-      <section class="panel clock-panel" aria-labelledby="h-clock">
-        <h2 class="panel-title" id="h-clock">Local time <span class="code" aria-hidden="true">01</span></h2>
-        <p class="clock-date" id="clock-date"></p>
-        <time class="clock" id="clock" datetime="">
-          <span class="clock-hm" id="clock-hm">--:--</span>
-          <span class="clock-side">
-            <span class="clock-ampm" id="clock-ampm"></span>
-            <span class="clock-sec" id="clock-sec">00</span>
-          </span>
-        </time>
-        <p class="clock-tz" id="clock-tz"></p>
-      </section>
-
       <nav class="panel launch-panel" aria-labelledby="h-launch">
         <h2 class="panel-title" id="h-launch">Launch <span class="code" aria-hidden="true">02</span></h2>
         <ul class="launchers" id="launchers"></ul>
@@ -118,13 +105,20 @@
     <!-- Right column -->
     <div class="col col-right">
       <section class="panel date-panel" aria-labelledby="h-date">
-        <h2 class="visually-hidden" id="h-date">Today</h2>
-        <div class="date-tile" aria-hidden="true">
-          <span class="date-day" id="date-day">--</span>
-          <span class="date-month" id="date-month"></span>
-          <span class="date-weekday" id="date-weekday"></span>
+        <h2 class="visually-hidden" id="h-date">Date and time</h2>
+        <div class="date-tile">
+          <p class="visually-hidden" id="clock-date"></p>
+          <span class="date-day" id="date-day" aria-hidden="true">--</span>
+          <span class="date-month" id="date-month" aria-hidden="true"></span>
+          <span class="date-weekday" id="date-weekday" aria-hidden="true"></span>
+          <span class="clock-tz" id="clock-tz"></span>
         </div>
-        <div class="ring-clock" id="ring-clock" aria-hidden="true"></div>
+        <div class="ring-clock" id="ring-clock">
+          <time class="ring-face" id="clock" datetime="">
+            <span class="clock-hm" id="clock-hm">--:--</span>
+            <span class="clock-ampm" id="clock-ampm"></span>
+          </time>
+        </div>
       </section>
 
       <section class="panel weather-panel" aria-labelledby="h-weather">
