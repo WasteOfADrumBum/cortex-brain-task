@@ -302,9 +302,10 @@ button, input { font: inherit; color: inherit; }
 .activity-caption { font-size: 15px; color: var(--muted); margin-top: 6px; }
 
 /* ---------- Files ---------- */
-.files-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap; }
-.files-head .panel-title { margin-bottom: 10px; }
-.files-filter { font-family: var(--font-mono); font-size: 12px; color: var(--muted); }
+/* The title keeps the full width so its number lines up with every other panel; the filter note sits below. */
+.files-head .panel-title { margin-bottom: 6px; }
+.files-filter { font-family: var(--font-mono); font-size: 12px; color: var(--muted); margin-bottom: 10px; }
+.files-filter:empty { display: none; }
 .search { display: flex; gap: 8px; margin-bottom: 12px; }
 .search input, .weather-settings input {
   flex: 1; min-width: 0; min-height: 42px; padding: 8px 12px;
