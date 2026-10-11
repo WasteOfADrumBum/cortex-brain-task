@@ -6,9 +6,11 @@ const json = (body, status = 200) =>
   new Response(JSON.stringify(body), { status, headers: { 'content-type': 'application/json', 'cache-control': 'no-store' } });
 
 export async function GET(request) {
-  if (!process.env.DASH_KEY || request.headers.get('x-dash-key') !== process.env.DASH_KEY) {
+  if (!process.env.DASH_KEY) return json({ error: 'DASH_KEY is not set in Vercel' }, 500);
+  if (request.headers.get('x-dash-key') !== process.env.DASH_KEY) {
     return json({ error: 'Missing or wrong dashboard key' }, 401);
   }
+  if (!process.env.TODOIST_TOKEN) return json({ error: 'TODOIST_TOKEN is not set in Vercel' }, 500);
   const all = [];
   let cursor = null;
   do {
@@ -21,7 +23,10 @@ export async function GET(request) {
     } catch {
       return json({ error: 'Could not reach Todoist' }, 502);
     }
-    if (!res.ok) return json({ error: `Todoist returned ${res.status}` }, 502);
+    if (!res.ok) {
+      const hint = res.status === 401 || res.status === 403 ? ', check TODOIST_TOKEN' : '';
+      return json({ error: `Todoist returned ${res.status}${hint}` }, 502);
+    }
     const data = await res.json();
     all.push(...(data.results || []));
     cursor = data.next_cursor;

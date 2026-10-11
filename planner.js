@@ -33,29 +33,41 @@ async function load() {
   const from = start < wkStart ? start : wkStart;
   const to = end > addDays(wkStart, 7) ? end : addDays(wkStart, 7);
   const k = getKey(), headers = k ? { 'x-dash-key': k } : {};
-  try {
-    const [tr, cr] = await Promise.all([
-      fetch('/api/tasks', { headers }),
-      fetch(`/api/calendar?from=${from.toISOString()}&to=${to.toISOString()}`, { headers })
-    ]);
-    if (tr.status === 401 || cr.status === 401) {
-      $('keyform').classList.add('on');
-      ({ tasks: TASKS, events: EVENTS } = sample(today));
-      status('Enter your dashboard key to load your tasks and calendar. Showing sample data until then.', true);
-      render();
-      return;
-    }
-    if (!tr.ok || !cr.ok) throw new Error('api');
-    const t = await tr.json(), c = await cr.json();
-    TASKS = t.tasks || []; EVENTS = c.events || [];
-    $('keyform').classList.remove('on');
-    status(`Updated ${fmtTime(new Date())}. Refreshes every 10 minutes.`);
-  } catch {
-    $('keyform').classList.remove('on');
+  // A network failure resolves to null so the other route still reports its own result.
+  const get = url => fetch(url, { headers }).catch(() => null);
+  const [tr, cr] = await Promise.all([
+    get('/api/tasks'),
+    get(`/api/calendar?from=${from.toISOString()}&to=${to.toISOString()}`)
+  ]);
+  if (tr?.status === 401 || cr?.status === 401) {
+    $('keyform').classList.add('on');
     ({ tasks: TASKS, events: EVENTS } = sample(today));
-    status('Showing sample data. Connect /api/tasks and /api/calendar to see yours.', true);
+    status(k ? 'That dashboard key was not accepted. Check it matches DASH_KEY in Vercel. Showing sample data until then.'
+      : 'Enter your dashboard key to load your tasks and calendar. Showing sample data until then.', true);
+    render();
+    return;
+  }
+  const [t, c] = await Promise.all([readApi('Tasks', tr), readApi('Calendar', cr)]);
+  $('keyform').classList.remove('on');
+  if (t.error || c.error) {
+    ({ tasks: TASKS, events: EVENTS } = sample(today));
+    status(`Showing sample data. ${[t.error, c.error].filter(Boolean).join(' ')}`, true);
+  } else {
+    TASKS = t.data.tasks || []; EVENTS = c.data.events || [];
+    status(`Updated ${fmtTime(new Date())}. Refreshes every 10 minutes.`);
   }
   render();
+}
+// Turns one API response into { data } or { error: a sentence saying what failed }.
+// The routes never put secrets in their error text, so it is safe to show.
+async function readApi(name, res) {
+  if (!res) return { error: `${name}: could not reach the API (offline or blocked).` };
+  let body = null;
+  try { body = await res.json(); } catch {}
+  if (res.ok && body) return { data: body };
+  if (res.status === 404) return { error: `${name}: API route not found (404), so the functions are not deployed.` };
+  if (res.ok) return { error: `${name}: API did not return JSON.` };
+  return { error: `${name}: ${body?.error || 'API error'} (${res.status}).` };
 }
 function status(msg, note) { const s = $('status'); s.textContent = msg; s.classList.toggle('note', !!note); }
 
