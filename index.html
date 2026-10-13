@@ -9,10 +9,10 @@
   <link rel="icon" href="/favicon.svg" type="image/svg+xml">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;800&family=Rajdhani:wght@500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;800;900&family=Rajdhani:wght@500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/styles.css">
 </head>
-<body>
+<body class="is-home">
   <a class="skip-link" href="#main">Skip to content</a>
   <div class="backdrop" aria-hidden="true"></div>
 
@@ -85,6 +85,170 @@
         <p class="panel-link"><a href="https://github.com/WasteOfADrumBum/cortex-brain-task/blob/main/config.js" target="_blank" rel="noopener">Edit quick links<span class="visually-hidden"> (opens in a new tab)</span></a></p>
       </nav>
     </div>
+
+    <!-- Desktop Home (1101px and up). The layout above is the phone and tablet Home; CSS shows one or the other. -->
+    <div class="home-desk" id="home-desk">
+      <div class="hd-head">
+        <h1 class="hd-greeting"><span id="d-greeting">Hello</span>, <span class="hd-name" id="d-name"></span></h1>
+        <p class="hd-lede">What matters today, at a glance. Each panel links to the tab with the detail.</p>
+      </div>
+
+      <div class="hd-main">
+        <div class="hd-col">
+          <section class="hd-panel" aria-labelledby="d-h-sched">
+            <div class="hd-row">
+              <h2 class="hd-label" id="d-h-sched">Today's schedule</h2>
+              <span class="hd-meta" id="d-open"></span>
+            </div>
+            <div id="d-sched" aria-live="polite"><p class="hd-note">Loading today's calendar…</p></div>
+            <div class="hd-div"><a class="hd-link" href="/planner#day">Open the Planner</a></div>
+          </section>
+
+          <section class="hd-panel" aria-labelledby="d-h-pri">
+            <div class="hd-row">
+              <h2 class="hd-label" id="d-h-pri">Top 3 priorities</h2>
+              <span class="hd-meta">Critical this week</span>
+            </div>
+            <div id="d-tasks" aria-live="polite"><p class="hd-note">Loading tasks…</p></div>
+            <div class="hd-div"><a class="hd-link" href="/planner">All tasks</a></div>
+          </section>
+        </div>
+
+        <div class="hd-center">
+          <div class="hd-hub-wrap">
+            <div class="hd-hub">
+              <span class="hd-line hd-line-1" aria-hidden="true"></span>
+              <span class="hd-line hd-line-2" aria-hidden="true"></span>
+              <span class="hd-line hd-line-3" aria-hidden="true"></span>
+              <span class="hd-line hd-line-4" aria-hidden="true"></span>
+
+              <svg class="hd-rings" viewBox="0 0 400 400" aria-hidden="true">
+                <g class="hd-spin"><circle cx="200" cy="200" r="197" fill="none" stroke="#38BDF8" stroke-opacity="0.55" stroke-width="2" stroke-dasharray="40 12 4 12"/></g>
+                <g class="hd-spin2"><circle cx="200" cy="200" r="189" fill="none" stroke="#67E8F9" stroke-opacity="0.35" stroke-width="5" stroke-dasharray="1.5 8"/></g>
+                <circle class="hd-track" cx="200" cy="200" r="178" stroke-width="5"/>
+                <circle class="hd-arc" id="d-ring-year" cx="200" cy="200" transform="rotate(-90 200 200)" r="178" stroke="#C4B5FD" stroke-width="5"/>
+                <circle class="hd-track" cx="200" cy="200" r="168" stroke-width="5"/>
+                <circle class="hd-arc" id="d-ring-month" cx="200" cy="200" transform="rotate(-90 200 200)" r="168" stroke="#3B82F6" stroke-width="5"/>
+                <circle class="hd-track" cx="200" cy="200" r="154" stroke-width="8"/>
+                <circle class="hd-arc" id="d-ring-hour" cx="200" cy="200" transform="rotate(-90 200 200)" r="154" stroke="#FB923C" stroke-width="8"/>
+                <circle class="hd-track" cx="200" cy="200" r="141" stroke-width="8"/>
+                <circle class="hd-arc" id="d-ring-min" cx="200" cy="200" transform="rotate(-90 200 200)" r="141" stroke="#A78BFA" stroke-width="8"/>
+                <circle class="hd-track" cx="200" cy="200" r="128" stroke-width="8"/>
+                <circle class="hd-arc" id="d-ring-sec" cx="200" cy="200" transform="rotate(-90 200 200)" r="128" stroke="#22D3EE" stroke-width="8"/>
+                <circle cx="200" cy="200" r="112" fill="rgba(8,22,40,0.85)" stroke="rgba(56,189,248,0.3)" stroke-width="1"/>
+                <circle cx="200" cy="200" r="106" fill="none" stroke="#7DD3FC" stroke-opacity="0.45" stroke-width="6" stroke-dasharray="1 10.1" transform="rotate(-90 200 200)"/>
+                <circle cx="200" cy="200" r="106" fill="none" stroke="#E0F2FE" stroke-width="10" stroke-dasharray="2 53.5" transform="rotate(-91 200 200)"/>
+              </svg>
+
+              <!-- Not a live region: the ticking clock is never announced. -->
+              <div class="hd-time" role="group" aria-label="Current time">
+                <span class="hd-tz" id="d-tz">Local time</span>
+                <span class="hd-hms"><span id="d-hm">--:--</span><span class="hd-secs" id="d-secs"></span></span>
+                <span class="hd-ampm" id="d-ampm"></span>
+              </div>
+
+              <div class="hd-date" role="group" aria-label="Date">
+                <span class="visually-hidden" id="d-date-full"></span>
+                <span class="hd-date-day" id="d-day" aria-hidden="true">--</span>
+                <span class="hd-date-month" id="d-month" aria-hidden="true"></span>
+                <span class="hd-date-weekday" id="d-weekday" aria-hidden="true"></span>
+              </div>
+
+              <div class="hd-wx" role="group" aria-label="Current weather" id="d-wx">
+                <span class="hd-wx-msg">Loading weather…</span>
+              </div>
+              <div class="hd-wx-bar">
+                <button type="button" class="hd-wx-btn" id="d-wx-more-btn" aria-expanded="false" aria-controls="d-wx-more">More weather</button>
+                <button type="button" class="hd-wx-btn" id="d-wx-loc-btn" aria-expanded="false" aria-controls="d-wx-loc">Change location</button>
+              </div>
+              <div class="hd-pop" id="d-wx-more" role="region" aria-label="More weather" hidden>
+                <p class="hd-pop-title" id="d-wx-place"></p>
+                <p class="hd-pop-sub" id="d-wx-updated"></p>
+                <dl class="hd-pop-dl" id="d-wx-rows"></dl>
+              </div>
+              <div class="hd-pop" id="d-wx-loc" role="region" aria-label="Change location" hidden>
+                <form id="d-weather-form">
+                  <label for="d-weather-city">City or ZIP</label>
+                  <div class="hd-pop-row">
+                    <input id="d-weather-city" type="text" autocomplete="address-level2" required>
+                    <button type="submit" class="btn btn-ghost">Set</button>
+                  </div>
+                  <button type="button" class="btn btn-ghost" id="d-weather-geo">Use my current location</button>
+                  <p class="hd-pop-err" id="d-wx-err" role="status"></p>
+                </form>
+              </div>
+            </div>
+          </div>
+
+          <ul class="hd-legend" aria-label="Clock rings, outside to inside">
+            <li><span class="hd-dot" style="--c:#C4B5FD" aria-hidden="true"></span>Year <span id="d-year-pct"></span></li>
+            <li><span class="hd-dot" style="--c:#3B82F6" aria-hidden="true"></span>Month <span id="d-month-pct"></span></li>
+            <li><span class="hd-dot" style="--c:#FB923C" aria-hidden="true"></span>Hour</li>
+            <li><span class="hd-dot" style="--c:#A78BFA" aria-hidden="true"></span>Minute</li>
+            <li><span class="hd-dot" style="--c:#22D3EE" aria-hidden="true"></span>Second</li>
+          </ul>
+
+          <section class="hd-panel hd-wide" aria-labelledby="d-h-brief">
+            <div class="hd-row">
+              <h2 class="hd-label" id="d-h-brief">Today's briefing</h2>
+              <span class="hd-meta">Phase 6</span>
+            </div>
+            <p class="hd-soon">Arrives in phase 6: a short morning briefing and approvals waiting for you.</p>
+          </section>
+        </div>
+
+        <div class="hd-col">
+          <section class="hd-panel" aria-labelledby="d-h-fc">
+            <div class="hd-row">
+              <h2 class="hd-label" id="d-h-fc">Forecast</h2>
+              <span class="hd-meta" id="d-fc-place"></span>
+            </div>
+            <div id="d-fc"><p class="hd-note">Loading forecast…</p></div>
+            <div class="hd-div"><a class="hd-link" id="d-fc-link" href="https://forecast.weather.gov/" target="_blank" rel="noopener">Full forecast<span class="visually-hidden"> (opens in a new tab)</span></a></div>
+          </section>
+
+          <section class="hd-panel" aria-labelledby="d-h-brain">
+            <h2 class="hd-label hd-label-solo" id="d-h-brain">Second brain</h2>
+            <div id="d-brain"><p class="hd-note">Link Drive to see your notes.</p></div>
+            <div class="hd-div"><a class="hd-link" href="/vault">Browse notes in the Vault</a></div>
+          </section>
+
+          <section class="hd-panel" aria-labelledby="d-h-ops">
+            <div class="hd-row">
+              <h2 class="hd-label" id="d-h-ops">Ops health</h2>
+              <span class="hd-meta">Phase 3</span>
+            </div>
+            <p class="hd-soon">Arrives in phase 3: health and last deploy for each project, plus PRs this week.</p>
+            <div class="hd-div"><a class="hd-link" href="/ops">Open Ops</a></div>
+          </section>
+        </div>
+      </div>
+
+      <div class="hd-bottom">
+        <section class="hd-panel" aria-labelledby="d-h-money">
+          <div class="hd-row">
+            <h2 class="hd-label" id="d-h-money">Money this month</h2>
+            <span class="hd-meta">Phase 4</span>
+          </div>
+          <p class="hd-soon">Arrives in phase 4: money in and out, and bills due in the next 7 days.</p>
+          <div class="hd-div"><a class="hd-link" href="/finances">Open Finances</a></div>
+        </section>
+
+        <section class="hd-panel hd-music" aria-labelledby="d-h-music">
+          <div class="hd-row">
+            <h2 class="hd-label" id="d-h-music">Now playing</h2>
+            <span class="hd-meta hd-meta-violet"><span class="hd-eq" id="d-eq" aria-hidden="true" hidden><span></span><span></span><span></span><span></span><span></span><span></span></span>Cortex playlist</span>
+          </div>
+          <div id="d-music"></div>
+        </section>
+
+        <nav class="hd-panel" aria-labelledby="d-h-links">
+          <h2 class="hd-label hd-label-solo" id="d-h-links">Quick links</h2>
+          <ul class="hd-links" id="d-links"></ul>
+          <div class="hd-div"><a class="hd-link" href="https://github.com/WasteOfADrumBum/cortex-brain-task/blob/main/config.js" target="_blank" rel="noopener">Edit quick links<span class="visually-hidden"> (opens in a new tab)</span></a></div>
+        </nav>
+      </div>
+    </div>
   </main>
 
   <footer class="ticker">
@@ -99,6 +263,7 @@
   <script src="/drive.js"></script>
   <script src="/weather.js"></script>
   <script src="/brain.js"></script>
+  <script src="/home-desk.js"></script>
   <script src="/home.js"></script>
   <script src="https://accounts.google.com/gsi/client" async defer></script>
 </body>
