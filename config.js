@@ -17,6 +17,13 @@ window.CORTEX_CONFIG = {
 
   clock24h: false,
 
+  // Name in the Home greeting ("Good morning, Joshua").
+  userName: "Joshua",
+
+  // Home's Now playing panel embeds this Spotify playlist (any open.spotify.com playlist, album or track link).
+  // Leave it empty to show a short "add a playlist" note instead.
+  spotifyPlaylistUrl: "https://open.spotify.com/playlist/2E6Qyjz9QtsOr0uteaizsl",
+
   // Quick links on Home. Add, remove or reorder freely.
   launchers: [
     { label: "Second Brain", code: "SB", url: "https://drive.google.com/drive/folders/1IztK9-y6uuh6QQEH3y927MlVjYXeMUgo" },

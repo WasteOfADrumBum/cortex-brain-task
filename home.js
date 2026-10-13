@@ -20,6 +20,7 @@
     $("date-month").textContent = now.toLocaleDateString([], { month: "long" });
     $("date-weekday").textContent = now.toLocaleDateString([], { weekday: "long" });
     ringClock.set(now);
+    HomeDesk.tick(now);
   }
 
   const wxHost = $("weather");
@@ -29,6 +30,7 @@
     if (url) $("forecast-link").href = url;
   }
   Weather.bind($("weather-form"), $("weather-city"), $("weather-geo"), wxHost, forecastLink);
+  HomeDesk.bindWeather(wxHost, forecastLink);
   Weather.refresh(wxHost).then(forecastLink);
   setInterval(() => Weather.refresh(wxHost), 15 * 60000);
 
@@ -72,6 +74,7 @@
     const timed = evs.filter((e) => !e.allDay && e.start < next && e.end > day).sort((a, b) => a.start - b.start);
     const open = largestOpen(day, timed);
     const upcoming = timed.filter((e) => e.end > new Date());
+    HomeDesk.schedule({ timed, all, upcoming, open, note });
     const shown = upcoming.slice(0, 5);
     const done = timed.length - upcoming.length;
 
@@ -92,6 +95,33 @@
 
   function scheduleMessage(text) {
     $("schedule-body").innerHTML = `<p class="panel-note">${esc(text)}</p>`;
+    HomeDesk.schedule({ message: text });
+  }
+
+  // ---------- Top 3 priorities (desktop Home): the same tasks route and dashboard key as the Planner ----------
+  async function loadTasks() {
+    const show = (model) => HomeDesk.tasks(model);
+    if (Brain.state.mode === "demo") { show({ message: "Preview has no sample tasks. Turn Preview off to see your critical tasks." }); return; }
+    let key = "";
+    try { key = localStorage.getItem("dashKey") || ""; } catch { /* storage blocked */ }
+    let res;
+    try {
+      res = await fetch("/api/tasks", { headers: key ? { "x-dash-key": key } : {} });
+    } catch {
+      show({ message: "Couldn't reach Todoist (offline or blocked)." });
+      return;
+    }
+    if (res.status === 401) {
+      show({ message: key ? "Your dashboard key wasn't accepted. Open the Planner to enter it again." : "Open the Planner once and enter your dashboard key to see your top tasks here." });
+      return;
+    }
+    let body = null;
+    try { body = await res.json(); } catch { /* not JSON */ }
+    if (!res.ok || !body) {
+      show({ message: res.status === 404 ? "The tasks route isn't deployed yet." : `Tasks unavailable: ${body?.error || `error ${res.status}`}.` });
+      return;
+    }
+    show({ tasks: body.tasks || [] });
   }
 
   // One failing source shows its own message here and leaves the rest of Home alone.
@@ -130,8 +160,10 @@
     if (state.mode === "idle") {
       const why = state.drive === "unconfigured" ? "Add the Google client ID to config.js, then link Drive." : "Link Drive (top bar) to see your notes, or press Preview for sample data.";
       host.innerHTML = `<p class="panel-note">${esc(why)}</p>`;
+      HomeDesk.brain(state);
       return;
     }
+    HomeDesk.brain(state);
     const s = Brain.stats(state.files);
     const sweep = Brain.routine("Claude", /sweep/i);
     const muse = Brain.routine("Muse");
@@ -178,16 +210,19 @@
 
   // ---------- Boot ----------
   renderGoto();
+  // One interval drives both clocks. It stops when the page is hidden for good or put in the back/forward cache.
   tick();
-  setInterval(tick, 1000);
+  let clock = setInterval(tick, 1000);
+  addEventListener("pagehide", () => { clearInterval(clock); clock = null; });
+  addEventListener("pageshow", (e) => { if (e.persisted && !clock) { tick(); clock = setInterval(tick, 1000); } });
   let lastMode = null;
   Brain.boot({
     onUpdate(state) {
       renderBrain(state);
       // Reload the calendar only when Preview turns on or off.
-      if (state.mode === "demo" ? lastMode !== "demo" : lastMode === "demo" || lastMode === null) loadSchedule();
+      if (state.mode === "demo" ? lastMode !== "demo" : lastMode === "demo" || lastMode === null) { loadSchedule(); loadTasks(); }
       lastMode = state.mode;
     },
   });
-  setInterval(loadSchedule, 10 * 60000);
+  setInterval(() => { loadSchedule(); loadTasks(); }, 10 * 60000);
 })();

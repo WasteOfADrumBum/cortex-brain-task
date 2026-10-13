@@ -24,6 +24,10 @@ const Weather = (() => {
   };
 
   let status = { ok: false, text: "Starting" };
+  // The latest result, for views that draw weather their own way (Home's desktop hub).
+  let last = null;
+  const subs = new Set();
+  function notify(info) { last = info; subs.forEach((fn) => fn(info)); }
 
   function location() {
     try {
@@ -62,7 +66,7 @@ const Weather = (() => {
   async function fetchWeather(loc) {
     const units = (window.CORTEX_CONFIG.weather.units || "fahrenheit") === "celsius" ? "celsius" : "fahrenheit";
     const params = new URLSearchParams({
-      latitude: loc.lat, longitude: loc.lon, timezone: "auto", forecast_days: "4",
+      latitude: loc.lat, longitude: loc.lon, timezone: "auto", forecast_days: "5",
       temperature_unit: units, wind_speed_unit: units === "celsius" ? "kmh" : "mph", precipitation_unit: units === "celsius" ? "mm" : "inch",
       current: "temperature_2m,apparent_temperature,relative_humidity_2m,precipitation,weather_code,wind_speed_10m,wind_direction_10m,surface_pressure",
       daily: "weather_code,temperature_2m_max,temperature_2m_min,sunrise,sunset,precipitation_probability_max",
@@ -76,12 +80,11 @@ const Weather = (() => {
     return new Date(iso).toLocaleTimeString([], { hour: "numeric", minute: "2-digit", hour12: !window.CORTEX_CONFIG.clock24h });
   }
 
-  function render(host, loc, { data, units }) {
+  function detailRows({ data, units }) {
     const c = data.current, d = data.daily;
-    const [cond, icon] = CODES[c.weather_code] || ["Unknown", "cloud"];
     const deg = units === "celsius" ? "°C" : "°F";
     const speed = units === "celsius" ? "km/h" : "mph";
-    const rows = [
+    return [
       ["Feels like", `${Math.round(c.apparent_temperature)}${deg}`],
       ["Humidity", `${c.relative_humidity_2m}%`],
       ["Wind", `${Math.round(c.wind_speed_10m)} ${speed} ${compass(c.wind_direction_10m)}`],
@@ -91,6 +94,29 @@ const Weather = (() => {
       ["Sunset", timeOf(d.sunset[0])],
       ["Moon", moonPhase(new Date())],
     ];
+  }
+
+  // Plain values for custom views: now, today's high/low, five days and the detail rows.
+  function summary(result) {
+    const { data, units } = result;
+    const c = data.current, d = data.daily;
+    const [cond, icon] = CODES[c.weather_code] || ["Unknown", "cloud"];
+    const days = d.time.slice(0, 5).map((t, i) => {
+      const date = new Date(`${t}T12:00:00`);
+      const [dc, di] = CODES[d.weather_code[i]] || ["Unknown", "cloud"];
+      return { date, cond: dc, icon: ICONS[di], hi: Math.round(d.temperature_2m_max[i]), lo: Math.round(d.temperature_2m_min[i]) };
+    });
+    return {
+      temp: Math.round(c.temperature_2m), deg: units === "celsius" ? "°C" : "°F", cond, icon: ICONS[icon],
+      hi: days[0]?.hi, lo: days[0]?.lo, days, rows: detailRows(result),
+    };
+  }
+
+  function render(host, loc, { data, units }) {
+    const c = data.current, d = data.daily;
+    const [cond, icon] = CODES[c.weather_code] || ["Unknown", "cloud"];
+    const deg = units === "celsius" ? "°C" : "°F";
+    const rows = detailRows({ data, units });
     const days = [1, 2, 3].map((i) => {
       const date = new Date(`${d.time[i]}T12:00:00`);
       const name = i === 1 ? "Tomorrow" : date.toLocaleDateString([], { weekday: "long" });
@@ -151,10 +177,12 @@ const Weather = (() => {
       const result = await fetchWeather(loc);
       render(host, loc, result);
       status = { ok: true, text: `Open-Meteo · ${loc.name}` };
+      notify({ ok: true, loc, result, at: new Date() });
     } catch (err) {
       host.innerHTML = '<p class="muted"></p>';
       host.firstChild.textContent = `Weather unavailable: ${err.message}`;
       status = { ok: false, text: err.message };
+      notify({ ok: false, loc, error: `Weather unavailable: ${err.message}` });
     }
     return status;
   }
@@ -169,10 +197,15 @@ const Weather = (() => {
       } catch (err) {
         host.innerHTML = '<p class="muted"></p>';
         host.firstChild.textContent = err.message;
+        subs.forEach((fn) => fn({ ...last, formError: err.message }));
       }
     });
     geoBtn.addEventListener("click", () => {
-      if (!navigator.geolocation) { host.textContent = "This browser can't share your location."; return; }
+      if (!navigator.geolocation) {
+        host.textContent = "This browser can't share your location.";
+        subs.forEach((fn) => fn({ ...last, formError: "This browser can't share your location." }));
+        return;
+      }
       geoBtn.disabled = true;
       navigator.geolocation.getCurrentPosition(async (pos) => {
         const loc = { name: "My location", lat: +pos.coords.latitude.toFixed(3), lon: +pos.coords.longitude.toFixed(3) };
@@ -180,7 +213,11 @@ const Weather = (() => {
         cityInput.value = loc.name;
         geoBtn.disabled = false;
         after(await refresh(host));
-      }, () => { geoBtn.disabled = false; host.insertAdjacentHTML("beforeend", '<p class="muted">Location permission was not given.</p>'); }, { timeout: 10000 });
+      }, () => {
+        geoBtn.disabled = false;
+        host.insertAdjacentHTML("beforeend", '<p class="muted">Location permission was not given.</p>');
+        subs.forEach((fn) => fn({ ...last, formError: "Location permission was not given." }));
+      }, { timeout: 10000 });
     });
   }
 
@@ -191,5 +228,8 @@ const Weather = (() => {
     return us ? `https://forecast.weather.gov/MapClick.php?lat=${lat}&lon=${lon}` : null;
   }
 
-  return { refresh, bind, forecastUrl, status: () => status };
+  // subscribe(fn): fn({ ok, loc, result | error, formError? }) after every refresh or failed location change.
+  function subscribe(fn) { subs.add(fn); if (last) fn(last); }
+
+  return { refresh, bind, forecastUrl, summary, subscribe, location, status: () => status };
 })();
