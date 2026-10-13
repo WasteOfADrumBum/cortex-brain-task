@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Finances · Cortex</title>
+  <meta name="description" content="Cortex Finances: this month in detail, plus the year.">
+  <meta name="theme-color" content="#04080e">
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;800&family=Rajdhani:wght@500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+  <div class="backdrop" aria-hidden="true"></div>
+
+  <header class="topbar" data-page="finances"></header>
+
+  <p class="notice" id="notice" role="alert" hidden></p>
+
+  <main id="main" class="page placeholder">
+    <div class="page-head">
+      <h1>Finances</h1>
+      <p class="page-lede">This month in detail, plus the year.</p>
+    </div>
+
+    <section class="panel soon-panel" aria-labelledby="h-soon">
+      <h2 class="panel-title" id="h-soon">Coming in phase 4</h2>
+      <p class="sub-line">This tab is a placeholder so the link works now. Here is what it will show:</p>
+      <ul class="soon-list">
+        <li><strong>This month:</strong> money in, money out and the difference, plus every bill with its due date and whether it is paid. Overdue bills are called out in words.</li>
+        <li><strong>Year:</strong> one row per month, with the current month highlighted.</li>
+        <li><strong>Update finances:</strong> paste the JSON from the ChatGPT Finances report, check the preview, then save it to Drive.</li>
+        <li><strong>Last updated:</strong> when the numbers were last saved and where they came from, so stale data is obvious.</li>
+      </ul>
+      <p class="panel-link"><a href="/planner">Meanwhile, see this week in the Planner</a></p>
+    </section>
+  </main>
+
+  <footer class="ticker">
+    <span>Cortex v2.0</span>
+    <span>Scope: drive.readonly</span>
+    <span id="ticker-sync">Last sync: never</span>
+  </footer>
+
+  <script src="/config.js"></script>
+  <script src="/header.js"></script>
+  <script src="/drive.js"></script>
+  <script src="/brain.js"></script>
+  <script src="/tab.js"></script>
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+</body>
+</html>

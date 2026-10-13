@@ -99,19 +99,29 @@ const Weather = (() => {
       return { name, short, hi: Math.round(d.temperature_2m_max[i]), lo: Math.round(d.temperature_2m_min[i]), cond: dc, rain: d.precipitation_probability_max?.[i] ?? 0 };
     });
 
+    // Today strip: now, today's high and low, then the rest behind "More weather".
+    const hi = Math.round(d.temperature_2m_max[0]), lo = Math.round(d.temperature_2m_min[0]);
     host.innerHTML = `
-      <p class="wx-loc"></p>
-      <p class="wx-updated"></p>
       <div class="wx-now">
         <svg class="wx-icon" viewBox="0 0 48 48" aria-hidden="true">${ICONS[icon]}</svg>
-        <div><p class="wx-temp"></p><p class="wx-cond"></p></div>
+        <div>
+          <p class="wx-temp"></p>
+          <p class="wx-cond"></p>
+          <p class="wx-hilo"></p>
+        </div>
       </div>
-      <dl class="wx-details"></dl>
-      <div class="wx-forecast"></div>`;
+      <p class="wx-loc"></p>
+      <details class="wx-more">
+        <summary>More weather</summary>
+        <p class="wx-updated"></p>
+        <dl class="wx-details"></dl>
+        <div class="wx-forecast"></div>
+      </details>`;
     host.querySelector(".wx-loc").textContent = loc.name;
     host.querySelector(".wx-updated").textContent = `Updated ${new Date().toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}`;
     host.querySelector(".wx-temp").textContent = `${Math.round(c.temperature_2m)}${deg}`;
     host.querySelector(".wx-cond").textContent = cond;
+    host.querySelector(".wx-hilo").textContent = `High ${hi}° · Low ${lo}°`;
     const dl = host.querySelector(".wx-details");
     for (const [k, v] of rows) {
       const dt = document.createElement("dt"); dt.textContent = k;
@@ -174,5 +184,12 @@ const Weather = (() => {
     });
   }
 
-  return { refresh, bind, status: () => status };
+  // A full forecast page for the saved location: the National Weather Service for US locations.
+  function forecastUrl() {
+    const { lat, lon } = location();
+    const us = lat > 18 && lat < 72 && lon > -180 && lon < -64;
+    return us ? `https://forecast.weather.gov/MapClick.php?lat=${lat}&lon=${lon}` : null;
+  }
+
+  return { refresh, bind, forecastUrl, status: () => status };
 })();

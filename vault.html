@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Vault · Cortex</title>
+  <meta name="description" content="Cortex Vault: Second Brain notes you can understand and find.">
+  <meta name="theme-color" content="#04080e">
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;800&family=Rajdhani:wght@500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+  <div class="backdrop" aria-hidden="true"></div>
+
+  <header class="topbar" data-page="vault"></header>
+
+  <p class="notice" id="notice" role="alert" hidden></p>
+
+  <main id="main" class="page vault">
+    <div class="page-head">
+      <h1>Vault</h1>
+      <p class="page-lede">Your Second Brain notes, newest first. Open one to read it here without leaving Cortex.</p>
+    </div>
+
+    <section class="panel notes-panel" aria-labelledby="h-notes">
+      <h2 class="panel-title" id="h-notes">Notes</h2>
+      <div class="filters" role="group" aria-label="Show notes of type">
+        <ul class="chips" id="chips"></ul>
+      </div>
+      <form class="search" id="search" role="search">
+        <label class="visually-hidden" for="search-input">Search notes</label>
+        <input type="search" id="search-input" placeholder="Filter by title or summary, or press Enter to search inside notes" autocomplete="off">
+        <button type="submit" class="btn btn-ghost">Search</button>
+      </form>
+      <p class="files-filter" id="files-filter" aria-live="polite"></p>
+      <ul class="notes" id="notes"></ul>
+    </section>
+  </main>
+
+  <footer class="ticker">
+    <span>Cortex v2.0</span>
+    <span>Scope: drive.readonly</span>
+    <span id="ticker-sync">Last sync: never</span>
+  </footer>
+
+  <dialog class="viewer" id="viewer" aria-labelledby="viewer-title">
+    <div class="viewer-head">
+      <div>
+        <p class="viewer-kicker" id="viewer-kicker"></p>
+        <h2 id="viewer-title"></h2>
+      </div>
+      <button type="button" class="btn btn-ghost" id="viewer-close">Close</button>
+    </div>
+    <div class="viewer-body" id="viewer-body"></div>
+    <p class="viewer-foot"><a id="viewer-link" href="#" target="_blank" rel="noopener">Open in Google Drive<span class="visually-hidden"> (opens in a new tab)</span></a></p>
+  </dialog>
+
+  <script src="/config.js"></script>
+  <script src="/header.js"></script>
+  <script src="/drive.js"></script>
+  <script src="/brain.js"></script>
+  <script src="/vault.js"></script>
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+</body>
+</html>
