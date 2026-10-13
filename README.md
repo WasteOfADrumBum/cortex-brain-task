@@ -1,22 +1,23 @@
 # Cortex
 
-A heads-up display for the Second Brain in Google Drive. Plain HTML, CSS and JavaScript with no build step, plus two small Vercel functions for the planner. The dashboard only ever asks for read-only Drive access (`drive.readonly`) and nothing depends on a home PC.
+A personal command center for the Second Brain in Google Drive. Plain HTML, CSS and JavaScript with no build step, plus small Vercel functions for the planner. The browser only ever asks for read-only Drive access (`drive.readonly`) and nothing depends on a home PC. The plan for version 2 is in [docs/cortex-v2-spec.md](docs/cortex-v2-spec.md).
 
-Two views, switched from the top bar: **Dashboard** (`index.html`) and **Planner** (`planner.html`).
+## Tabs
 
-## What's on the HUD
+Six tabs in the shared top bar, one clean URL each (`vercel.json` turns on `cleanUrls`), so every tab is linkable and the back button works. On screens narrower than 1100px the tabs fold into the menu button.
 
-- **Brain core**: active files in the Second Brain (retired versions are counted separately), with an orbit of area buttons (Inbox, Notes, Digests, Index, Profile, Retired) that filter the file list. The glowing band shows sweep health.
-- **Brain telemetry gauges**: inbox load, files created this week, days since the last weekly digest, and overall brain health.
-- **Activity**: files changed per day over the last 30 days.
-- **Recent files**: search by name as you type, or press Enter to search inside notes. Open any text note or Google Doc in a reader without leaving Cortex.
-- **Clock and date**: big digital clock, date tile and ring clock.
-- **Weather**: current conditions, feels-like, humidity, wind, pressure, sunrise and sunset, moon phase and a 3-day forecast from [Open-Meteo](https://open-meteo.com) (free, no key). Change the city on the dashboard.
-- **Time elapsed**: how far through the day, week, month and year you are.
-- **Schedule**: countdowns to the Monday sweep and Saturday health check.
-- **Launch**: one-tap links to Drive, the rules index, Gmail, Calendar, Todoist and your AI tools.
-- **Systems**: Drive link status, weather feed, network, and battery where the browser reports it.
-- **Preview**: shows the whole HUD with sample data, so you can see it before Drive is linked. Add `?demo=1` to the URL to open in Preview.
+| Tab | Route | What it does today |
+| --- | --- | --- |
+| Home | `/` | Today strip (date, time, weather with today's high and low), today's schedule with the largest open block, Second Brain summary, links to every tab and your quick links |
+| Planner | `/planner` | Tasks, today, this week and this month (see below) |
+| Finances | `/finances` | Placeholder until phase 4 |
+| News | `/news` | Placeholder until phase 5 |
+| Vault | `/vault` | Every note with its title and one-line summary (frontmatter `name` and `description`), type tag, filters, search and an in-app reader |
+| Ops | `/ops` | Second Brain checklist, notes changed over 30 days (with a table view), Drive storage. Project cards arrive in phase 3 |
+
+Every Home panel has a plain heading and ends with a link to the place that has the detail. Each source fails on its own: a broken weather or calendar feed shows a message in its own panel.
+
+**Preview** shows Home, Vault and Ops with sample data before Drive is linked, and stays on while you move between tabs. `/?demo=1` opens in Preview.
 
 ## Planner (At a glance)
 
@@ -37,23 +38,25 @@ Set these in Vercel (Project → Settings → Environment Variables); `.env.exam
 
 Google's iCal feed can lag your live calendar by minutes to a few hours.
 
-A website can't read a computer's CPU, RAM, disk or Wi-Fi strength, so those desktop-widget gauges are replaced by the brain telemetry above.
-
 ## Files
 
 | File | Purpose |
 | --- | --- |
-| `index.html` | Page layout |
-| `styles.css` | HUD styling |
-| `config.js` | **Your settings**: Google client ID, folder ID, weather location, launchers, schedule |
-| `app.js` | Wires everything together |
-| `hud.js` | Draws the core, gauges, rings and chart |
+| `index.html`, `home.js` | Home tab |
+| `vault.html`, `vault.js` | Vault tab |
+| `ops.html`, `ops.js` | Ops tab |
+| `finances.html`, `news.html`, `tab.js` | Placeholder tabs |
+| `planner.html`, `planner.css`, `planner.js` | Planner tab |
+| `header.js` | Shared top bar and tab menu |
+| `brain.js` | Shared Drive link, Preview, note types, titles and summaries |
+| `styles.css` | Styling for every tab |
+| `config.js` | **Your settings**: Google client ID, folder ID, weather location, quick links, routines |
+| `hud.js` | Ring clock and bar chart |
 | `drive.js` | Read-only Google Drive access |
 | `weather.js` | Weather from Open-Meteo |
-| `favicon.svg` | Tab icon |
-| `planner.html`, `planner.css`, `planner.js` | Planner view |
 | `api/tasks.js` | Todoist tasks for the planner (needs `DASH_KEY`) |
-| `api/calendar.js` | Google Calendar events from iCal feeds (needs `DASH_KEY`) |
+| `api/calendar.js` | Google Calendar events from iCal feeds (needs `DASH_KEY`); also used by Home's schedule |
+| `vercel.json` | Clean URLs for the tabs |
 | `.env.example` | The three planner settings to set in Vercel |
 
 ## Setup
@@ -68,4 +71,4 @@ A website can't read a computer's CPU, RAM, disk or Wi-Fi strength, so those des
 
 ## Accessibility
 
-Landmarks and headings for every panel, a skip link, visible focus outlines, 44px touch targets, text values next to every gauge, colour never used alone to carry meaning, and animations switched off when the system asks for reduced motion.
+Aiming for WCAG 2.2 AA: one `h1` per tab, landmarks and headings for every panel, a skip link, visible focus outlines, 44px touch targets, status shown with words and icons rather than colour alone, a table view for the activity chart, and animations switched off when the system asks for reduced motion.

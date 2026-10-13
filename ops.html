@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Ops · Cortex</title>
+  <meta name="description" content="Cortex Ops: is everything healthy, and what shipped.">
+  <meta name="theme-color" content="#04080e">
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;800&family=Rajdhani:wght@500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+  <div class="backdrop" aria-hidden="true"></div>
+
+  <header class="topbar" data-page="ops"></header>
+
+  <p class="notice" id="notice" role="alert" hidden></p>
+
+  <main id="main" class="page ops">
+    <div class="page-head">
+      <h1>Ops</h1>
+      <p class="page-lede">Is everything I run healthy, and what shipped. Project cards with deploys and pull requests arrive in phase 3; for now this tab checks the Second Brain.</p>
+    </div>
+
+    <div class="ops-grid">
+      <section class="panel checklist-panel" aria-labelledby="h-check">
+        <h2 class="panel-title" id="h-check">Second Brain checklist</h2>
+        <ul class="checklist" id="checklist"></ul>
+      </section>
+
+      <section class="panel activity-panel" aria-labelledby="h-activity">
+        <h2 class="panel-title" id="h-activity">Recent activity</h2>
+        <p class="sub-line">Notes changed per day over the last 30 days.</p>
+        <div class="activity" id="activity"></div>
+        <p class="activity-caption" id="activity-caption"></p>
+        <details class="data-table" id="activity-table-wrap">
+          <summary>Show as a table</summary>
+          <div class="table-scroll" tabindex="0" role="region" aria-labelledby="activity-table-caption">
+            <table id="activity-table">
+              <caption id="activity-table-caption">Notes changed per day, last 30 days</caption>
+              <thead><tr><th scope="col">Day</th><th scope="col">Notes changed</th></tr></thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </details>
+        <p class="panel-link"><a href="/vault">See the notes in the Vault</a></p>
+      </section>
+
+      <section class="panel storage-panel" aria-labelledby="h-storage">
+        <h2 class="panel-title" id="h-storage">Drive storage</h2>
+        <div id="storage-body"><p class="panel-note">Link Drive to see storage.</p></div>
+        <p class="panel-link"><a href="https://one.google.com/storage" target="_blank" rel="noopener">Manage Google storage<span class="visually-hidden"> (opens in a new tab)</span></a></p>
+      </section>
+    </div>
+  </main>
+
+  <footer class="ticker">
+    <span>Cortex v2.0</span>
+    <span>Scope: drive.readonly</span>
+    <span id="ticker-sync">Last sync: never</span>
+  </footer>
+
+  <script src="/config.js"></script>
+  <script src="/header.js"></script>
+  <script src="/hud.js"></script>
+  <script src="/drive.js"></script>
+  <script src="/brain.js"></script>
+  <script src="/ops.js"></script>
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+</body>
+</html>

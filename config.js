@@ -17,7 +17,7 @@ window.CORTEX_CONFIG = {
 
   clock24h: false,
 
-  // Launcher panel. Add, remove or reorder freely.
+  // Quick links on Home. Add, remove or reorder freely.
   launchers: [
     { label: "Second Brain", code: "SB", url: "https://drive.google.com/drive/folders/1IztK9-y6uuh6QQEH3y927MlVjYXeMUgo" },
     { label: "Rules index", code: "00", url: "https://drive.google.com/file/d/1sTsh5KEZq3QoMdt2De56a5t9k8O1xUc9/view" },
@@ -30,7 +30,7 @@ window.CORTEX_CONFIG = {
     { label: "Gemini", code: "GE", url: "https://gemini.google.com/" },
   ],
 
-  // Recurring brain routines shown in the Schedule panel. day: 0 = Sunday ... 6 = Saturday. time: 24h local time.
+  // Recurring brain routines. Home's Second Brain panel uses the Claude sweep and the Muse check. day: 0 = Sunday ... 6 = Saturday. time: 24h local time.
   schedule: [
     { label: "Weekly brain sweep", who: "Claude", day: 1, time: "07:47" },
     { label: "Sweep task due", who: "Todoist", day: 1, time: "09:00" },
@@ -45,6 +45,9 @@ window.CORTEX_CONFIG = {
     retired: "-retired",
   },
 
-  // A sweep is "fresh" for this many days, then the health gauge starts dropping.
+  // A sweep counts as "ran this week" for this many days after the newest digest note.
   sweepIntervalDays: 7,
+
+  // Ops checklist: the brain inbox is healthy while fewer than this many notes are waiting.
+  inboxLimit: 7,
 };

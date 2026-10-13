@@ -330,7 +330,7 @@ function renderDrive() {
 }
 $('btn-auth').addEventListener('click', () => (driveState === 'linked' ? Drive.signOut() : Drive.signIn()));
 // Preview is the dashboard's sample mode; the planner already shows sample data until its routes are set up.
-$('btn-demo').addEventListener('click', () => { location.href = 'index.html?demo=1'; });
+$('btn-demo').addEventListener('click', () => { location.href = '/?demo=1'; });
 Drive.init(event => { driveState = event === 'signed-out' ? 'ready' : event; renderDrive(); })
   .then(r => { driveState = r; renderDrive(); })
   .catch(() => { driveState = 'error'; renderDrive(); });
