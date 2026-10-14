@@ -24,11 +24,11 @@ Every Home panel has a plain heading and ends with a link to the place that has 
 One screen with your Todoist tasks, today hour by hour (6 AM to 10 PM) with open time blocks, the week Sunday to Saturday on the same hours, and the month with event titles only.
 
 - **Critical this week**: overdue, or P1/P2 due within 7 days
-- **Quick pickups**: Todoist duration 30 min or less, or label `quick`
-- **Big tasks**: duration 60 min or more, or label `deep`
-- **Everything else**: collapsed list, so nothing disappears
+- **Quick pickups**: label `@quick` (under 45 minutes)
+- **Big tasks**: label `@deep` (45 minutes or more)
+- **Everything else**: collapsed list, so nothing disappears; tasks with no size label are marked "Needs size"
 
-Set a Todoist **duration** on every task (or ask your AI tools to) so the quick/big split is automatic. Until the API is set up, the planner shows sample data.
+Tasks labeled `@system` (automated, like "Brain sweep ran") are left out of every bucket, count and Home. Label names live in `config/topics.json` (size labels and topic labels); `task-rules.js` holds the shared rules Home and the Planner both use. A label in the config that doesn't exist in Todoist is ignored. Home's Top 3 shows each task's topics as text chips, and tasks with a private topic (`@health`, `@money`) show only as "Health task" or "Money task" there; full titles stay in the Planner. Until the API is set up, the planner shows sample data.
 
 Set these in Vercel (Project → Settings → Environment Variables); `.env.example` explains each one:
 
@@ -50,11 +50,13 @@ Google's iCal feed can lag your live calendar by minutes to a few hours.
 | `header.js` | Shared top bar and tab menu |
 | `brain.js` | Shared Drive link, Preview, note types, titles and summaries |
 | `styles.css` | Styling for every tab |
+| `config/topics.json` | Todoist size and topic labels, and which topics are private on Home |
+| `task-rules.js` | Shared task rules: labels, Critical, Planner buckets, Home title privacy |
 | `config.js` | **Your settings**: Google client ID, folder ID, weather location, quick links, routines |
 | `hud.js` | Ring clock and bar chart |
 | `drive.js` | Read-only Google Drive access |
 | `weather.js` | Weather from Open-Meteo |
-| `api/tasks.js` | Todoist tasks for the planner (needs `DASH_KEY`) |
+| `api/tasks.js` | Todoist tasks, labels, projects and sections for the Planner and Home (needs `DASH_KEY`) |
 | `api/calendar.js` | Google Calendar events from iCal feeds (needs `DASH_KEY`); also used by Home's schedule |
 | `vercel.json` | Clean URLs for the tabs |
 | `.env.example` | The three planner settings to set in Vercel |

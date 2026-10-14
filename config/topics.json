@@ -1,0 +1,19 @@
+{
+  "_about": "Todoist labels Cortex reads (names without the @). Size: one per task. Topics: any number. private: true hides the task title on Home. Labels missing from Todoist are ignored.",
+  "size": {
+    "quick": { "label": "quick", "hint": "Labeled @quick, under 45 minutes" },
+    "deep": { "label": "deep", "hint": "Labeled @deep, 45 minutes or more, best for a long open block" },
+    "system": { "label": "system", "hint": "Automated, hidden from every bucket, count and Home" }
+  },
+  "topics": [
+    { "label": "development", "name": "Development" },
+    { "label": "photography", "name": "Photography" },
+    { "label": "music", "name": "Music" },
+    { "label": "family", "name": "Family" },
+    { "label": "house", "name": "House" },
+    { "label": "car", "name": "Car" },
+    { "label": "health", "name": "Health", "private": true },
+    { "label": "money", "name": "Money", "private": true },
+    { "label": "brain", "name": "Brain" }
+  ]
+}

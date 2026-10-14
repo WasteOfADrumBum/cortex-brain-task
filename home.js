@@ -121,7 +121,10 @@
       show({ message: res.status === 404 ? "The tasks route isn't deployed yet." : `Tasks unavailable: ${body?.error || `error ${res.status}`}.` });
       return;
     }
-    show({ tasks: body.tasks || [] });
+    // Size and topic labels come from config/topics.json. Without it Home can't hide @system tasks or private
+    // titles, so it shows a message instead of guessing.
+    try { await TaskRules.ready(); } catch (e) { show({ message: e.message }); return; }
+    show({ body });
   }
 
   // One failing source shows its own message here and leaves the rest of Home alone.
