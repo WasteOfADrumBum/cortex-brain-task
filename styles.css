@@ -618,9 +618,13 @@ body { padding-bottom: calc(var(--ticker-h) + env(safe-area-inset-bottom)); }
   }
   .hd-tz { font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: #a9c1d9; }
   .hd-hms { display: flex; align-items: baseline; font-family: var(--font-display); font-weight: 700; line-height: 1.05; font-variant-numeric: tabular-nums; }
-  #d-hm { font-size: 64px; color: #e2ecf7; }
-  .hd-secs { font-size: 22px; color: #22d3ee; }
-  .hd-ampm { font-family: var(--font-display); font-weight: 700; font-size: 18px; letter-spacing: 0.3em; color: #67e8f9; }
+  /* Fixed boxes: "12:59" fits #d-hm and ":59" fits the seconds, so the time never resizes as it ticks. */
+  #d-hm { display: inline-flex; justify-content: center; width: calc(4 * 0.84em + 0.3em); font-size: 64px; color: #e2ecf7; }
+  .hd-secs { display: inline-flex; width: calc(2 * 0.84em + 0.3em); font-size: 22px; color: #22d3ee; }
+  /* Orbitron's digits vary in width (a 1 is half a 0) and it has no tabular figures, so each glyph gets a slot. */
+  .hd-g { display: inline-block; width: 0.84em; text-align: center; }
+  .hd-g-colon { width: 0.3em; }
+  .hd-ampm { min-width: 3.3em; text-align: center; font-family: var(--font-display); font-weight: 700; font-size: 18px; letter-spacing: 0.3em; color: #67e8f9; }
 
   .hd-date, .hd-wx {
     position: absolute; border-radius: 50%; background: radial-gradient(circle, #0e2a45, #071828);

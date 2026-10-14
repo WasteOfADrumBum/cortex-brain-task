@@ -143,8 +143,10 @@
               <!-- Not a live region: the ticking clock is never announced. -->
               <div class="hd-time" role="group" aria-label="Current time">
                 <span class="hd-tz" id="d-tz">Local time</span>
-                <span class="hd-hms"><span id="d-hm">--:--</span><span class="hd-secs" id="d-secs"></span></span>
-                <span class="hd-ampm" id="d-ampm"></span>
+                <span class="visually-hidden" id="d-time-sr"></span>
+                <!-- Each character sits in a fixed-width slot (see .hd-g), so a changing digit never moves the others. -->
+                <span class="hd-hms" aria-hidden="true"><span id="d-hm">--:--</span><span class="hd-secs" id="d-secs"></span></span>
+                <span class="hd-ampm" id="d-ampm" aria-hidden="true"></span>
               </div>
 
               <div class="hd-date" role="group" aria-label="Date">

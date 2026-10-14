@@ -34,6 +34,9 @@ const HomeDesk = (() => {
   })();
   $("d-name").textContent = CFG.userName || "there";
 
+  // Orbitron has no tabular digits, so each character gets its own fixed-width slot (.hd-g in styles.css).
+  const slots = (text) => [...text].map((c) => `<span class="hd-g${c === ":" ? " hd-g-colon" : ""}">${c}</span>`).join("");
+
   let lastMinute = -1;
   function tick(d) {
     const h = d.getHours(), m = d.getMinutes(), s = d.getSeconds();
@@ -47,14 +50,17 @@ const HomeDesk = (() => {
     setRing(rings.hour, ((h % 12) + m / 60) / 12);
     setRing(rings.month, monthP);
     setRing(rings.year, yearP);
-    $("d-secs").textContent = `:${String(s).padStart(2, "0")}`;
+    $("d-secs").innerHTML = slots(`:${String(s).padStart(2, "0")}`);
     if (m === lastMinute) return;
 
     // Everything below changes at most once a minute.
     lastMinute = m;
     const hh = CFG.clock24h ? String(h).padStart(2, "0") : String(h % 12 || 12);
-    $("d-hm").textContent = `${hh}:${String(m).padStart(2, "0")}`;
-    $("d-ampm").textContent = CFG.clock24h ? "" : h < 12 ? "AM" : "PM";
+    const hm = `${hh}:${String(m).padStart(2, "0")}`;
+    const ampm = CFG.clock24h ? "" : h < 12 ? "AM" : "PM";
+    $("d-hm").innerHTML = slots(hm);
+    $("d-ampm").textContent = ampm;
+    $("d-time-sr").textContent = `${hm} ${ampm}`.trim();
     $("d-greeting").textContent = h < 12 ? "Good morning" : h < 17 ? "Good afternoon" : "Good evening";
     $("d-day").textContent = day;
     $("d-month").textContent = MONTHS[mo];
