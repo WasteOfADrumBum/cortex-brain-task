@@ -54,10 +54,36 @@ const Weather = (() => {
   }
 
   // "My location" comes from the browser as coordinates only. Open-Meteo, our location source, has no reverse
-  // lookup, so the place is named by a city name when one is saved, otherwise by its coordinates.
+  // lookup, so the town comes from BigDataCloud's free, keyless client endpoint (agreed with the owner), written the
+  // same way as a searched place ("Town, State"). Without a town the coordinates are shown instead.
   const isGeo = (loc) => loc.name === "My location";
   function coords({ lat, lon }) {
     return `${Math.abs(lat).toFixed(2)}° ${lat < 0 ? "S" : "N"}, ${Math.abs(lon).toFixed(2)}° ${lon < 0 ? "W" : "E"}`;
+  }
+  async function placeName(lat, lon) {
+    const res = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lon}&localityLanguage=en`);
+    if (!res.ok) throw new Error("Place lookup failed.");
+    const hit = await res.json();
+    const town = hit.city || hit.locality;
+    if (!town) throw new Error("No town for these coordinates.");
+    const region = hit.principalSubdivision && hit.principalSubdivision !== town ? `, ${hit.principalSubdivision}` : "";
+    return `${town}${region}`;
+  }
+  // A "My location" saved before towns were looked up gets one once per page load, then keeps it.
+  let placeTried = false;
+  async function ensurePlace(host, loc) {
+    if (Demo.on || !isGeo(loc) || loc.place || placeTried) return;
+    placeTried = true;
+    let place = null;
+    try { place = await placeName(loc.lat, loc.lon); } catch { /* the coordinates stay */ }
+    const now = location();
+    if (!place || now.lat !== loc.lat || now.lon !== loc.lon) return;
+    now.place = place;
+    saveLocation(now);
+    const el = host.querySelector(".wx-place");
+    if (el) el.textContent = place;
+    status = { ...status, text: `Open-Meteo · ${place}` };
+    if (last?.ok) notify({ ...last, loc: now });
   }
 
   function moonPhase(date) {
@@ -194,8 +220,9 @@ const Weather = (() => {
     try {
       const result = await fetchWeather(loc);
       render(host, loc, result);
-      status = { ok: true, text: `Open-Meteo · ${loc.name}` };
+      status = { ok: true, text: `Open-Meteo · ${loc.place || loc.name}` };
       notify({ ok: true, loc, result, at: new Date() });
+      ensurePlace(host, loc);
     } catch (err) {
       host.innerHTML = '<p class="muted"></p>';
       host.firstChild.textContent = `Weather unavailable: ${err.message}`;
@@ -227,6 +254,7 @@ const Weather = (() => {
       geoBtn.disabled = true;
       navigator.geolocation.getCurrentPosition(async (pos) => {
         const loc = { name: "My location", lat: +pos.coords.latitude.toFixed(3), lon: +pos.coords.longitude.toFixed(3) };
+        try { loc.place = await placeName(loc.lat, loc.lon); } catch { /* shown as coordinates instead */ }
         saveLocation(loc);
         cityInput.value = loc.name;
         geoBtn.disabled = false;

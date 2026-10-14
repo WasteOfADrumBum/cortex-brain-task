@@ -83,7 +83,7 @@ export interface DriveStorage {
 }
 
 // ---------- Home: weather (Open-Meteo forecast, the fields Cortex asks for) ----------
-export interface WeatherLocation { name: string; lat: number; lon: number }
+export interface WeatherLocation { name: string; lat: number; lon: number; /** Town found for "My location" */ place?: string }
 export interface WeatherData {
   current: {
     temperature_2m: number;
