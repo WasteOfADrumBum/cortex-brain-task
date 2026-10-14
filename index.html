@@ -126,10 +126,11 @@
         <div class="hd-center">
           <div class="hd-hub-wrap">
             <div class="hd-hub">
-              <span class="hd-line hd-line-1" aria-hidden="true"></span>
-              <span class="hd-line hd-line-2" aria-hidden="true"></span>
-              <span class="hd-line hd-line-3" aria-hidden="true"></span>
-              <span class="hd-line hd-line-4" aria-hidden="true"></span>
+              <!-- Connectors: the date links left to Today's schedule, the weather right to Forecast. Both target the top
+                   panel of their column, whose top never moves, so they line up whatever has loaded. -->
+              <span class="hd-line hd-line-date" aria-hidden="true"></span>
+              <span class="hd-line hd-line-wx" aria-hidden="true"></span>
+              <span class="hd-line hd-line-brain" aria-hidden="true"></span>
 
               <svg class="hd-rings" viewBox="0 0 400 400" aria-hidden="true">
                 <g class="hd-spin"><circle cx="200" cy="200" r="197" fill="none" stroke="#38BDF8" stroke-opacity="0.55" stroke-width="2" stroke-dasharray="40 12 4 12"/></g>
