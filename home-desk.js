@@ -88,7 +88,7 @@ const HomeDesk = (() => {
   function weather(info) {
     $("d-wx-err").textContent = info.formError || "";
     if (info.formError) return;
-    const place = info.loc?.name || "";
+    const place = info.loc?.place || info.loc?.name || "";
     $("d-fc-place").textContent = place;
     $("d-wx-place").textContent = place;
     const url = Weather.forecastUrl();
