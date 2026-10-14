@@ -81,9 +81,10 @@
     $("schedule-body").innerHTML = html;
   }
 
-  function scheduleMessage(text) {
+  // deskText: the desktop panel's own wording, where it differs from the phone's.
+  function scheduleMessage(text, deskText = text) {
     $("schedule-body").innerHTML = `<p class="panel-note">${esc(text)}</p>`;
-    HomeDesk.schedule({ message: text });
+    HomeDesk.schedule({ message: deskText });
   }
 
   // ---------- Top 3 priorities (desktop Home): the same tasks route and dashboard key as the Planner ----------
@@ -105,7 +106,7 @@
       return;
     }
     if (res.status === 401) {
-      show({ message: key ? "Your dashboard key wasn't accepted. Open the Planner to enter it again." : "Open the Planner once and enter your dashboard key to see your top tasks here." });
+      show({ needKey: key ? "rejected" : "missing" });
       return;
     }
     let body = null;
@@ -135,7 +136,11 @@
       return;
     }
     if (res.status === 401) {
-      scheduleMessage(key ? "Your dashboard key wasn't accepted. Open the Planner to enter it again." : "Open the Planner once and enter your dashboard key to see today's events here.");
+      // The phone Home has no key form, so it still points at the Planner; the desktop form is under Top 3.
+      scheduleMessage(
+        key ? "Your dashboard key wasn't accepted. Open the Planner to enter it again." : "Open the Planner once and enter your dashboard key to see today's events here.",
+        key ? "Your dashboard key wasn't accepted. Enter it again under Top 3 priorities." : "Enter your dashboard key under Top 3 priorities to see today's events here.",
+      );
       return;
     }
     let body = null;
@@ -147,6 +152,27 @@
     const skipped = body.errors || [];
     renderSchedule(body.events || [], skipped.length ? `Skipped ${skipped.length === 1 ? "a calendar feed" : `${skipped.length} calendar feeds`}.` : "");
   }
+
+  // ---------- Dashboard key form (desktop Top 3) ----------
+  // Saves to the same localStorage entry as the Planner, then reloads the schedule and tasks at once.
+  // The key is never logged or shown: the field is a password field and is cleared on save.
+  $("d-key-form").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    if (Demo.on) return;
+    const input = $("d-key");
+    const value = input.value.trim();
+    if (!value) return;
+    try { localStorage.setItem("dashKey", value); } catch {
+      $("d-key-err").textContent = "This browser blocked saving the key, so it can't be kept.";
+      return;
+    }
+    input.value = "";
+    $("d-key-err").textContent = "Checking the key…";
+    await Promise.all([loadSchedule(), loadTasks()]);
+    // Accepted: the form is gone, so move focus to the Top 3 heading instead of losing it.
+    if ($("d-key-form").hidden) $("d-h-pri").focus();
+    else input.focus();
+  });
 
   // ---------- Second Brain ----------
   function plural(n, one, many = `${one}s`) { return `${n} ${n === 1 ? one : many}`; }
