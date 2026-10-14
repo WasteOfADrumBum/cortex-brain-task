@@ -330,6 +330,33 @@ button, input { font: inherit; color: inherit; }
   .today-time { width: 100%; justify-content: space-between; }
   .ring-clock { width: 140px; }
 }
+/* Phones: the same Today pieces, arranged as one column with an even rhythm. Layout only: the date tile, clock,
+   weather, details and forecast cards keep their own styles. DOM order (and so reading order) is unchanged. */
+@media (max-width: 640px) {
+  .today-panel { --today-gap: 16px; }
+  .today-strip { display: grid; grid-template-columns: minmax(0, 1fr); gap: 0; }
+  /* Date and clock: one balanced row, both centred on the same line. */
+  .today-time { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: var(--today-gap); width: 100%; }
+  .today-weather { max-width: none; margin-top: var(--today-gap); padding-top: var(--today-gap); border-top: 1px solid var(--line); }
+  /* Weather: summary across the top, then the place and "More weather" on one row, then the opened details. */
+  #weather { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: start; column-gap: var(--today-gap); }
+  #weather > * { grid-column: 1 / -1; }
+  #weather .wx-now { margin: 0 0 var(--today-gap); }
+  #weather .wx-loc { grid-row: 2; grid-column: 1; display: flex; align-items: center; min-height: 32px; }
+  #weather .wx-more { grid-row: 2; margin: 0; }
+  #weather .wx-more > summary { width: fit-content; margin-left: auto; }
+  #weather .wx-more[open] > summary { margin-bottom: var(--today-gap); }
+  #weather .wx-more > .wx-updated { margin: 0; padding-top: var(--today-gap); border-top: 1px solid var(--line); }
+  #weather .wx-details { margin: 8px 0 var(--today-gap); row-gap: 6px; }
+  /* Each value sits on its label's line, even when a neighbouring value wraps. */
+  #weather .wx-details > * { align-self: baseline; }
+  .weather-settings { margin-top: var(--today-gap); }
+  .weather-settings summary { width: fit-content; }
+}
+/* Wide enough phones: the detail rows sit in two even columns of label and value pairs. */
+@media (min-width: 380px) and (max-width: 640px) {
+  #weather .wx-details { grid-template-columns: auto minmax(0, 1fr) auto minmax(0, 1fr); }
+}
 
 /* ---------- Weather ---------- */
 .wx-loc { font-family: var(--font-display); font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--cyan-soft); }
