@@ -45,13 +45,13 @@
     <div class="layout">
       <section class="panel" id="tasks" aria-labelledby="tasks-h" tabindex="-1">
         <header><h2 id="tasks-h">To do</h2><p class="sub" id="tasks-sub"></p></header>
-        <div id="task-groups"></div>
+        <div id="task-groups" tabindex="0" role="region" aria-label="Tasks"></div>
       </section>
 
       <section class="panel" id="day" aria-labelledby="day-h" tabindex="-1">
         <header><h2 id="day-h">Today</h2><p class="sub" id="open-sum"></p></header>
         <ul class="allday" id="day-allday" aria-label="All-day events today"></ul>
-        <div class="scroll" id="day-scroll" tabindex="0" role="region" aria-label="Today, 6 AM to 10 PM"></div>
+        <div class="scroll" id="day-scroll" tabindex="0" role="region" aria-label="Today, midnight to midnight, opens at 6 AM"></div>
         <p class="outside" id="day-outside"></p>
       </section>
 
