@@ -6,8 +6,8 @@
     { "source": "/", "has": [{ "type": "query", "key": "demo" }], "destination": "/demo", "permanent": false }
   ],
   "rewrites": [
-    { "source": "/demo", "destination": "/index.html" },
-    { "source": "/demo/:tab(planner|finances|news|vault|ops)", "destination": "/:tab.html" }
+    { "source": "/demo", "destination": "/" },
+    { "source": "/demo/:tab(planner|finances|news|vault|ops)", "destination": "/:tab" }
   ],
   "headers": [
     {

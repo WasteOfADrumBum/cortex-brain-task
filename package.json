@@ -10,7 +10,8 @@
     "ical-expander": "^3.2.0"
   },
   "scripts": {
-    "test": "tsc -p tsconfig.json && node --test test/*.test.js"
+    "test": "tsc -p tsconfig.json && node --test test/*.test.js",
+    "check:routes": "node scripts/check-routes.mjs"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",
