@@ -89,7 +89,7 @@ test("the demo contains nothing personal from config.js", () => {
 
 test("/demo routes: every tab is rewritten and sent with noindex", () => {
   const v = JSON.parse(read("vercel.json"));
-  assert.ok(v.rewrites.some((r) => r.source === "/demo" && r.destination === "/index.html"));
+  assert.ok(v.rewrites.some((r) => r.source === "/demo" && r.destination === "/"));
   const tabs = v.rewrites.find((r) => r.source.startsWith("/demo/:tab")).source;
   for (const t of ["planner", "finances", "news", "vault", "ops"]) assert.ok(tabs.includes(t), `/demo/${t} missing`);
   for (const src of ["/demo", "/demo/:path*"]) {
