@@ -38,42 +38,49 @@ const HomeDesk = (() => {
   // Orbitron has no tabular digits, so each character gets its own fixed-width slot (.hd-g in styles.css).
   const slots = (text) => [...text].map((c) => `<span class="hd-g${c === ":" ? " hd-g-colon" : ""}">${c}</span>`).join("");
 
+  const pad = (n) => String(n).padStart(2, "0");
+  // Legend percentages: whole numbers, rounded down, so each ring reads 0-99% and only reaches 100% when it completes.
+  const pct = (p) => `${Math.floor(p * 100)}%`;
+  let lastHms = "";
   let lastMinute = -1;
   function tick(d) {
     const h = d.getHours(), m = d.getMinutes(), s = d.getSeconds();
     const y = d.getFullYear(), mo = d.getMonth(), day = d.getDate();
-    const dayFrac = (h * 3600 + m * 60 + s) / 86400;
-    const monthP = (day - 1 + dayFrac) / new Date(y, mo + 1, 0).getDate();
+    const dayP = (h * 3600 + m * 60 + s) / 86400;
+    const monthP = (day - 1 + dayP) / new Date(y, mo + 1, 0).getDate();
     const yearP = (d - new Date(y, 0, 1)) / (new Date(y + 1, 0, 1) - new Date(y, 0, 1));
+    const hourP = (m * 60 + s) / 3600;
+    const minP = s / 60;
 
-    setRing(rings.sec, (s + 1) / 60);
+    // Each ring shows the same share as its legend entry: year, month, day (the hour ring), hour (minute ring), minute.
+    setRing(rings.year, yearP);
+    setRing(rings.month, monthP);
+    setRing(rings.hour, dayP);
+    setRing(rings.min, hourP);
+    setRing(rings.sec, minP);
     // The seconds marker rides the tip of the seconds arc.
-    const a = ((s + 1) / 60) * 2 * Math.PI;
+    const a = minP * 2 * Math.PI;
     secDot.setAttribute("cx", (200 + 128 * Math.sin(a)).toFixed(1));
     secDot.setAttribute("cy", (200 - 128 * Math.cos(a)).toFixed(1));
-    setRing(rings.min, (m + s / 60) / 60);
-    setRing(rings.hour, ((h % 12) + m / 60) / 12);
-    setRing(rings.month, monthP);
-    setRing(rings.year, yearP);
-    $("d-secs").innerHTML = slots(String(s).padStart(2, "0"));
+    $("d-year-pct").textContent = pct(yearP);
+    $("d-month-pct").textContent = pct(monthP);
+    $("d-hour-pct").textContent = pct(dayP);
+    $("d-min-pct").textContent = pct(hourP);
+    $("d-sec-pct").textContent = pct(minP);
+
+    // Always 24-hour and zero-padded on this panel, whatever clock24h says.
+    const hms = `${pad(h)}:${pad(m)}:${pad(s)}`;
+    if (hms !== lastHms) { $("d-hms").innerHTML = slots(hms); lastHms = hms; }
     if (m === lastMinute) return;
 
     // Everything below changes at most once a minute.
     lastMinute = m;
-    const hh = CFG.clock24h ? String(h).padStart(2, "0") : String(h % 12 || 12);
-    const hm = `${hh}:${String(m).padStart(2, "0")}`;
-    const ampm = CFG.clock24h ? "" : h < 12 ? "AM" : "PM";
-    $("d-hm").innerHTML = slots(hm);
-    $("d-hm").parentElement.toggleAttribute("data-lead-one", /^1\d:/.test(hm));
-    $("d-ampm").textContent = ampm;
-    $("d-time-sr").textContent = `${hm} ${ampm}`.trim();
+    $("d-time-sr").textContent = `${pad(h)}:${pad(m)}`;
     $("d-greeting").textContent = h < 12 ? "Good morning" : h < 17 ? "Good afternoon" : "Good evening";
     $("d-day").textContent = day;
     $("d-month").textContent = MONTHS[mo];
     $("d-weekday").textContent = d.toLocaleDateString([], { weekday: "long" });
     $("d-date-full").textContent = d.toLocaleDateString([], { weekday: "long", month: "long", day: "numeric", year: "numeric" });
-    $("d-year-pct").textContent = `${Math.round(yearP * 100)}%`;
-    $("d-month-pct").textContent = `${Math.round(monthP * 100)}%`;
   }
 
   // ---------- Weather circle, its pop-overs, and the Forecast panel ----------
@@ -149,13 +156,13 @@ const HomeDesk = (() => {
     if (model.message) { host.innerHTML = `<p class="hd-note">${esc(model.message)}</p>`; $("d-open").textContent = ""; return; }
     const { all, upcoming, open, note } = model;
     $("d-open").textContent = open ? `Open ${shortRange(open.from, open.to)}` : "No open block";
-    const shown = upcoming.slice(0, 5);
+    // Every remaining event: the panel has a fixed height and scrolls inside, so a long day never stretches it.
+    const shown = upcoming;
     let html = note ? `<p class="hd-note">${esc(note)}</p>` : "";
     if (all.length) html += `<p class="hd-allday">All day: ${all.map((e) => esc(e.title)).join(", ")}</p>`;
     html += shown.length
       ? `<ul class="hd-sched">${shown.map((e, i) => `<li class="acc-${ACCENTS[i % 3]}"><span class="hd-sched-time">${fmtTime(e.start)}</span><span class="hd-sched-title">${esc(e.title)}</span></li>`).join("")}</ul>`
       : `<p class="hd-note">${model.timed.length ? "Nothing else on the calendar today." : "Nothing scheduled today."}</p>`;
-    if (upcoming.length > shown.length) html += `<p class="hd-more">${upcoming.length - shown.length} more later today</p>`;
     host.innerHTML = html;
   }
 
@@ -239,8 +246,8 @@ const HomeDesk = (() => {
         <p class="hd-fake-now"><span class="hd-fake-label">Sample playlist</span><span class="hd-fake-title">${esc(list[0].title)}</span><span class="hd-fake-artist">${esc(list[0].artist)} · ${esc(list[0].length)}</span></p>
         <button type="button" class="btn btn-ghost" data-write="Playing music">Play</button>
         <ol class="hd-fake-list" aria-label="Up next">${list.slice(1).map((t) => `<li>${esc(t.title)} <span>${esc(t.artist)}</span></li>`).join("")}</ol>
-      </div>
-      <div class="hd-div"><a class="hd-link" href="#demo-only" data-write="Opening Spotify">Open in Spotify</a></div>`;
+      </div>`;
+    $("d-music-link").innerHTML = '<a class="hd-link" href="#demo-only" data-write="Opening Spotify">Open in Spotify</a>';
     $("d-eq").hidden = false;
   }
 
@@ -259,8 +266,8 @@ const HomeDesk = (() => {
       <div class="hd-embed">
         <iframe title="Spotify player: Cortex playlist" src="https://open.spotify.com/embed/${type}/${id}?utm_source=generator&amp;theme=0"
           width="100%" height="152" loading="lazy" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"></iframe>
-      </div>
-      <div class="hd-div"><a class="hd-link" href="${open}" target="_blank" rel="noopener">Open in Spotify<span class="visually-hidden"> (opens in a new tab)</span></a></div>`;
+      </div>`;
+    $("d-music-link").innerHTML = `<a class="hd-link" href="${open}" target="_blank" rel="noopener">Open in Spotify<span class="visually-hidden"> (opens in a new tab)</span></a>`;
     $("d-eq").hidden = false;
   }
 
@@ -284,6 +291,29 @@ const HomeDesk = (() => {
   function bindWeather(host, after) {
     Weather.bind($("d-weather-form"), $("d-weather-city"), $("d-weather-geo"), host, after);
     Weather.subscribe(weather);
+  }
+
+  // ---------- Fixed panels that scroll inside ----------
+  // A panel body that overflows becomes a keyboard stop (tabindex 0) named by its panel heading, so it can be
+  // scrolled without a mouse; one that fits stays out of the tab order.
+  function syncScroll(body) {
+    const over = body.scrollHeight > body.clientHeight + 1;
+    if (over) {
+      body.tabIndex = 0;
+      body.setAttribute("role", "region");
+      body.setAttribute("aria-labelledby", body.closest(".hd-panel").querySelector(".hd-label").id);
+    } else {
+      body.removeAttribute("tabindex");
+      body.removeAttribute("role");
+      body.removeAttribute("aria-labelledby");
+    }
+  }
+  const bodies = [...document.querySelectorAll(".home-desk .hd-body")];
+  const resized = new ResizeObserver(() => bodies.forEach(syncScroll));
+  const changed = new MutationObserver(() => bodies.forEach(syncScroll));
+  for (const b of bodies) {
+    resized.observe(b);
+    changed.observe(b, { childList: true, subtree: true, characterData: true, attributes: true, attributeFilter: ["hidden"] });
   }
 
   music();
