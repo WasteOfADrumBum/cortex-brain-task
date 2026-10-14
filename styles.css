@@ -146,7 +146,7 @@ button, input { font: inherit; color: inherit; }
 .goto-panel { grid-column: span 12; }
 .ops-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: var(--gap); align-items: start; }
 .checklist-panel { grid-row: span 2; }
-.notes-panel, .soon-panel { max-width: 1100px; }
+.soon-panel { max-width: 1100px; }
 @media (max-width: 900px) {
   .schedule-panel, .brain-panel { grid-column: span 12; }
   .ops-grid { grid-template-columns: minmax(0, 1fr); }
@@ -264,7 +264,7 @@ button, input { font: inherit; color: inherit; }
 .notes li + li { border-top: 1px solid rgba(67, 217, 255, 0.1); }
 .note-btn {
   width: 100%; display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 6px 16px;
-  min-height: 56px; padding: 10px 6px; background: none; border: 0; text-align: left; cursor: pointer; border-radius: 4px;
+  min-height: 56px; padding: 10px 10px 10px 14px; background: none; border: 0; text-align: left; cursor: pointer; border-radius: 4px;
 }
 .note-btn:hover { background: rgba(67, 217, 255, 0.07); }
 .note-main { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
@@ -431,25 +431,45 @@ body { padding-bottom: calc(var(--ticker-h) + env(safe-area-inset-bottom)); }
   font-family: var(--font-mono); font-size: 12px; color: var(--muted); letter-spacing: 0.06em;
 }
 
-/* ---------- Viewer ---------- */
-.viewer {
-  width: min(760px, calc(100vw - 32px)); max-height: min(80vh, 900px);
-  padding: 0; border: 1px solid var(--line-strong); border-radius: var(--radius);
-  background: var(--panel-solid); color: var(--text);
-  box-shadow: 0 0 0 1px rgba(67, 217, 255, 0.1), 0 30px 80px rgba(0, 0, 0, 0.6), var(--glow);
+/* ---------- Vault reader ---------- */
+/* Desktop: list 2/3, reader 1/3, both a fixed height that fits the window and scroll inside. Narrower: stacked. */
+.vault-grid { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); gap: var(--gap); }
+.notes-panel, .reader-panel {
+  display: flex; flex-direction: column; min-height: 0;
+  /* --vault-top (set by vault.js) is where the panels start, so they end just above the footer ticker. */
+  height: max(460px, calc(100dvh - var(--vault-top, 300px) - var(--ticker-h) - var(--gap)));
 }
-.viewer::backdrop { background: rgba(1, 4, 8, 0.7); backdrop-filter: blur(3px); }
-.viewer-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; padding: 16px 18px; border-bottom: 1px solid var(--line); position: sticky; top: 0; background: var(--panel-solid); }
-.viewer-kicker { font-family: var(--font-mono); font-size: 12px; color: var(--muted); }
-.viewer-head h2 { font-family: var(--font-display); font-size: 18px; letter-spacing: 0.06em; word-break: break-word; }
-.viewer-body { padding: 16px 18px; font-size: 17px; line-height: 1.55; }
-.viewer-body h3 { font-family: var(--font-display); font-size: 15px; letter-spacing: 0.08em; color: var(--cyan); margin: 18px 0 6px; }
-.viewer-body h3:first-child { margin-top: 0; }
-.viewer-body p { margin: 0 0 10px; }
-.viewer-body ul { list-style: disc; padding-left: 22px; margin: 0 0 10px; }
-.viewer-body pre { white-space: pre-wrap; font-family: var(--font-mono); font-size: 14px; }
-.viewer-foot { padding: 0 18px 18px; }
-.viewer-body .viewer-lead { font-size: 18px; color: #f2fcff; margin-bottom: 14px; padding-bottom: 12px; border-bottom: 1px dashed var(--line); }
+@media (min-width: 1101px) { .page.vault { padding-bottom: var(--gap); } }
+.notes-panel .notes { flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain; }
+.reader-panel { padding: 0; }
+.reader-panel::before, .reader-panel::after { z-index: 1; }
+.reader-head { padding: 16px 18px 12px; border-bottom: 1px solid var(--line); }
+.reader-head .panel-title { margin-bottom: 8px; }
+.reader-kicker { font-family: var(--font-mono); font-size: 12px; color: var(--muted); overflow-wrap: anywhere; }
+.reader-title { margin-top: 4px; font-family: var(--font-display); font-size: 18px; letter-spacing: 0.06em; color: #f2fcff; overflow-wrap: anywhere; }
+.reader-body { flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding: 16px 18px; font-size: 17px; line-height: 1.55; }
+.reader-body:focus-visible { outline-offset: -3px; }
+.reader-body h3 { font-family: var(--font-display); font-size: 15px; letter-spacing: 0.08em; color: var(--cyan); margin: 18px 0 6px; }
+.reader-body h3:first-child { margin-top: 0; }
+.reader-body p { margin: 0 0 10px; }
+.reader-body ul { list-style: disc; padding-left: 22px; margin: 0 0 10px; }
+.reader-body .reader-lead { font-size: 18px; color: #f2fcff; margin-bottom: 14px; padding-bottom: 12px; border-bottom: 1px dashed var(--line); }
+.reader-foot { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 16px; padding: 10px 18px 14px; border-top: 1px dashed var(--line); }
+.reader-foot:not(:has(:not([hidden]))) { display: none; }
+.reader-foot a { display: inline-flex; align-items: center; min-height: 32px; font-weight: 700; text-decoration: underline; text-underline-offset: 3px; }
+.reader-back { margin-left: auto; }
+/* The list scrolls, so keep the focus ring inside it rather than clipped at its edges. */
+.notes-panel .note-btn:focus-visible { outline-offset: -2px; }
+/* The open note: an accent bar plus a tint, so it doesn't rely on colour alone. */
+.note-btn[aria-current="true"] { background: rgba(67, 217, 255, 0.12); box-shadow: inset 4px 0 0 var(--cyan); }
+.note-btn[aria-current="true"] .note-title::before { content: "▸ " / ""; color: var(--cyan); }
+@media (max-width: 1100px) {
+  .vault-grid { grid-template-columns: minmax(0, 1fr); }
+  .notes-panel { height: max(420px, 70dvh); }
+  .reader-panel { height: auto; min-height: 240px; }
+  .reader-body { overflow: visible; }
+}
+@media (max-width: 640px) { .notes-panel { height: max(460px, 80dvh); } }
 
 /* ---------- Compact top bar ---------- */
 /* Six tabs don't fit beside the actions on narrower screens, so tabs and actions collapse into the menu. */
