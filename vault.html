@@ -23,9 +23,10 @@
   <main id="main" class="page vault">
     <div class="page-head">
       <h1>Vault</h1>
-      <p class="page-lede">Your Second Brain notes, newest first. Open one to read it here without leaving Cortex.</p>
+      <p class="page-lede">Your Second Brain notes, newest first. Pick one to read it here without leaving Cortex.</p>
     </div>
 
+    <div class="vault-grid">
     <section class="panel notes-panel" aria-labelledby="h-notes">
       <h2 class="panel-title" id="h-notes">Notes</h2>
       <div class="filters" role="group" aria-label="Show notes of type">
@@ -37,8 +38,26 @@
         <button type="submit" class="btn btn-ghost">Search</button>
       </form>
       <p class="files-filter" id="files-filter" aria-live="polite"></p>
-      <ul class="notes" id="notes"></ul>
+      <ul class="notes" id="notes" aria-describedby="notes-hint"></ul>
+      <p class="visually-hidden" id="notes-hint">Up and down arrow keys move between notes. Enter opens the note in the reader.</p>
     </section>
+
+    <section class="panel reader-panel" id="reader" aria-labelledby="reader-title">
+      <div class="reader-head">
+        <p class="panel-title" aria-hidden="true">Reader</p>
+        <p class="reader-kicker" id="reader-kicker"></p>
+        <h2 class="reader-title" id="reader-title" tabindex="-1">No note open</h2>
+      </div>
+      <div class="reader-body" id="reader-body" tabindex="0" role="region" aria-label="Note text">
+        <p class="muted">Pick a note from the list to read it here.</p>
+      </div>
+      <div class="reader-foot">
+        <a id="reader-link" href="#" target="_blank" rel="noopener" hidden>Open in Google Drive<span class="visually-hidden"> (opens in a new tab)</span></a>
+        <button type="button" class="btn btn-ghost reader-back" id="reader-back" hidden>Back to list</button>
+      </div>
+    </section>
+    </div>
+    <p class="visually-hidden" id="reader-status" aria-live="polite"></p>
   </main>
 
   <footer class="ticker">
@@ -46,18 +65,6 @@
     <span>Scope: drive.readonly</span>
     <span id="ticker-sync">Last sync: never</span>
   </footer>
-
-  <dialog class="viewer" id="viewer" aria-labelledby="viewer-title">
-    <div class="viewer-head">
-      <div>
-        <p class="viewer-kicker" id="viewer-kicker"></p>
-        <h2 id="viewer-title"></h2>
-      </div>
-      <button type="button" class="btn btn-ghost" id="viewer-close">Close</button>
-    </div>
-    <div class="viewer-body" id="viewer-body"></div>
-    <p class="viewer-foot"><a id="viewer-link" href="#" target="_blank" rel="noopener">Open in Google Drive<span class="visually-hidden"> (opens in a new tab)</span></a></p>
-  </dialog>
 
   <script src="/config.js"></script>
   <script src="/src/demo/mode.js"></script>
