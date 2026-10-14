@@ -554,6 +554,10 @@ body { padding-bottom: calc(var(--ticker-h) + env(safe-area-inset-bottom)); }
   .home-desk .hd-pri-title { display: inline-flex; align-items: center; min-height: 24px; font-weight: 700; font-size: 17px; color: #e2ecf7; text-decoration: none; }
   .home-desk .hd-pri-title:hover { text-decoration: underline; color: #ffffff; }
   .hd-pri-meta { font-size: 15px; color: #a9c1d9; }
+  /* Topic chips: the word is the meaning, the outline is decoration. */
+  .hd-pri-head { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; }
+  .hd-chips { display: inline-flex; flex-wrap: wrap; gap: 6px; }
+  .hd-chip { padding: 1px 8px; border: 1px solid rgba(169, 193, 217, 0.5); border-radius: 999px; font-size: 13px; font-weight: 600; line-height: 1.4; color: #d5e3f0; background: rgba(255, 255, 255, 0.04); }
 
   /* Clock hub: a fixed 500px drawing, scaled down a little between 1101px and 1399px. */
   /* Above the briefing panel, so the weather pop-overs can overlap it. */

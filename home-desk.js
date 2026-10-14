@@ -148,18 +148,9 @@ const HomeDesk = (() => {
   }
 
   // ---------- Top 3 priorities ----------
-  // Top 3 is the Planner's "Critical this week" bucket in the Planner's order (planner.js prepTasks):
-  // overdue, or P1/P2 due in the next 7 days; sorted by due time, then priority.
+  // Top 3 is the Planner's "Critical this week" bucket in the Planner's order, from the shared rules in task-rules.js:
+  // overdue, or P1/P2 due in the next 7 days; sorted by due time, then priority. @system tasks never appear.
   const sod = (d) => new Date(d.getFullYear(), d.getMonth(), d.getDate());
-  const localDate = (s) => { const [y, m, d] = s.slice(0, 10).split("-").map(Number); return new Date(y, m - 1, d); };
-  function critical(tasks, today) {
-    const wk = new Date(today); wk.setDate(wk.getDate() + 7);
-    return tasks.map((t) => {
-      const dueAt = t.due ? (t.due.length > 10 ? new Date(t.due) : localDate(t.due)) : null;
-      return { ...t, dueAt, dueDay: dueAt ? sod(dueAt) : null };
-    }).sort((a, b) => (a.dueAt ?? Infinity) - (b.dueAt ?? Infinity) || b.priority - a.priority)
-      .filter((t) => t.dueDay && (t.dueDay < today || (t.dueDay < wk && t.priority >= 3)));
-  }
   function dueText(t, today) {
     const diff = Math.round((t.dueDay - today) / 864e5);
     let text = diff < 0 ? `Overdue ${-diff} day${diff === -1 ? "" : "s"}` : diff === 0 ? "Due today" : diff === 1 ? "Due tomorrow"
@@ -171,14 +162,18 @@ const HomeDesk = (() => {
     const host = $("d-tasks");
     if (model.message) { host.innerHTML = `<p class="hd-note">${esc(model.message)}</p>`; return; }
     const today = sod(new Date());
-    const crit = critical(model.tasks, today);
+    const crit = TaskRules.buckets(TaskRules.prepare(model.body).tasks, today).crit;
     if (!crit.length) { host.innerHTML = '<p class="hd-note">Nothing critical this week. Pick something up in the Planner.</p>'; return; }
     const top = crit.slice(0, 3);
     host.innerHTML = `<ol class="hd-pri">${top.map((t, i) => {
       const meta = [dueText(t, today), 5 - t.priority <= 2 ? `P${5 - t.priority}` : "", t.duration ? fmtDur(t.duration) : ""].filter(Boolean).join(" · ");
       const url = t.url || `https://app.todoist.com/app/task/${encodeURIComponent(t.id)}`;
+      // Topic chips are plain text; private topics (Health, Money) also replace the title with "<Topic> task".
+      const chips = t.topics.length
+        ? `<span class="hd-chips"><span class="visually-hidden">Topics: </span>${t.topics.map((x) => `<span class="hd-chip">${esc(x.name)}</span>`).join('<span class="visually-hidden">, </span>')}</span>`
+        : "";
       return `<li class="acc-${PRI_ACCENTS[i]}"><span class="hd-pri-n" aria-hidden="true">${i + 1}</span><span class="hd-pri-text">
-        <a class="hd-pri-title" href="${esc(url)}" target="_blank" rel="noopener">${esc(t.content)}<span class="visually-hidden"> (opens Todoist)</span></a>
+        <span class="hd-pri-head"><a class="hd-pri-title" href="${esc(url)}" target="_blank" rel="noopener">${esc(TaskRules.homeTitle(t))}<span class="visually-hidden"> (opens Todoist)</span></a>${chips}</span>
         <span class="hd-pri-meta">${esc(meta)}</span></span></li>`;
     }).join("")}</ol>${crit.length > 3 ? `<p class="hd-more">${crit.length - 3} more critical in the Planner</p>` : ""}`;
   }

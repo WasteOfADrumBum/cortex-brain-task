@@ -164,3 +164,5 @@ table.month { width: 100%; min-width: 640px; border-collapse: collapse; table-la
 @media (prefers-reduced-motion: reduce) {
   html:has(.planner-page) { scroll-behavior: auto !important; }
 }
+/* Tasks in Everything else with no size label (@quick or @deep in config/topics.json) */
+.needs-size { color: var(--amber); font-weight: 600; border: 1px solid currentColor; border-radius: 3px; padding: 0 6px; }

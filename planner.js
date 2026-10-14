@@ -12,7 +12,7 @@ const fmtTime = d => d.toLocaleTimeString([], { hour: 'numeric', minute: '2-digi
 const fmtDur = m => { const h = Math.floor(m / 60), r = Math.round(m % 60); return [h ? `${h} hr` : '', r ? `${r} min` : ''].filter(Boolean).join(' '); };
 const atMin = (day, m) => new Date(day.getFullYear(), day.getMonth(), day.getDate(), START_H, m);
 
-let TASKS = [], EVENTS = [], firstRender = true;
+let TASKS = [], EVENTS = [], TASK_META = {}, firstRender = true;
 
 /* ---------- data ---------- */
 function getKey() { try { return localStorage.getItem('dashKey') || ''; } catch { return ''; } }
@@ -35,15 +35,17 @@ async function load() {
   const k = getKey(), headers = k ? { 'x-dash-key': k } : {};
   // A network failure resolves to null so the other route still reports its own result.
   const get = url => fetch(url, { headers }).catch(() => null);
-  const [tr, cr] = await Promise.all([
+  const [tr, cr, rulesError] = await Promise.all([
     get('/api/tasks'),
-    get(`/api/calendar?from=${from.toISOString()}&to=${to.toISOString()}`)
+    get(`/api/calendar?from=${from.toISOString()}&to=${to.toISOString()}`),
+    TaskRules.ready().then(() => '', e => (TaskRules.fallback(), e.message))
   ]);
+  const rulesNote = rulesError ? ` ${rulesError} Sizes and topics are off until it does.` : '';
   if (tr?.status === 401 || cr?.status === 401) {
     $('keyform').classList.add('on');
-    ({ tasks: TASKS, events: EVENTS } = sample(today));
-    status(k ? 'That dashboard key was not accepted. Check it matches DASH_KEY in Vercel. Showing sample data until then.'
-      : 'Enter your dashboard key to load your tasks and calendar. Showing sample data until then.', true);
+    ({ tasks: TASKS, events: EVENTS } = sample(today)); TASK_META = {};
+    status((k ? 'That dashboard key was not accepted. Check it matches DASH_KEY in Vercel. Showing sample data until then.'
+      : 'Enter your dashboard key to load your tasks and calendar. Showing sample data until then.') + rulesNote, true);
     CortexHeader.setStatus('warn', 'Key needed');
     render();
     return;
@@ -51,15 +53,18 @@ async function load() {
   const [t, c] = await Promise.all([readApi('Tasks', tr), readApi('Calendar', cr)]);
   $('keyform').classList.remove('on');
   if (t.error || c.error) {
-    ({ tasks: TASKS, events: EVENTS } = sample(today));
-    status(`Showing sample data. ${[t.error, c.error].filter(Boolean).join(' ')}`, true);
+    ({ tasks: TASKS, events: EVENTS } = sample(today)); TASK_META = {};
+    status(`Showing sample data. ${[t.error, c.error].filter(Boolean).join(' ')}${rulesNote}`, true);
     CortexHeader.setStatus('warn', 'Sample data');
   } else {
     TASKS = t.data.tasks || []; EVENTS = c.data.events || [];
+    // Todoist labels, projects and sections (null when Todoist could not list them).
+    TASK_META = { labels: t.data.labels, projects: t.data.projects, sections: t.data.sections };
     // Some calendar feeds can fail while others load: show what loaded and name the skipped ones.
-    const skipped = c.data.errors || [];
+    const skipped = c.data.errors || [], warn = t.data.warnings || [];
     status(`Updated ${fmtTime(new Date())}. Refreshes every 10 minutes.${skipped.length
-      ? ` Skipped ${skipped.length === 1 ? 'a calendar feed' : `${skipped.length} calendar feeds`}: ${skipped.join('. ')}.` : ''}`, skipped.length > 0);
+      ? ` Skipped ${skipped.length === 1 ? 'a calendar feed' : `${skipped.length} calendar feeds`}: ${skipped.join('. ')}.` : ''}${warn.length ? ` ${warn.join('. ')}.` : ''}${rulesNote}`,
+      skipped.length > 0 || warn.length > 0 || !!rulesError);
     CortexHeader.setStatus('ok', 'Planner live');
   }
   render();
@@ -78,23 +83,9 @@ async function readApi(name, res) {
 function status(msg, note) { const s = $('status'); s.textContent = msg; s.classList.toggle('note', !!note); }
 
 /* ---------- tasks ---------- */
+// Buckets come from the shared rules in task-rules.js (also used by Home's Top 3).
 function prepTasks(today) {
-  const wk = addDays(today, 7);
-  const L = t => (t.labels || []).map(l => l.toLowerCase());
-  const quick = t => (t.duration && t.duration <= 30) || L(t).some(l => ['quick', 'small', '5min', '15min'].includes(l));
-  const big = t => (t.duration && t.duration >= 60) || L(t).some(l => ['deep', 'big', 'large'].includes(l));
-  const list = TASKS.map(t => {
-    const dueAt = t.due ? (t.due.length > 10 ? new Date(t.due) : localDate(t.due)) : null;
-    return { ...t, dueAt, dueDay: dueAt ? sod(dueAt) : null };
-  }).sort((a, b) => (a.dueAt ?? Infinity) - (b.dueAt ?? Infinity) || b.priority - a.priority);
-  const isCrit = t => t.dueDay && (t.dueDay < today || (t.dueDay < wk && t.priority >= 3));
-  const crit = list.filter(isCrit), rest = list.filter(t => !isCrit(t));
-  return {
-    crit,
-    quick: rest.filter(quick),
-    big: rest.filter(t => !quick(t) && big(t)),
-    other: rest.filter(t => !quick(t) && !big(t))
-  };
+  return TaskRules.buckets(TaskRules.prepare({ tasks: TASKS, ...TASK_META }).tasks, today);
 }
 function dueLabel(t, today) {
   if (!t.dueDay) return { text: 'No date' };
@@ -104,9 +95,10 @@ function dueLabel(t, today) {
   if (t.due.length > 10) text += `, ${fmtTime(t.dueAt)}`;
   return { text, overdue: diff < 0 };
 }
-function taskLi(t, today) {
+function taskLi(t, today, needsSize) {
   const d = dueLabel(t, today), p = 5 - t.priority;
   const meta = [
+    needsSize ? '<span class="needs-size">Needs size</span>' : '',
     p <= 3 ? `<span class="pri p${p}">P${p}<span class="sr"> priority</span></span>` : '',
     `<span class="${d.overdue ? 'overdue' : ''}"><span class="sr">Due </span>${esc(d.text)}</span>`,
     t.duration ? `<span>${fmtDur(t.duration)}</span>` : ''
@@ -116,7 +108,7 @@ function taskLi(t, today) {
 }
 const LIST_CAP = 5; // lists longer than this scroll inside their own box
 function taskList(key, label, items, today) {
-  const ul = `<ul class="tasks">${items.map(t => taskLi(t, today)).join('')}</ul>`;
+  const ul = `<ul class="tasks">${items.map(t => taskLi(t, today, key === 'other')).join('')}</ul>`;
   if (items.length <= LIST_CAP) return ul;
   return `<div class="task-scroll fade" data-list="${key}" tabindex="0" role="region" aria-label="${label}, ${items.length} tasks, scrollable">${ul}</div>
     <p class="more-cue" aria-hidden="true"></p>`;
@@ -138,7 +130,7 @@ function taskCue(box) {
   if (cue) cue.textContent = below ? `${below} more below, scroll the list` : 'End of list';
 }
 function renderTasks(today) {
-  const g = prepTasks(today);
+  const g = prepTasks(today), size = TaskRules.config.size;
   const keep = {}, open = document.querySelector('#task-groups details')?.open;
   document.querySelectorAll('.task-scroll').forEach(b => { keep[b.dataset.list] = b.scrollTop; });
   const group = (cls, title, hint, items, emptyMsg) => `
@@ -149,10 +141,10 @@ function renderTasks(today) {
     </section>`;
   $('task-groups').innerHTML =
     group('crit', 'Critical this week', 'Overdue, or P1 and P2 due in the next 7 days', g.crit, 'Nothing critical. Pick up something below.') +
-    group('quick', 'Quick pickups', '30 minutes or less', g.quick, 'No quick tasks right now.') +
-    group('big', 'Big tasks', 'An hour or more, best for a long open block', g.big, 'No big tasks right now.') +
+    group('quick', 'Quick pickups', size.quick?.hint || '', g.quick, 'No quick tasks right now.') +
+    group('big', 'Big tasks', size.deep?.hint || '', g.big, 'No big tasks right now.') +
     (g.other.length ? `<section class="group" aria-label="Everything else"><details${open ? ' open' : ''}><summary>Everything else (${g.other.length})</summary>${taskList('other', 'Everything else', g.other, today)}</details></section>` : '');
-  $('tasks-sub').textContent = `${TASKS.length} open`;
+  $('tasks-sub').textContent = `${g.count} open`;
   document.querySelectorAll('.task-scroll').forEach(b => {
     b.scrollTop = keep[b.dataset.list] || 0;
     b.addEventListener('scroll', () => taskCue(b), { passive: true });
@@ -299,17 +291,19 @@ function sample(today) {
     ev(today, 15, 15, 15, 45, 'School pickup'), ev(today, 18, 0, 19, 0, 'Family dinner'), ev(today, 5, 30, 5, 50, 'Dog walk'));
   events.push({ title: 'Kids half day', start: key(addDays(today, 3)), end: key(addDays(today, 4)), allDay: true });
   const due = n => key(addDays(today, n));
+  // Labels match config/topics.json so the sample shows the size buckets, a task that needs a size, and a hidden @system task.
   const tasks = [
-    { id: '1', content: 'Fix map layer bug for agency client', priority: 4, due: due(-1), duration: 120, labels: [] },
-    { id: '2', content: 'Send senior dev promotion notes to manager', priority: 4, due: due(1), duration: 45, labels: [] },
-    { id: '3', content: 'Review Codex PR on cortex-brain-task', priority: 3, due: due(2), duration: 30, labels: [] },
-    { id: '4', content: 'Schedule dentist for kids', priority: 2, due: due(0), duration: 10, labels: [] },
-    { id: '5', content: 'Renew motorcycle registration', priority: 1, due: due(5), duration: 15, labels: [] },
+    { id: '1', content: 'Fix map layer bug for agency client', priority: 4, due: due(-1), duration: 120, labels: ['deep', 'development'] },
+    { id: '2', content: 'Send senior dev promotion notes to manager', priority: 4, due: due(1), duration: 45, labels: ['quick'] },
+    { id: '3', content: 'Review Codex PR on cortex-brain-task', priority: 3, due: due(2), duration: 30, labels: ['quick', 'development'] },
+    { id: '4', content: 'Schedule dentist for kids', priority: 2, due: due(0), duration: 10, labels: ['quick', 'family', 'health'] },
+    { id: '5', content: 'Renew motorcycle registration', priority: 1, due: due(5), duration: 15, labels: ['quick', 'car', 'money'] },
     { id: '6', content: 'Reply to recruiter on LinkedIn', priority: 1, due: null, duration: 15, labels: [] },
-    { id: '7', content: 'Edit fall photo set for One Small Photo', priority: 2, due: due(9), duration: 180, labels: [] },
-    { id: '8', content: 'Write case study for portfolio', priority: 1, due: null, duration: 90, labels: [] },
-    { id: '9', content: 'Order furnace filters', priority: 1, due: due(3), duration: 0, labels: ['quick'] },
-    { id: '10', content: 'Back up drum recordings', priority: 1, due: null, duration: 0, labels: [] }
+    { id: '7', content: 'Edit fall photo set for One Small Photo', priority: 2, due: due(9), duration: 180, labels: ['deep', 'photography'] },
+    { id: '8', content: 'Write case study for portfolio', priority: 1, due: null, duration: 90, labels: ['deep', 'development'] },
+    { id: '9', content: 'Order furnace filters', priority: 1, due: due(3), duration: 0, labels: ['quick', 'house'] },
+    { id: '10', content: 'Back up drum recordings', priority: 1, due: null, duration: 0, labels: ['music'] },
+    { id: '11', content: 'Brain sweep ran', priority: 1, due: due(0), duration: 0, labels: ['system', 'brain'] }
   ];
   return { tasks, events };
 }
