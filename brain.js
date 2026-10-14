@@ -1,5 +1,6 @@
 // Shared Second Brain state for the Home, Vault and Ops tabs (and the header on placeholder tabs):
-// Drive link, Preview (sample data), note types, sweep facts and note titles/summaries.
+// the sign-in gate, Drive link, note types, sweep facts and note titles/summaries.
+// Signed out, these pages show only the sign-in screen. On /demo (src/demo/mode.js) they show sample notes instead of Drive.
 const Brain = (() => {
   const CFG = window.CORTEX_CONFIG;
   const DAY = 86400000;
@@ -139,61 +140,10 @@ const Brain = (() => {
     }
   }
 
-  // ---------- Preview (sample data) ----------
-  // Preview carries across tabs for this browser tab, so moving between tabs keeps the sample data.
-  const PREVIEW_KEY = "cortex.preview";
-  const previewOn = () => { try { return sessionStorage.getItem(PREVIEW_KEY) === "1"; } catch { return false; } };
-  const setPreview = (on) => { try { on ? sessionStorage.setItem(PREVIEW_KEY, "1") : sessionStorage.removeItem(PREVIEW_KEY); } catch { /* blocked */ } };
-
-  function demoFiles() {
-    const now = Date.now();
-    const iso = (daysAgo, h = 0) => new Date(now - daysAgo * DAY - h * 3600000).toISOString();
-    const mk = (name, folder, created, modified, body) => ({
-      id: `demo-${name}`, name, folder, mimeType: "text/markdown",
-      createdTime: iso(created), modifiedTime: iso(modified ?? created, 1), webViewLink: "", body,
-    });
-    const note = (title, description, text) => `---\nname: ${title}\ndescription: ${description}\n---\n# ${title}\n\n${text}`;
-    const files = [
-      mk("00-index.md", "", 30, 3, note("Second Brain rules (v6)", "How the brain is organised and what the weekly sweep does.", "## Folders\n- inbox/ holds new captures\n- notes/ is flat\n\n## Weekly sweep\n- Runs Mondays before 9am\n- Tags decision and about-me notes\n- Writes a digest")),
-      mk("about-me.md", "", 60, 2, note("About me", "Sample profile: who I am, what I work on and how I like to work.", "Sample profile text. Your real about-me.md appears here once Drive is linked.")),
-      mk("2026-10-05-weekly-digest.md", "notes", 5, 5, note("Weekly digest, Oct 5", "9 notes filed, 2 decisions tagged, inbox down to 3.", "- 9 notes filed\n- 2 decisions tagged\n- Inbox cleared to 3")),
-      mk("2026-09-28-weekly-digest.md", "notes", 12, 12, note("Weekly digest, Sep 28", "6 notes filed and one duplicate merged.", "- 6 notes filed")),
-      mk("00-index-v5-retired.md", "notes", 40, 20, "Retired index version."),
-      mk("00-index-v4-retired.md", "notes", 70, 40, "Retired index version."),
-      mk("idea-garage-workbench.md", "inbox", 0, 0, "Build a fold-down workbench for the garage."),
-      mk("call-dentist.md", "inbox", 1, 1, "Reschedule cleaning."),
-      mk("podcast-notes-focus.md", "inbox", 2, 2, "Notes on deep work and focus."),
-      mk("gift-ideas.md", "inbox", 3, 1, "- Headphones\n- Board game"),
-    ];
-    const topics = [
-      ["decision-new-laptop", "Decision: new laptop", "Chose a 14-inch model for battery life over raw speed."],
-      ["drum-practice-plan", "Drum practice plan", "Four short sessions a week focused on rudiments and fills."],
-      ["budget-q4", "Q4 budget", "Spending targets for October to December, with holiday travel."],
-      ["meal-prep-ideas", "Meal prep ideas", "Easy batch meals that keep for four days."],
-      ["reading-list", "Reading list", "Books queued for the rest of the year."],
-      ["car-maintenance", "Car maintenance", "Oil change and tire rotation schedule."],
-      ["workout-split", "Workout split", "Three-day strength routine with one cardio day."],
-      ["home-network", "Home network", "Router settings and which devices sit on the guest network."],
-      ["vacation-shortlist", "Vacation shortlist", "Three spring trip options with rough costs."],
-      ["side-project-cortex", "Side project: Cortex", "What Cortex is for and the plan for version 2."],
-      ["habit-tracker", "Habit tracker", "Daily habits being tried this month."],
-      ["learning-rust", "Learning Rust", "Notes from the first five chapters of the Rust book."],
-      ["garden-plan", "Garden plan", "What to plant in the raised beds next spring."],
-      ["music-gear-wishlist", "Music gear wishlist", "Cymbals and an audio interface, in priority order."],
-      ["weekly-review-template", "Weekly review template", "Questions to answer every Sunday evening."],
-      ["ai-tools-compare", "AI tools compared", "Which assistant to use for writing, coding and research."],
-      ["photo-backup-plan", "Photo backup plan", "Two copies on site, one in the cloud."],
-    ];
-    topics.forEach(([slug, title, desc], i) => {
-      const created = (i * 7) % 29 + (i % 3);
-      files.push(mk(`${slug}.md`, "notes", created, Math.max(0, created - (i % 4)), note(title, desc, `Sample note for Preview mode.\n\n- Point one\n- Point two`)));
-    });
-    return files.map((f) => ({ ...f, area: areaOf(f) }));
-  }
-
-  // ---------- Drive link + Preview wiring for a page ----------
+  // ---------- Sign-in gate, Drive link and demo wiring for a page ----------
   const state = {
     mode: "idle", // idle | live | demo
+    auth: "pending", // pending | in | out: out shows only the sign-in screen
     drive: "starting", // starting | unconfigured | ready | linked | expired | error
     files: [],
     folders: [],
@@ -211,9 +161,51 @@ const Brain = (() => {
     n.textContent = text || "";
   }
 
+  // ---------- Sign-in screen ----------
+  // Signed out, the page shows this and nothing else: no panels, no tabs, no sample data.
+  // The page's own content stays in the DOM but hidden (body[data-auth="out"] in styles.css), and never loads data.
+  let signinNote = null;
+  let signinBtn = null;
+  function buildSignin() {
+    const main = document.getElementById("main");
+    if (!main || document.getElementById("signin")) return;
+    const box = document.createElement("section");
+    box.className = "signin";
+    box.id = "signin";
+    box.setAttribute("aria-labelledby", "signin-h");
+    box.innerHTML = `
+      <svg class="signin-mark" viewBox="0 0 48 48" aria-hidden="true">
+        <circle cx="24" cy="24" r="21" class="bm-outer"/><circle cx="24" cy="24" r="14" class="bm-mid"/><circle cx="24" cy="24" r="6" class="bm-core"/>
+      </svg>
+      <h1 id="signin-h">Sign in to Cortex</h1>
+      <p class="signin-lede">Cortex is a private dashboard. Sign in with the Google account that owns it.</p>
+      <button type="button" class="btn btn-primary signin-btn" id="signin-btn" disabled>Sign in with Google</button>
+      <p class="signin-note" id="signin-note" role="status">Loading Google sign-in…</p>
+      <p class="signin-demo"><a href="/demo">See the demo with sample data</a></p>`;
+    main.prepend(box);
+    signinBtn = box.querySelector("#signin-btn");
+    signinNote = box.querySelector("#signin-note");
+    signinBtn.addEventListener("click", () => Drive.signIn());
+  }
+  function renderSignin() {
+    if (!signinBtn) return;
+    signinBtn.disabled = !["ready", "expired", "error"].includes(state.drive);
+    signinNote.textContent =
+      state.drive === "starting" ? "Loading Google sign-in…"
+      : state.drive === "unconfigured" ? "Sign-in isn't set up: add the Google client ID to config.js."
+      : state.drive === "error" ? `Google sign-in: ${state.error}`
+      : state.drive === "expired" ? "Your session ended. Sign in again to continue."
+      : "";
+  }
+  function setAuth(auth) {
+    state.auth = auth;
+    document.body.dataset.auth = auth;
+  }
+
   function renderHeader() {
     let s = ["", "Standby"];
-    if (state.mode === "demo") s = ["demo", "Preview data"];
+    if (Demo.on) s = ["demo", "Demo data"];
+    else if (state.auth === "out") s = ["", "Signed out"];
     else if (state.drive === "unconfigured") s = ["warn", "Setup needed"];
     else if (state.drive === "expired") s = ["warn", "Relink Drive"];
     else if (state.drive === "error") s = ["warn", "Drive error"];
@@ -223,18 +215,19 @@ const Brain = (() => {
     }
     CortexHeader.setStatus(s[0], s[1]);
     const auth = document.getElementById("btn-auth");
-    auth.textContent = state.drive === "linked" ? "Sign out" : state.drive === "expired" ? "Relink Drive" : "Link Drive";
-    auth.disabled = !["ready", "linked", "expired", "error"].includes(state.drive);
-    const demo = document.getElementById("btn-demo");
-    demo.setAttribute("aria-pressed", String(state.mode === "demo"));
-    // Preview is only for trying Cortex before Drive is linked.
-    demo.hidden = state.drive === "linked" && state.mode !== "demo";
+    if (Demo.on) {
+      auth.textContent = "Link Drive"; // data-write: the demo answers with "Demo only"
+    } else {
+      auth.textContent = state.drive === "linked" ? "Sign out" : state.drive === "expired" ? "Relink Drive" : "Link Drive";
+      auth.disabled = !["ready", "linked", "expired", "error"].includes(state.drive);
+    }
     const ticker = document.getElementById("ticker-sync");
-    if (ticker) ticker.textContent = state.lastSync ? `Last sync: ${fmtTime(state.lastSync)}` : "Last sync: never";
+    if (ticker) ticker.textContent = Demo.on ? "Sample data" : state.lastSync ? `Last sync: ${fmtTime(state.lastSync)}` : "Last sync: never";
   }
 
   function update() {
     renderHeader();
+    renderSignin();
     onUpdate(state);
   }
 
@@ -244,7 +237,6 @@ const Brain = (() => {
         Drive.loadBrain(CFG.brainFolderId),
         wantStorage ? Drive.storage().catch(() => null) : null, // storage is a nice-to-have; never fail the sync over it
       ]);
-      if (state.mode === "demo") return; // Preview was switched on while syncing
       state.storage = storage;
       state.files = files.map((f) => ({ ...f, area: areaOf(f) }));
       state.folders = folders;
@@ -257,22 +249,36 @@ const Brain = (() => {
     update();
   }
 
-  function startDemo() {
-    state.mode = "demo";
-    state.files = demoFiles();
-    state.storage = { used: 4.2 * 2 ** 30, limit: 15 * 2 ** 30, trash: 0 };
-    state.lastSync = null;
-  }
-
   function onDriveChange(event, detail) {
-    if (event === "linked") { state.drive = "linked"; if (state.mode !== "demo") sync(); else update(); return; }
-    if (event === "signed-out") { state.drive = "ready"; if (state.mode === "live") { state.mode = "idle"; state.files = []; } state.storage = null; }
+    if (event === "linked") { state.drive = "linked"; setAuth("in"); sync(); return; }
+    // Signing out leaves nothing of the brain on screen: reload to the sign-in screen.
+    if (event === "signed-out") { location.reload(); return; }
+    // An expired session keeps what is on screen; the top bar offers Relink Drive.
     if (event === "expired") state.drive = "expired";
-    if (event === "error") { state.drive = "error"; state.error = detail; notice(`Google sign-in: ${detail}`); }
+    if (event === "error") { state.drive = "error"; state.error = detail; if (state.auth === "in") notice(`Google sign-in: ${detail}`); }
     update();
   }
 
+  // The demo's sample notes and storage, the same shape Drive gives (src/types.d.ts).
+  async function bootDemo() {
+    setAuth("in");
+    update();
+    const demo = await Demo.data();
+    state.files = demo.notes(new Date()).map((f) => ({ ...f, area: areaOf(f) }));
+    state.storage = demo.storage;
+    state.mode = "demo";
+    update();
+  }
+
+  // What a panel says while there are no notes to show yet (signed in, but Drive hasn't answered).
+  function idleText(st) {
+    if (st.drive === "unconfigured" && !Demo.on) return "Add the Google client ID to config.js, then link Drive.";
+    if (st.drive === "expired" || st.drive === "error") return "Link Drive again (top bar) to see your notes.";
+    return "Loading notes…";
+  }
+
   // options: { storage: also load Drive storage, onUpdate(state): redraw the page }
+  // Pages read state.auth: they load their own data (weather, calendar, tasks) only once it is "in".
   function boot(options = {}) {
     onUpdate = options.onUpdate || (() => {});
     wantStorage = Boolean(options.storage);
@@ -281,36 +287,24 @@ const Brain = (() => {
       if (state.drive === "linked") Drive.signOut();
       else Drive.signIn();
     });
-    document.getElementById("btn-demo").addEventListener("click", () => {
-      if (state.mode === "demo") {
-        setPreview(false);
-        state.mode = Drive.linked() ? "live" : "idle";
-        state.files = [];
-        state.storage = null;
-        if (state.mode === "live") { sync(); return; }
-      } else {
-        setPreview(true);
-        startDemo();
-      }
-      update();
-    });
 
-    // ?demo=1 is the old Preview link; it switches Preview on for this browser tab.
-    if (new URLSearchParams(location.search).has("demo")) setPreview(true);
-    if (previewOn()) startDemo();
+    if (Demo.on) { bootDemo(); return state; }
+
+    buildSignin();
+    // Decide on first paint from the stored session, so a signed-in reload never flashes the sign-in screen.
+    setAuth(Drive.hasSession() ? "in" : "out");
     update();
 
     setInterval(() => { if (state.mode === "live" && Drive.linked()) sync(); }, 10 * 60000);
 
     Drive.init(onDriveChange).then((r) => {
       state.drive = r;
-      if (r === "unconfigured") notice("Add your Google OAuth client ID to config.js to link Drive. Until then, press Preview to see Cortex with sample data.");
-      if (r === "linked" && state.mode !== "demo") { sync(); return; }
+      if (r === "linked") { setAuth("in"); sync(); return; }
+      if (state.mode !== "live") setAuth("out");
       update();
     }).catch((err) => {
       state.drive = "error";
       state.error = err.message;
-      notice(err.message);
       update();
     });
     return state;
@@ -318,6 +312,6 @@ const Brain = (() => {
 
   return {
     AREAS, DAY, areaOf, ago, startOfDay, fmtTime, fmtWhen, nextOccurrence, routine,
-    stats, parseNote, prettyName, describe, boot, state, notice,
+    stats, parseNote, prettyName, describe, boot, idleText, state, notice,
   };
 })();

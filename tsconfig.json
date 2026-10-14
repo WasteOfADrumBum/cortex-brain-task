@@ -1,0 +1,19 @@
+{
+  // Type checking only (no build, nothing is emitted). `npm test` runs it: the /demo sample data and the real
+  // /api routes are both checked against src/types.d.ts, so demo and real data can't drift apart.
+  "compilerOptions": {
+    "allowJs": true,
+    "checkJs": true,
+    "noEmit": true,
+    "strict": false,
+    "target": "es2022",
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "lib": ["es2022", "dom"],
+    "types": ["node"],
+    "skipLibCheck": true,
+    // src/demo/mode.js imports the sample data by its URL on the site ("/src/demo/index.js").
+    "paths": { "/src/*": ["./src/*"] }
+  },
+  "include": ["src/**/*.js", "src/**/*.d.ts", "api/*.js"]
+}

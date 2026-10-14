@@ -29,7 +29,9 @@ const Weather = (() => {
   const subs = new Set();
   function notify(info) { last = info; subs.forEach((fn) => fn(info)); }
 
+  // The demo always shows its made-up place, never a location saved in this browser.
   function location() {
+    if (Demo.on) return window.CORTEX_CONFIG.weather;
     try {
       const saved = JSON.parse(localStorage.getItem(KEY) || "null");
       if (saved && typeof saved.lat === "number") return saved;
@@ -64,6 +66,7 @@ const Weather = (() => {
   }
 
   async function fetchWeather(loc) {
+    if (Demo.on) return (await Demo.data()).weather(new Date());
     const units = (window.CORTEX_CONFIG.weather.units || "fahrenheit") === "celsius" ? "celsius" : "fahrenheit";
     const params = new URLSearchParams({
       latitude: loc.lat, longitude: loc.lon, timezone: "auto", forecast_days: "5",
@@ -223,6 +226,7 @@ const Weather = (() => {
 
   // A full forecast page for the saved location: the National Weather Service for US locations.
   function forecastUrl() {
+    if (Demo.on) return "https://forecast.weather.gov/";
     const { lat, lon } = location();
     const us = lat > 18 && lat < 72 && lon > -180 && lon < -64;
     return us ? `https://forecast.weather.gov/MapClick.php?lat=${lat}&lon=${lon}` : null;

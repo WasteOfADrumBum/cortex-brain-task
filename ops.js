@@ -23,7 +23,7 @@
       {
         label: "Weekly sweep ran in the last 7 days",
         status: !live ? "unknown" : s.sweepFresh ? "yes" : "no",
-        detail: !live ? "Link Drive to check." : s.lastSweep ? `Newest digest: ${day(s.lastSweep)}.` : "No digest note found.",
+        detail: !live ? Brain.idleText(state) : s.lastSweep ? `Newest digest: ${day(s.lastSweep)}.` : "No digest note found.",
         link: live && s.lastDigest ? ["/vault?type=digest", "See digests"] : null,
       },
       {
@@ -34,7 +34,7 @@
       {
         label: `Brain inbox has under ${limit} notes waiting`,
         status: !live ? "unknown" : s.counts.inbox < limit ? "yes" : "no",
-        detail: !live ? "Link Drive to check." : `${s.counts.inbox} ${s.counts.inbox === 1 ? "note is" : "notes are"} waiting to be filed.`,
+        detail: !live ? Brain.idleText(state) : `${s.counts.inbox} ${s.counts.inbox === 1 ? "note is" : "notes are"} waiting to be filed.`,
         link: live ? ["/vault?type=inbox", "Open the inbox"] : null,
       },
       { label: "Daily briefing exists for today", status: "later", detail: "Arrives with the Assistant in phase 6." },
@@ -67,7 +67,7 @@
     const total = counts.reduce((a, b) => a + b, 0);
     const peak = counts.indexOf(Math.max(...counts));
     $("activity-caption").textContent = state.mode === "idle"
-      ? "Link Drive to see how often your notes change."
+      ? Brain.idleText(state)
       : `${total} ${total === 1 ? "note" : "notes"} changed in the last 30 days${total ? `. Busiest day: ${label(peak)} with ${counts[peak]}.` : "."}`;
     $("activity-table-wrap").hidden = state.mode === "idle";
     $("activity-table").tBodies[0].innerHTML = counts.map((n, i) => `<tr><td>${i === days - 1 ? "Today" : label(i)}</td><td>${n}</td></tr>`).reverse().join("");
@@ -83,7 +83,7 @@
   function renderStorage(state) {
     const st = state.storage;
     if (!st) {
-      $("storage-body").innerHTML = `<p class="panel-note">${state.mode === "idle" ? "Link Drive to see storage." : "Storage isn't available right now."}</p>`;
+      $("storage-body").innerHTML = `<p class="panel-note">${state.mode === "idle" ? esc(Brain.idleText(state)) : "Storage isn't available right now."}</p>`;
       return;
     }
     const pct = st.limit ? st.used / st.limit : null;

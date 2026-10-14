@@ -86,6 +86,9 @@ const Drive = (() => {
   }
 
   const linked = () => Boolean(token) && Date.now() < expiresAt - 30000;
+  // True when this browser holds an unexpired session, without waiting for Google sign-in to load.
+  // Pages use it to pick the sign-in screen or the app on first paint.
+  const hasSession = () => linked() || restoreSession();
 
   async function request(url, asText = false) {
     if (!linked()) { dropToken(); onChange("expired"); throw new Error("Drive session expired. Link Drive again."); }
@@ -160,5 +163,5 @@ const Drive = (() => {
     return request(`${API}/files/${encodeURIComponent(file.id)}?alt=media&supportsAllDrives=true`, true);
   }
 
-  return { init, signIn, signOut, linked, loadBrain, storage, searchContent, readFile, configured };
+  return { init, signIn, signOut, linked, hasSession, loadBrain, storage, searchContent, readFile, configured };
 })();

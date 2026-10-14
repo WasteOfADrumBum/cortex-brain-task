@@ -31,23 +31,11 @@
   }
   Weather.bind($("weather-form"), $("weather-city"), $("weather-geo"), wxHost, forecastLink);
   HomeDesk.bindWeather(wxHost, forecastLink);
-  Weather.refresh(wxHost).then(forecastLink);
-  setInterval(() => Weather.refresh(wxHost), 15 * 60000);
 
   // ---------- Today's schedule (same calendar route and dashboard key as the Planner) ----------
   // The Planner's day view runs 6 AM to 10 PM and counts gaps of 30 minutes or more as open time.
   const DAY_START = 6, DAY_END = 22, MIN_OPEN = 30;
   const fmtDur = (m) => { const h = Math.floor(m / 60), r = Math.round(m % 60); return [h ? `${h} hr` : "", r ? `${r} min` : ""].filter(Boolean).join(" "); };
-
-  function sampleEvents(day) {
-    const at = (h, m) => new Date(day.getFullYear(), day.getMonth(), day.getDate(), h, m).toISOString();
-    return [
-      { title: "Standup", start: at(9, 0), end: at(9, 15), allDay: false },
-      { title: "Sprint planning", start: at(10, 0), end: at(11, 0), allDay: false },
-      { title: "School pickup", start: at(15, 15), end: at(15, 45), allDay: false },
-      { title: "Family dinner", start: at(18, 0), end: at(19, 0), allDay: false },
-    ];
-  }
 
   function largestOpen(day, timed) {
     const base = new Date(day.getFullYear(), day.getMonth(), day.getDate(), DAY_START).getTime();
@@ -101,7 +89,12 @@
   // ---------- Top 3 priorities (desktop Home): the same tasks route and dashboard key as the Planner ----------
   async function loadTasks() {
     const show = (model) => HomeDesk.tasks(model);
-    if (Brain.state.mode === "demo") { show({ message: "Preview has no sample tasks. Turn Preview off to see your critical tasks." }); return; }
+    if (Demo.on) {
+      const demo = await Demo.data();
+      try { await TaskRules.ready(); } catch (e) { show({ message: e.message }); return; }
+      show({ body: demo.tasks(Brain.startOfDay(new Date())) });
+      return;
+    }
     let key = "";
     try { key = localStorage.getItem("dashKey") || ""; } catch { /* storage blocked */ }
     let res;
@@ -130,10 +123,10 @@
   // One failing source shows its own message here and leaves the rest of Home alone.
   async function loadSchedule() {
     const day = Brain.startOfDay(new Date());
-    if (Brain.state.mode === "demo") { renderSchedule(sampleEvents(day), "Sample calendar (Preview)."); return; }
+    const to = new Date(day.getTime() + Brain.DAY);
+    if (Demo.on) { renderSchedule((await Demo.data()).calendar(day, to).events, ""); return; }
     let key = "";
     try { key = localStorage.getItem("dashKey") || ""; } catch { /* storage blocked */ }
-    const to = new Date(day.getTime() + Brain.DAY);
     let res;
     try {
       res = await fetch(`/api/calendar?from=${day.toISOString()}&to=${to.toISOString()}`, { headers: key ? { "x-dash-key": key } : {} });
@@ -161,8 +154,7 @@
   function renderBrain(state) {
     const host = $("brain-body");
     if (state.mode === "idle") {
-      const why = state.drive === "unconfigured" ? "Add the Google client ID to config.js, then link Drive." : "Link Drive (top bar) to see your notes, or press Preview for sample data.";
-      host.innerHTML = `<p class="panel-note">${esc(why)}</p>`;
+      host.innerHTML = `<p class="panel-note">${esc(Brain.idleText(state))}</p>`;
       HomeDesk.brain(state);
       return;
     }
@@ -218,14 +210,20 @@
   let clock = setInterval(tick, 1000);
   addEventListener("pagehide", () => { clearInterval(clock); clock = null; });
   addEventListener("pageshow", (e) => { if (e.persisted && !clock) { tick(); clock = setInterval(tick, 1000); } });
-  let lastMode = null;
+  // Weather, calendar and tasks load only once signed in (or in the demo); signed out, Home is the sign-in screen.
+  let started = false;
+  function start() {
+    started = true;
+    Weather.refresh(wxHost).then(forecastLink);
+    loadSchedule();
+    loadTasks();
+    setInterval(() => Weather.refresh(wxHost), 15 * 60000);
+    setInterval(() => { loadSchedule(); loadTasks(); }, 10 * 60000);
+  }
   Brain.boot({
     onUpdate(state) {
       renderBrain(state);
-      // Reload the calendar only when Preview turns on or off.
-      if (state.mode === "demo" ? lastMode !== "demo" : lastMode === "demo" || lastMode === null) { loadSchedule(); loadTasks(); }
-      lastMode = state.mode;
+      if (state.auth === "in" && !started) start();
     },
   });
-  setInterval(() => { loadSchedule(); loadTasks(); }, 10 * 60000);
 })();

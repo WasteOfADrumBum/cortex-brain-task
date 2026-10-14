@@ -1,5 +1,6 @@
 // Cortex planner ("At a glance"): Todoist tasks, today, this week and this month.
-// Data comes from /api/tasks and /api/calendar; sample data is shown when they are not set up.
+// Data comes from /api/tasks and /api/calendar. When they fail, the planner says why and shows nothing in their place.
+// On /demo it shows the sample tasks and calendar from src/demo/ (same shapes as the routes, src/types.d.ts).
 const START_H = 6, END_H = 22, SPAN = (END_H - START_H) * 60, PX = 48 / 60, MIN_OPEN = 30;
 const $ = id => document.getElementById(id);
 const pad = n => String(n).padStart(2, '0');
@@ -32,6 +33,7 @@ async function load() {
   const { start, end } = monthRange(today);
   const from = start < wkStart ? start : wkStart;
   const to = end > addDays(wkStart, 7) ? end : addDays(wkStart, 7);
+  if (Demo.on) return loadDemo(today, from, to);
   const k = getKey(), headers = k ? { 'x-dash-key': k } : {};
   // A network failure resolves to null so the other route still reports its own result.
   const get = url => fetch(url, { headers }).catch(() => null);
@@ -43,9 +45,9 @@ async function load() {
   const rulesNote = rulesError ? ` ${rulesError} Sizes and topics are off until it does.` : '';
   if (tr?.status === 401 || cr?.status === 401) {
     $('keyform').classList.add('on');
-    ({ tasks: TASKS, events: EVENTS } = sample(today)); TASK_META = {};
-    status((k ? 'That dashboard key was not accepted. Check it matches DASH_KEY in Vercel. Showing sample data until then.'
-      : 'Enter your dashboard key to load your tasks and calendar. Showing sample data until then.') + rulesNote, true);
+    TASKS = []; EVENTS = []; TASK_META = {};
+    status((k ? 'That dashboard key was not accepted. Check it matches DASH_KEY in Vercel.'
+      : 'Enter your dashboard key to load your tasks and calendar.') + rulesNote, true);
     CortexHeader.setStatus('warn', 'Key needed');
     render();
     return;
@@ -53,9 +55,11 @@ async function load() {
   const [t, c] = await Promise.all([readApi('Tasks', tr), readApi('Calendar', cr)]);
   $('keyform').classList.remove('on');
   if (t.error || c.error) {
-    ({ tasks: TASKS, events: EVENTS } = sample(today)); TASK_META = {};
-    status(`Showing sample data. ${[t.error, c.error].filter(Boolean).join(' ')}${rulesNote}`, true);
-    CortexHeader.setStatus('warn', 'Sample data');
+    // Show whichever route loaded; the one that failed stays empty and the status names it.
+    TASKS = t.data?.tasks || []; EVENTS = c.data?.events || [];
+    TASK_META = t.data ? { labels: t.data.labels, projects: t.data.projects, sections: t.data.sections } : {};
+    status(`${[t.error, c.error].filter(Boolean).join(' ')}${rulesNote}`, true);
+    CortexHeader.setStatus('warn', 'Data unavailable');
   } else {
     TASKS = t.data.tasks || []; EVENTS = c.data.events || [];
     // Todoist labels, projects and sections (null when Todoist could not list them).
@@ -67,6 +71,16 @@ async function load() {
       skipped.length > 0 || warn.length > 0 || !!rulesError);
     CortexHeader.setStatus('ok', 'Planner live');
   }
+  render();
+}
+// The demo's sample tasks and calendar, in the same shapes the routes return.
+async function loadDemo(today, from, to) {
+  const [demo, rulesError] = await Promise.all([Demo.data(), TaskRules.ready().then(() => '', e => (TaskRules.fallback(), e.message))]);
+  const t = demo.tasks(today), c = demo.calendar(from, to);
+  TASKS = t.tasks; EVENTS = c.events;
+  TASK_META = { labels: t.labels, projects: t.projects, sections: t.sections };
+  status(`Sample tasks and calendar, updated ${fmtTime(new Date())}.${rulesError ? ` ${rulesError}` : ''}`, !!rulesError);
+  CortexHeader.setStatus('demo', 'Demo data');
   render();
 }
 // Turns one API response into { data } or { error: a sentence saying what failed }.
@@ -273,41 +287,6 @@ function render() {
   } else { $('day-scroll').scrollTop = keep.d; $('week-scroll').scrollTop = keep.w; }
 }
 
-/* ---------- sample data (used when the API routes are missing) ---------- */
-function sample(today) {
-  const at = (d, h, m) => new Date(d.getFullYear(), d.getMonth(), d.getDate(), h, m).toISOString();
-  const ev = (d, h1, m1, h2, m2, title) => ({ title, start: at(d, h1, m1), end: at(d, h2, m2), allDay: false });
-  const { start, end } = monthRange(today), events = [];
-  for (let d = new Date(start); d < end; d = addDays(d, 1)) {
-    const w = d.getDay();
-    if (w >= 1 && w <= 5) events.push(ev(d, 9, 0, 9, 15, 'Standup'));
-    if (w === 2 || w === 4) events.push(ev(d, 17, 30, 18, 30, 'Soccer practice'));
-    if (w === 3) events.push(ev(d, 14, 0, 15, 0, 'Release deploy'));
-    if (w === 4) events.push(ev(d, 11, 0, 11, 30, '1:1 with manager'));
-    if (w === 6) events.push(ev(d, 9, 0, 10, 0, 'Motorcycle service'));
-    if (w === 1) events.push({ title: 'Trash and recycling', start: key(d), end: key(addDays(d, 1)), allDay: true });
-  }
-  events.push(ev(today, 10, 0, 11, 0, 'Sprint planning'), ev(today, 10, 30, 11, 15, 'Vendor demo'),
-    ev(today, 15, 15, 15, 45, 'School pickup'), ev(today, 18, 0, 19, 0, 'Family dinner'), ev(today, 5, 30, 5, 50, 'Dog walk'));
-  events.push({ title: 'Kids half day', start: key(addDays(today, 3)), end: key(addDays(today, 4)), allDay: true });
-  const due = n => key(addDays(today, n));
-  // Labels match config/topics.json so the sample shows the size buckets, a task that needs a size, and a hidden @system task.
-  const tasks = [
-    { id: '1', content: 'Fix map layer bug for agency client', priority: 4, due: due(-1), duration: 120, labels: ['deep', 'development'] },
-    { id: '2', content: 'Send senior dev promotion notes to manager', priority: 4, due: due(1), duration: 45, labels: ['quick'] },
-    { id: '3', content: 'Review Codex PR on cortex-brain-task', priority: 3, due: due(2), duration: 30, labels: ['quick', 'development'] },
-    { id: '4', content: 'Schedule dentist for kids', priority: 2, due: due(0), duration: 10, labels: ['quick', 'family', 'health'] },
-    { id: '5', content: 'Renew motorcycle registration', priority: 1, due: due(5), duration: 15, labels: ['quick', 'car', 'money'] },
-    { id: '6', content: 'Reply to recruiter on LinkedIn', priority: 1, due: null, duration: 15, labels: [] },
-    { id: '7', content: 'Edit fall photo set for One Small Photo', priority: 2, due: due(9), duration: 180, labels: ['deep', 'photography'] },
-    { id: '8', content: 'Write case study for portfolio', priority: 1, due: null, duration: 90, labels: ['deep', 'development'] },
-    { id: '9', content: 'Order furnace filters', priority: 1, due: due(3), duration: 0, labels: ['quick', 'house'] },
-    { id: '10', content: 'Back up drum recordings', priority: 1, due: null, duration: 0, labels: ['music'] },
-    { id: '11', content: 'Brain sweep ran', priority: 1, due: due(0), duration: 0, labels: ['system', 'brain'] }
-  ];
-  return { tasks, events };
-}
-
 /* ---------- boot ---------- */
 $('keyform').addEventListener('submit', e => { e.preventDefault(); setKey($('keyinput').value.trim()); $('keyinput').value = ''; load(); });
 setInterval(() => {
@@ -320,15 +299,15 @@ function renderDrive() {
   const auth = $('btn-auth');
   auth.textContent = driveState === 'linked' ? 'Sign out' : driveState === 'expired' ? 'Relink Drive' : 'Link Drive';
   auth.disabled = !['ready', 'linked', 'expired', 'error'].includes(driveState);
-  $('btn-demo').hidden = driveState === 'linked';
 }
+// In the demo the button is marked data-write, so it shows "Demo only" and the planner never starts Google sign-in.
 $('btn-auth').addEventListener('click', () => (driveState === 'linked' ? Drive.signOut() : Drive.signIn()));
-// Preview is the dashboard's sample mode; the planner already shows sample data until its routes are set up.
-$('btn-demo').addEventListener('click', () => { location.href = '/?demo=1'; });
-Drive.init(event => { driveState = event === 'signed-out' ? 'ready' : event; renderDrive(); })
-  .then(r => { driveState = r; renderDrive(); })
-  .catch(() => { driveState = 'error'; renderDrive(); });
-renderDrive();
+if (!Demo.on) {
+  Drive.init(event => { driveState = event === 'signed-out' ? 'ready' : event; renderDrive(); })
+    .then(r => { driveState = r; renderDrive(); })
+    .catch(() => { driveState = 'error'; renderDrive(); });
+  renderDrive();
+}
 
 CortexHeader.setStatus('', 'Loading');
 setInterval(load, 10 * 60000);
