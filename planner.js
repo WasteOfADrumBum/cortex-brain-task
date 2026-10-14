@@ -1,7 +1,11 @@
 // Cortex planner ("At a glance"): Todoist tasks, today, this week and this month.
 // Data comes from /api/tasks and /api/calendar. When they fail, the planner says why and shows nothing in their place.
 // On /demo it shows the sample tasks and calendar from src/demo/ (same shapes as the routes, src/types.d.ts).
-const START_H = 6, END_H = 22, SPAN = (END_H - START_H) * 60, PX = 48 / 60, MIN_OPEN = 30;
+const PX = 48 / 60, MIN_OPEN = 30;
+// Hours each timeline covers. Today shows the whole day; the week keeps 6 AM to 10 PM.
+// Open blocks are only counted inside WAKE (6 AM to 10 PM), whichever range is drawn.
+const DAY = { from: 0, to: 24 }, WEEK = { from: 6, to: 22 }, WAKE = WEEK;
+const span = r => (r.to - r.from) * 60;
 const $ = id => document.getElementById(id);
 const pad = n => String(n).padStart(2, '0');
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -11,7 +15,9 @@ const key = d => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())
 const localDate = s => { const [y, m, d] = s.slice(0, 10).split('-').map(Number); return new Date(y, m - 1, d); };
 const fmtTime = d => d.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
 const fmtDur = m => { const h = Math.floor(m / 60), r = Math.round(m % 60); return [h ? `${h} hr` : '', r ? `${r} min` : ''].filter(Boolean).join(' '); };
-const atMin = (day, m) => new Date(day.getFullYear(), day.getMonth(), day.getDate(), START_H, m);
+const atMin = (day, m, r = WEEK) => new Date(day.getFullYear(), day.getMonth(), day.getDate(), r.from, m);
+const hourName = h => new Date(2000, 0, 1, h).toLocaleTimeString([], { hour: 'numeric' });
+const rangeName = r => r.to - r.from >= 24 ? 'the whole day' : `${hourName(r.from)} to ${hourName(r.to)}`;
 
 let TASKS = [], EVENTS = [], TASK_META = {}, firstRender = true;
 
@@ -181,10 +187,10 @@ function eventsOn(day, evs) {
     timed: evs.filter(e => !e.allDay && e.start < next && e.end > day).sort((a, b) => a.start - b.start)
   };
 }
-function place(day, list) {
-  const base = atMin(day, 0), items = [], outside = [];
+function place(day, list, r = WEEK) {
+  const base = atMin(day, 0, r), items = [], outside = [];
   for (const e of list) {
-    const s = Math.max(0, (e.start - base) / 6e4), f = Math.min(SPAN, (e.end - base) / 6e4);
+    const s = Math.max(0, (e.start - base) / 6e4), f = Math.min(span(r), (e.end - base) / 6e4);
     if (f <= s) { outside.push(e); continue; }
     items.push({ ev: e, s, f: Math.max(f, s + 15) });
   }
@@ -200,11 +206,13 @@ function place(day, list) {
   flush();
   return { items, outside };
 }
-function openBlocks(items, fromMin) {
+// Free time of at least MIN_OPEN minutes, from fromMin on, inside the WAKE hours. Minutes count from r.from.
+function openBlocks(items, fromMin, r = WEEK) {
+  const lo = (WAKE.from - r.from) * 60, hi = (WAKE.to - r.from) * 60;
   const busy = items.map(i => [i.s, i.f]).sort((a, b) => a[0] - b[0]), out = [];
-  let cur = Math.ceil(Math.max(0, fromMin) / 15) * 15;
-  for (const [s, f] of busy) { if (s - cur >= MIN_OPEN) out.push([cur, s]); cur = Math.max(cur, f); }
-  if (SPAN - cur >= MIN_OPEN) out.push([cur, SPAN]);
+  let cur = Math.ceil(Math.max(lo, fromMin) / 15) * 15;
+  for (const [s, f] of busy) { if (Math.min(s, hi) - cur >= MIN_OPEN) out.push([cur, Math.min(s, hi)]); cur = Math.max(cur, f); }
+  if (hi - cur >= MIN_OPEN) out.push([cur, hi]);
   return out;
 }
 function evLi(it) {
@@ -213,29 +221,29 @@ function evLi(it) {
   return `<li class="ev${h < 34 ? ' short' : ''}" style="top:${it.s * PX}px;height:${h - 2}px;left:${it.lane * w}%;width:calc(${w}% - 3px)">
     <span class="ev-t">${esc(e.title)}</span><span class="ev-time"><span class="sr">, </span>${fmtTime(e.start)}<span class="sr"> to ${fmtTime(e.end)}</span></span></li>`;
 }
-function gutterHTML() {
+function gutterHTML(r = WEEK) {
   let h = '';
-  for (let i = START_H; i <= END_H; i++) h += `<span style="top:${(i - START_H) * 48}px">${new Date(2000, 0, 1, i).toLocaleTimeString([], { hour: 'numeric' })}</span>`;
+  for (let i = r.from; i <= r.to; i++) h += `<span style="top:${(i - r.from) * 48}px">${hourName(i)}</span>`;
   return `<div class="gutter" aria-hidden="true">${h}</div>`;
 }
-function nowMin(day) { const n = new Date(); return sod(n).getTime() === day.getTime() ? (n - atMin(day, 0)) / 6e4 : null; }
-function nowLine(m) { return m !== null && m >= 0 && m <= SPAN ? `<div class="now" data-now style="top:${m * PX}px" aria-hidden="true"></div>` : ''; }
+function nowMin(day, r = WEEK) { const n = new Date(); return sod(n).getTime() === day.getTime() ? (n - atMin(day, 0, r)) / 6e4 : null; }
+function nowLine(m, r = WEEK) { return m !== null && m >= 0 && m <= span(r) ? `<div class="now" data-now="${r.from}" style="top:${m * PX}px" aria-hidden="true"></div>` : ''; }
 
 function renderDay(today, evs) {
   const { all, timed } = eventsOn(today, evs);
-  const { items, outside } = place(today, timed);
-  const nm = nowMin(today);
-  const open = openBlocks(items, nm ?? 0);
+  const { items, outside } = place(today, timed, DAY);
+  const nm = nowMin(today, DAY);
+  const open = openBlocks(items, nm ?? 0, DAY);
   const total = open.reduce((a, [s, f]) => a + f - s, 0);
   $('open-sum').textContent = open.length ? `${open.length} open block${open.length > 1 ? 's' : ''}, ${fmtDur(total)} free` : 'No open blocks left today';
   $('day-allday').innerHTML = all.map(e => `<li class="chip">${esc(e.title)}</li>`).join('');
   $('day-allday').hidden = !all.length;
   const blocks = [
     ...items.map(it => ({ s: it.s, html: evLi(it) })),
-    ...open.map(([s, f]) => ({ s, html: `<li class="open" style="top:${s * PX}px;height:${(f - s) * PX - 2}px">Open ${fmtDur(f - s)}<span class="sr">, ${fmtTime(atMin(today, s))} to ${fmtTime(atMin(today, f))}</span></li>` }))
+    ...open.map(([s, f]) => ({ s, html: `<li class="open" style="top:${s * PX}px;height:${(f - s) * PX - 2}px">Open ${fmtDur(f - s)}<span class="sr">, ${fmtTime(atMin(today, s, DAY))} to ${fmtTime(atMin(today, f, DAY))}</span></li>` }))
   ].sort((a, b) => a.s - b.s);
-  $('day-scroll').innerHTML = `<div class="tl">${gutterHTML()}<div class="track">${nowLine(nm)}<ol aria-label="Events and open time today">${blocks.map(b => b.html).join('')}</ol></div></div>`;
-  $('day-outside').textContent = outside.length ? `Outside 6 AM to 10 PM: ${outside.map(e => `${e.title} at ${fmtTime(e.start)}`).join(', ')}` : '';
+  $('day-scroll').innerHTML = `<div class="tl" style="--hours:${DAY.to - DAY.from}">${gutterHTML(DAY)}<div class="track">${nowLine(nm, DAY)}<ol aria-label="Events and open time today">${blocks.map(b => b.html).join('')}</ol></div></div>`;
+  $('day-outside').textContent = outside.length ? `Outside ${rangeName(DAY)}: ${outside.map(e => `${e.title} at ${fmtTime(e.start)}`).join(', ')}` : '';
 }
 
 function renderWeek(today, evs) {
@@ -248,7 +256,7 @@ function renderWeek(today, evs) {
     const label = d.toLocaleDateString([], { weekday: 'long', month: 'long', day: 'numeric' });
     head += `<div class="wk-day" id="wd${i}"${isToday ? ' aria-current="date"' : ''}><span class="sr">${label}</span><span aria-hidden="true">${d.toLocaleDateString([], { weekday: 'short' })}<strong>${d.getDate()}</strong></span>${all.length ? `<ul aria-label="All-day">${all.map(e => `<li>${esc(e.title)}</li>`).join('')}</ul>` : ''}</div>`;
     const { items, outside } = place(d, timed);
-    const extra = outside.length ? `<li class="sr">Outside 6 AM to 10 PM: ${outside.map(e => esc(e.title)).join(', ')}</li>` : '';
+    const extra = outside.length ? `<li class="sr">Outside ${rangeName(WEEK)}: ${outside.map(e => esc(e.title)).join(', ')}</li>` : '';
     body += `<div class="track${isToday ? ' today' : ''}">${isToday ? nowLine(nowMin(d)) : ''}<ol aria-labelledby="wd${i}">${items.map(evLi).join('')}${extra}${!items.length && !extra ? '<li class="sr">No events</li>' : ''}</ol></div>`;
   });
   $('week-scroll').innerHTML = `<div class="wk"><div class="wk-head">${head}</div><div class="wk-body">${body}</div></div>`;
@@ -265,9 +273,9 @@ function renderMonth(today, evs) {
     for (let i = 0; i < 7; i++) {
       const d = addDays(start, w * 7 + i), { all, timed } = eventsOn(d, evs);
       const list = [...all.map(e => ({ t: e.title, all: true })), ...timed.map(e => ({ t: e.title }))];
-      const isToday = d.getTime() === today.getTime(), other = d.getMonth() !== today.getMonth();
-      rows += `<td class="${other ? 'other' : ''}"${isToday ? ' aria-current="date"' : ''}>
-        <span class="dnum"><span class="sr">${d.toLocaleDateString([], { weekday: 'long', month: 'long' })} </span>${d.getDate()}</span>
+      const isToday = d.getTime() === today.getTime(), other = d.getMonth() !== today.getMonth(), past = d < today;
+      rows += `<td class="${[other && 'other', past && 'past'].filter(Boolean).join(' ')}"${isToday ? ' aria-current="date"' : ''}>
+        <span class="dnum"><span class="sr">${d.toLocaleDateString([], { weekday: 'long', month: 'long' })} </span>${d.getDate()}${past ? '<span class="sr">, past</span>' : ''}</span>
         ${list.length ? `<ul>${list.map((e, n) => `<li class="${e.all ? 'all' : ''}${n > 2 ? ' sr' : ''}">${esc(e.t)}</li>`).join('')}</ul>` : ''}
         ${list.length > 3 ? `<span class="more" aria-hidden="true">+${list.length - 3} more</span>` : ''}</td>`;
     }
@@ -282,8 +290,10 @@ function render() {
   $('today-date').textContent = new Date().toLocaleDateString([], { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
   renderTasks(today); renderDay(today, evs); renderWeek(today, evs); renderMonth(today, evs);
   if (firstRender) {
-    const m = nowMin(today), y = m !== null && m > 60 ? (Math.min(m, SPAN) - 60) * PX : 0;
-    $('day-scroll').scrollTop = y; $('week-scroll').scrollTop = y; firstRender = false;
+    // The week opens an hour before now; earlier and later hours scroll.
+    const m = nowMin(today), y = m !== null && m > 60 ? (Math.min(m, span(WEEK)) - 60) * PX : 0;
+    // Today opens at 6 AM, less 12px so its label shows whole.
+    $('day-scroll').scrollTop = (6 - DAY.from) * 60 * PX - 12; $('week-scroll').scrollTop = y; firstRender = false;
   } else { $('day-scroll').scrollTop = keep.d; $('week-scroll').scrollTop = keep.w; }
 }
 
@@ -291,7 +301,10 @@ function render() {
 $('keyform').addEventListener('submit', e => { e.preventDefault(); setKey($('keyinput').value.trim()); $('keyinput').value = ''; load(); });
 setInterval(() => {
   const today = sod(new Date());
-  document.querySelectorAll('[data-now]').forEach(el => { const m = nowMin(today); if (m !== null) el.style.top = `${Math.min(Math.max(m, 0), SPAN) * PX}px`; });
+  document.querySelectorAll('[data-now]').forEach(el => {
+    const r = +el.dataset.now === DAY.from ? DAY : WEEK, m = nowMin(today, r);
+    if (m !== null) el.style.top = `${Math.min(Math.max(m, 0), span(r)) * PX}px`;
+  });
 }, 60000);
 /* ---------- Drive link in the shared header (same session as the dashboard) ---------- */
 let driveState = 'unconfigured';
