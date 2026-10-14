@@ -93,44 +93,25 @@
         <p class="hd-lede">What matters today, at a glance. Each panel links to the tab with the detail.</p>
       </div>
 
-      <div class="hd-main">
-        <div class="hd-col">
-          <section class="hd-panel" aria-labelledby="d-h-sched">
-            <div class="hd-row">
-              <h2 class="hd-label" id="d-h-sched">Today's schedule</h2>
-              <span class="hd-meta" id="d-open"></span>
-            </div>
-            <div id="d-sched" aria-live="polite"><p class="hd-note">Loading today's calendar…</p></div>
-            <div class="hd-div"><a class="hd-link" href="/planner#day">Open the Planner</a></div>
-          </section>
+      <!-- One grid, explicit rows (styles.css, .hd-grid), so every panel's top and bottom line up with a neighbour's.
+           Panels take their height from the grid; content scrolls inside .hd-body and never resizes a panel. -->
+      <div class="hd-grid">
+        <section class="hd-panel hd-a-sched" aria-labelledby="d-h-sched">
+          <div class="hd-row">
+            <h2 class="hd-label" id="d-h-sched">Today's schedule</h2>
+            <span class="hd-meta" id="d-open"></span>
+          </div>
+          <div class="hd-body"><div id="d-sched" aria-live="polite"><p class="hd-note">Loading today's calendar…</p></div></div>
+          <div class="hd-div"><a class="hd-link" href="/planner#day">Open the Planner</a></div>
+        </section>
 
-          <section class="hd-panel hd-top3" aria-labelledby="d-h-pri">
-            <div class="hd-row">
-              <h2 class="hd-label" id="d-h-pri" tabindex="-1">Top 3 priorities</h2>
-              <span class="hd-meta">Critical this week</span>
-            </div>
-            <div id="d-tasks" aria-live="polite"><p class="hd-note">Loading tasks…</p></div>
-            <!-- Shown only when the tasks route asks for a key (never in /demo). Saves to the same dashKey the Planner uses. -->
-            <form class="hd-key" id="d-key-form" hidden>
-              <label for="d-key">Dashboard key</label>
-              <div class="hd-key-row">
-                <input id="d-key" type="password" autocomplete="current-password" spellcheck="false" required aria-describedby="d-key-err">
-                <button type="submit" class="btn btn-primary">Save</button>
-              </div>
-              <p class="hd-key-err" id="d-key-err" role="status"></p>
-            </form>
-            <div class="hd-div"><a class="hd-link" href="/planner">All tasks</a></div>
-          </section>
-        </div>
-
-        <div class="hd-center">
+        <div class="hd-clock hd-a-clock">
           <div class="hd-hub-wrap">
             <div class="hd-hub">
-              <!-- Connectors: the date links left to Today's schedule, the weather right to Forecast. Both target the top
-                   panel of their column, whose top never moves, so they line up whatever has loaded. -->
-              <span class="hd-line hd-line-date" aria-hidden="true"></span>
+              <!-- Connectors: each starts with a dot on its bubble's ring and runs level with the bubble's centre to the
+                   panel beside it (weather to Forecast, date to Top 3). The grid rows are fixed, so they line up in every state. -->
               <span class="hd-line hd-line-wx" aria-hidden="true"></span>
-              <span class="hd-line hd-line-brain" aria-hidden="true"></span>
+              <span class="hd-line hd-line-date" aria-hidden="true"></span>
 
               <svg class="hd-rings" viewBox="0 0 400 400" aria-hidden="true">
                 <g class="hd-spin"><circle cx="200" cy="200" r="197" fill="none" stroke="#38BDF8" stroke-opacity="0.55" stroke-width="2" stroke-dasharray="40 12 4 12"/></g>
@@ -151,15 +132,12 @@
                 <circle cx="200" cy="200" r="106" fill="none" stroke="#E0F2FE" stroke-width="10" stroke-dasharray="2 53.5" transform="rotate(-91 200 200)"/>
               </svg>
 
-              <!-- Not a live region: the ticking clock is never announced. -->
-              <!-- H:MM and AM/PM are one block centred in the inner ring; the zone above and the seconds below are
-                   positioned off that centre, so they never pull it sideways. -->
+              <!-- Not a live region: the ticking clock is never announced. Always 24-hour HH:MM:SS on one centred line;
+                   each character sits in a fixed-width slot (see .hd-g), so no tick moves anything. -->
               <div class="hd-time" role="group" aria-label="Current time">
                 <span class="hd-tz" id="d-tz">Local time</span>
                 <span class="visually-hidden" id="d-time-sr"></span>
-                <!-- Each character sits in a fixed-width slot (see .hd-g), so a changing digit never moves the others. -->
-                <span class="hd-hm-block" aria-hidden="true"><span id="d-hm">--:--</span><span class="hd-ampm" id="d-ampm"></span></span>
-                <span class="hd-secs" id="d-secs" aria-hidden="true"></span>
+                <span class="hd-hms" id="d-hms" aria-hidden="true">--:--:--</span>
               </div>
 
               <div class="hd-date" role="group" aria-label="Date">
@@ -196,70 +174,99 @@
           </div>
 
           <ul class="hd-legend" aria-label="Clock rings, outside to inside">
-            <li><span class="hd-dot" style="--c:#C4B5FD" aria-hidden="true"></span>Year <span id="d-year-pct"></span></li>
-            <li><span class="hd-dot" style="--c:#3B82F6" aria-hidden="true"></span>Month <span id="d-month-pct"></span></li>
-            <li><span class="hd-dot" style="--c:#FB923C" aria-hidden="true"></span>Hour</li>
-            <li><span class="hd-dot" style="--c:#A78BFA" aria-hidden="true"></span>Minute</li>
-            <li><span class="hd-dot hd-dot-sec" style="--c:#22D3EE" aria-hidden="true"></span>Second</li>
+            <li><span class="hd-dot" style="--c:#C4B5FD" aria-hidden="true"></span>Year <span class="hd-pct" id="d-year-pct"></span></li>
+            <li><span class="hd-dot" style="--c:#3B82F6" aria-hidden="true"></span>Month <span class="hd-pct" id="d-month-pct"></span></li>
+            <li><span class="hd-dot" style="--c:#FB923C" aria-hidden="true"></span>Hour <span class="hd-pct" id="d-hour-pct"></span><span class="visually-hidden"> of the day</span></li>
+            <li><span class="hd-dot" style="--c:#A78BFA" aria-hidden="true"></span>Minute <span class="hd-pct" id="d-min-pct"></span><span class="visually-hidden"> of the hour</span></li>
+            <li><span class="hd-dot hd-dot-sec" style="--c:#22D3EE" aria-hidden="true"></span>Second <span class="hd-pct" id="d-sec-pct"></span><span class="visually-hidden"> of the minute</span></li>
           </ul>
-
-          <section class="hd-panel hd-wide" aria-labelledby="d-h-brief">
-            <div class="hd-row">
-              <h2 class="hd-label" id="d-h-brief">Today's briefing</h2>
-              <span class="hd-meta">Phase 6</span>
-            </div>
-            <p class="hd-soon">Arrives in phase 6: a short morning briefing and approvals waiting for you.</p>
-          </section>
         </div>
 
-        <div class="hd-col">
-          <section class="hd-panel" aria-labelledby="d-h-fc">
-            <div class="hd-row">
-              <h2 class="hd-label" id="d-h-fc">Forecast</h2>
-              <span class="hd-meta" id="d-fc-place"></span>
-            </div>
-            <div id="d-fc"><p class="hd-note">Loading forecast…</p></div>
-            <div class="hd-div"><a class="hd-link" id="d-fc-link" href="https://forecast.weather.gov/" target="_blank" rel="noopener">Full forecast<span class="visually-hidden"> (opens in a new tab)</span></a></div>
-          </section>
+        <section class="hd-panel hd-a-fc" aria-labelledby="d-h-fc">
+          <div class="hd-row">
+            <h2 class="hd-label" id="d-h-fc">Forecast</h2>
+            <span class="hd-meta" id="d-fc-place"></span>
+          </div>
+          <div class="hd-body"><div id="d-fc"><p class="hd-note">Loading forecast…</p></div></div>
+          <div class="hd-div"><a class="hd-link" id="d-fc-link" href="https://forecast.weather.gov/" target="_blank" rel="noopener">Full forecast<span class="visually-hidden"> (opens in a new tab)</span></a></div>
+        </section>
 
-          <section class="hd-panel" aria-labelledby="d-h-brain">
-            <h2 class="hd-label hd-label-solo" id="d-h-brain">Second brain</h2>
-            <div id="d-brain"><p class="hd-note">Link Drive to see your notes.</p></div>
-            <div class="hd-div"><a class="hd-link" href="/vault">Browse notes in the Vault</a></div>
-          </section>
+        <section class="hd-panel hd-a-top3" aria-labelledby="d-h-pri">
+          <div class="hd-row">
+            <h2 class="hd-label" id="d-h-pri" tabindex="-1">Top 3 priorities</h2>
+            <span class="hd-meta">Critical this week</span>
+          </div>
+          <div class="hd-body">
+            <div id="d-tasks" aria-live="polite"><p class="hd-note">Loading tasks…</p></div>
+            <!-- Shown only when the tasks route asks for a key (never in /demo). Saves to the same dashKey the Planner uses. -->
+            <form class="hd-key" id="d-key-form" hidden>
+              <label for="d-key">Dashboard key</label>
+              <div class="hd-key-row">
+                <input id="d-key" type="password" autocomplete="current-password" spellcheck="false" required aria-describedby="d-key-err">
+                <button type="submit" class="btn btn-primary">Save</button>
+              </div>
+              <p class="hd-key-err" id="d-key-err" role="status"></p>
+            </form>
+          </div>
+          <div class="hd-div"><a class="hd-link" href="/planner">All tasks</a></div>
+        </section>
 
-          <section class="hd-panel" aria-labelledby="d-h-ops">
-            <div class="hd-row">
-              <h2 class="hd-label" id="d-h-ops">Ops health</h2>
-              <span class="hd-meta">Phase 3</span>
-            </div>
-            <p class="hd-soon">Arrives in phase 3: health and last deploy for each project, plus PRs this week.</p>
-            <div class="hd-div"><a class="hd-link" href="/ops">Open Ops</a></div>
-          </section>
-        </div>
-      </div>
+        <section class="hd-panel hd-a-brain" aria-labelledby="d-h-brain">
+          <h2 class="hd-label hd-label-solo" id="d-h-brain">Second brain</h2>
+          <div class="hd-body"><div id="d-brain"><p class="hd-note">Link Drive to see your notes.</p></div></div>
+          <div class="hd-div"><a class="hd-link" href="/vault">Browse notes in the Vault</a></div>
+        </section>
 
-      <div class="hd-bottom">
-        <section class="hd-panel" aria-labelledby="d-h-money">
+        <section class="hd-panel hd-a-brief" aria-labelledby="d-h-brief">
+          <div class="hd-row">
+            <h2 class="hd-label" id="d-h-brief">Today's briefing</h2>
+            <span class="hd-meta">Phase 6</span>
+          </div>
+          <div class="hd-body"><p class="hd-soon">Arrives in phase 6: a short morning briefing and approvals waiting for you.</p></div>
+        </section>
+
+        <section class="hd-panel hd-a-ops" aria-labelledby="d-h-ops">
+          <div class="hd-row">
+            <h2 class="hd-label" id="d-h-ops">Ops health</h2>
+            <span class="hd-meta">Phase 3</span>
+          </div>
+          <div class="hd-body"><p class="hd-soon">Arrives in phase 3: health and last deploy for each project, plus PRs this week.</p></div>
+          <div class="hd-div"><a class="hd-link" href="/ops">Open Ops</a></div>
+        </section>
+
+        <section class="hd-panel hd-a-money" aria-labelledby="d-h-money">
           <div class="hd-row">
             <h2 class="hd-label" id="d-h-money">Money this month</h2>
             <span class="hd-meta">Phase 4</span>
           </div>
-          <p class="hd-soon">Arrives in phase 4: money in and out, and bills due in the next 7 days.</p>
+          <div class="hd-body"><p class="hd-soon">Arrives in phase 4: money in and out, and bills due in the next 7 days.</p></div>
           <div class="hd-div"><a class="hd-link" href="/finances">Open Finances</a></div>
         </section>
 
-        <section class="hd-panel hd-music" aria-labelledby="d-h-music">
-          <div class="hd-row">
-            <h2 class="hd-label" id="d-h-music">Now playing</h2>
-            <span class="hd-meta hd-meta-violet"><span class="hd-eq" id="d-eq" aria-hidden="true" hidden><span></span><span></span><span></span><span></span><span></span><span></span></span>Cortex playlist</span>
+        <!-- Now playing in the clock's style: a spinning ring "disc" beside the title, and the player in a ringed HUD frame. -->
+        <section class="hd-panel hd-music hd-a-music" aria-labelledby="d-h-music">
+          <div class="hd-music-head">
+            <svg class="hd-disc" viewBox="0 0 100 100" aria-hidden="true">
+              <defs><linearGradient id="d-disc-g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#A78BFA"/><stop offset="1" stop-color="#38BDF8"/></linearGradient></defs>
+              <g class="hd-disc-spin"><circle cx="50" cy="50" r="47" fill="none" stroke="#38BDF8" stroke-opacity="0.55" stroke-width="1.5" stroke-dasharray="18 6 3 6"/></g>
+              <circle cx="50" cy="50" r="41" fill="none" stroke="url(#d-disc-g)" stroke-width="4" stroke-linecap="round" stroke-dasharray="190 68" transform="rotate(-90 50 50)"/>
+              <g class="hd-disc-spin2"><circle cx="50" cy="50" r="33" fill="#120a2a" stroke="#C4B5FD" stroke-opacity="0.35" stroke-width="5" stroke-dasharray="1 4"/></g>
+              <circle cx="50" cy="50" r="24" fill="none" stroke="#A78BFA" stroke-opacity="0.4" stroke-width="1"/>
+              <circle cx="50" cy="50" r="15" fill="none" stroke="#A78BFA" stroke-opacity="0.3" stroke-width="1"/>
+              <circle cx="50" cy="50" r="6" fill="#A78BFA"/><circle cx="50" cy="50" r="2" fill="#050d1a"/>
+            </svg>
+            <div class="hd-music-title">
+              <h2 class="hd-label" id="d-h-music">Now playing</h2>
+              <span class="hd-meta hd-meta-violet"><span class="hd-eq" id="d-eq" aria-hidden="true" hidden><span></span><span></span><span></span><span></span><span></span><span></span></span>Cortex playlist</span>
+              <span id="d-music-link"></span>
+            </div>
           </div>
-          <div id="d-music"></div>
+          <div class="hd-body"><div id="d-music"></div></div>
         </section>
 
-        <nav class="hd-panel" aria-labelledby="d-h-links">
+        <nav class="hd-panel hd-a-links" aria-labelledby="d-h-links">
           <h2 class="hd-label hd-label-solo" id="d-h-links">Quick links</h2>
-          <ul class="hd-links" id="d-links"></ul>
+          <div class="hd-body"><ul class="hd-links" id="d-links"></ul></div>
           <div class="hd-div"><a class="hd-link" href="https://github.com/WasteOfADrumBum/cortex-brain-task/blob/main/config.js" target="_blank" rel="noopener" data-write="Editing quick links">Edit quick links<span class="visually-hidden"> (opens in a new tab)</span></a></div>
         </nav>
       </div>

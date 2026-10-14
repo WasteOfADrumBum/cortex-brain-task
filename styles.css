@@ -534,29 +534,50 @@ body { padding-bottom: calc(var(--ticker-h) + env(safe-area-inset-bottom)); }
   .hd-name { color: #67e8f9; }
   .hd-lede { margin-top: 6px; color: #a9c1d9; font-size: 17px; }
 
-  .hd-main, .hd-bottom {
-    display: grid; gap: 28px; align-items: start;
-    grid-template-columns: minmax(0, 1fr) minmax(0, calc(var(--hub) * var(--s))) minmax(0, 1fr);
+  /* One grid, three columns, explicit rows: every panel's top and bottom line up with a neighbour's, and the gap is
+     the same everywhere. Panels take their height from the grid and never from their content (.hd-body scrolls).
+       row 1  Today's schedule | clock (rows 1-2)  | Forecast
+       row 2  Top 3 (rows 2-3) | clock             | Second brain
+       row 3  Top 3            | Today's briefing  | Ops health
+       row 4  Money this month | Now playing       | Quick links                                               */
+  .hd-grid {
+    --gap: 24px;
+    display: grid; gap: var(--gap);
+    grid-template-columns: minmax(0, 1fr) calc(var(--hub) * var(--s)) minmax(0, 1fr);
+    grid-template-rows: 360px 240px 240px 340px;
+    grid-template-areas:
+      "sched clock fc"
+      "top3  clock brain"
+      "top3  brief ops"
+      "money music links";
   }
-  /* Side columns fill the row, and their panels stretch to fill the column, so a short Top 3 (no tasks, the key
-     message, an error) never leaves a hole above Money this month. Each panel's link stays at its bottom. */
-  .hd-col { align-self: stretch; display: flex; flex-direction: column; gap: 26px; }
-  .hd-col > .hd-panel { flex: 1 0 auto; display: flex; flex-direction: column; }
-  .hd-col > .hd-panel > .hd-div { margin-top: auto; }
-  .hd-col > .hd-panel > :has(+ .hd-div) { margin-bottom: 16px; }
-  .hd-top3 { min-height: 300px; }
-  .hd-center { display: flex; flex-direction: column; align-items: center; gap: 22px; }
+  .hd-a-sched { grid-area: sched; } .hd-a-clock { grid-area: clock; } .hd-a-fc { grid-area: fc; }
+  .hd-a-top3 { grid-area: top3; } .hd-a-brain { grid-area: brain; } .hd-a-brief { grid-area: brief; }
+  .hd-a-ops { grid-area: ops; } .hd-a-money { grid-area: money; } .hd-a-music { grid-area: music; } .hd-a-links { grid-area: links; }
+  /* Above the panels, so the weather pop-overs can overlap them. The hub and legend are centred in rows 1-2. */
+  .hd-clock { position: relative; z-index: 2; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; }
 
   /* Panels */
   .hd-panel {
-    position: relative; padding: 22px 24px; border-radius: 4px;
+    position: relative; display: flex; flex-direction: column; min-height: 0; overflow: hidden; padding: 22px 24px; border-radius: 4px;
     background: linear-gradient(180deg, rgba(14, 36, 58, 0.92), rgba(8, 22, 40, 0.92));
     border: 1px solid rgba(56, 189, 248, 0.22);
   }
   .hd-panel::before, .hd-panel::after { content: ""; position: absolute; width: 16px; height: 16px; pointer-events: none; border: 0 solid #38bdf8; }
   .hd-panel::before { left: -1px; top: -1px; border-width: 2px 0 0 2px; }
   .hd-panel::after { right: -1px; bottom: -1px; border-width: 0 2px 2px 0; }
-  .hd-wide { width: 100%; }
+  .hd-row, .hd-label-solo, .hd-div, .hd-music-head { flex: none; }
+  /* The panel's content area: fills what the header and link row leave, and scrolls when the content is longer.
+     home-desk.js makes an overflowing body a keyboard stop named by its panel heading. */
+  .hd-body {
+    flex: 1 1 auto; min-height: 0; overflow-y: auto; overscroll-behavior: contain; margin-right: -10px; padding-right: 10px;
+    scrollbar-width: thin; scrollbar-color: rgba(56, 189, 248, 0.7) rgba(56, 189, 248, 0.08);
+  }
+  .hd-body::-webkit-scrollbar { width: 8px; }
+  .hd-body::-webkit-scrollbar-track { background: rgba(56, 189, 248, 0.08); border-radius: 4px; }
+  .hd-body::-webkit-scrollbar-thumb { background: rgba(56, 189, 248, 0.7); border-radius: 4px; }
+  .hd-body:focus { outline: none; }
+  .hd-body:focus-visible { outline: 2px solid #67e8f9; outline-offset: 2px; }
   .hd-row { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-bottom: 14px; }
   .hd-label { font-family: var(--font-display); font-weight: 700; font-size: 13px; letter-spacing: 0.24em; text-transform: uppercase; color: #67e8f9; }
   .hd-label-solo { margin-bottom: 14px; }
@@ -567,7 +588,7 @@ body { padding-bottom: calc(var(--ticker-h) + env(safe-area-inset-bottom)); }
   .hd-more, .hd-allday { margin-top: 8px; font-size: 15px; color: #a9c1d9; }
   .hd-allday { margin: 0 0 8px; }
   .hd-note + .hd-sched, .hd-note + .hd-allday { margin-top: 8px; }
-  .hd-div { margin-top: 16px; padding-top: 6px; border-top: 1px dashed rgba(56, 189, 248, 0.35); }
+  .hd-div { margin-top: 12px; padding-top: 6px; border-top: 1px dashed rgba(56, 189, 248, 0.35); }
   .hd-link { display: inline-flex; align-items: center; gap: 6px; min-height: 44px; font-weight: 700; font-size: 16px; text-decoration: underline; text-underline-offset: 3px; }
   .hd-link::after { content: "→"; text-decoration: none; }
   .hd-big { font-family: var(--font-display); font-weight: 700; font-size: 22px; }
@@ -612,7 +633,7 @@ body { padding-bottom: calc(var(--ticker-h) + env(safe-area-inset-bottom)); }
 
   /* Clock hub: a fixed 500px drawing, scaled down a little between 1101px and 1399px. */
   /* Above the briefing panel, so the weather pop-overs can overlap it. */
-  .hd-hub-wrap { position: relative; z-index: 2; width: calc(var(--hub) * var(--s)); height: calc(var(--hub) * var(--s)); }
+  .hd-hub-wrap { position: relative; flex: none; width: calc(var(--hub) * var(--s)); height: calc(var(--hub) * var(--s)); }
   .hd-hub { position: relative; width: var(--hub); height: var(--hub); transform: scale(var(--s)); transform-origin: top left; }
   .hd-rings { position: absolute; left: 30px; top: 30px; width: 440px; height: 440px; overflow: visible; }
   .hd-track { fill: none; stroke: rgba(255, 255, 255, 0.07); }
@@ -621,47 +642,29 @@ body { padding-bottom: calc(var(--ticker-h) + env(safe-area-inset-bottom)); }
   .hd-spin2 { transform-origin: 200px 200px; animation: hdspin 70s linear infinite reverse; }
   @keyframes hdspin { to { transform: rotate(360deg); } }
 
-  .hd-line { position: absolute; display: block; border-top: 1px solid var(--lc); width: var(--lw); }
-  .hd-line::before { content: ""; position: absolute; top: -5px; width: 9px; height: 9px; border-radius: 50%; background: var(--dot); }
-  /* Date and weather connectors run level with their circle's centre, from the circle's edge (they tuck under it)
-     to the panel beside it: short, horizontal, and clear of the rings. */
-  .hd-line-date { --lc: rgba(56, 189, 248, 0.7); --dot: #38bdf8; --lw: 40px; left: -28px; top: 74px; }
-  .hd-line-wx { --lc: rgba(251, 146, 60, 0.7); --dot: #fb923c; --lw: 40px; right: -28px; top: 132px; }
-  .hd-line-brain { --lc: rgba(167, 139, 250, 0.6); --dot: #a78bfa; --lw: 76px; right: -28px; top: 330px; }
-  .hd-line-date::before { left: -4px; }
-  .hd-line-wx::before, .hd-line-brain::before { right: -4px; }
-  /* The connectors land inside the top panel of each side column in every state (signed in, loading, loaded, demo):
-     those panels start level with the hub and never get shorter than this. */
-  .hd-col > .hd-panel:first-child { min-height: 200px; }
+  /* Connectors: the dot sits on the bubble's ring, level with its centre, and the line runs across the grid gap to the
+     panel beside it (weather to Forecast, date to Top 3). Lengths are in hub units, so they divide by the hub's scale. */
+  .hd-line { position: absolute; display: block; height: 0; border-top: 1px solid var(--lc); width: calc(var(--gap) / var(--s) + 4px); }
+  .hd-line::before { content: ""; position: absolute; top: -6px; width: 11px; height: 11px; border-radius: 50%; background: var(--dot); box-shadow: 0 0 6px var(--dot); }
+  .hd-line-wx { --lc: rgba(251, 146, 60, 0.8); --dot: #fb923c; left: 496px; top: 80px; }
+  .hd-line-wx::before { left: -1px; }
+  .hd-line-date { --lc: rgba(56, 189, 248, 0.8); --dot: #38bdf8; right: 496px; top: 396px; }
+  .hd-line-date::before { right: -1px; }
 
   .hd-time { position: absolute; left: 30px; top: 30px; width: 440px; height: 440px; }
-  /* The H:MM + AM/PM block is centred on the ring centre (220, 220), measured on the ink rather than the box:
-     Orbitron's digits sit low in their line box, and a leading "1" leaves its slot half empty on the left. */
-  .hd-hm-block {
-    --nudge-x: 0px;
-    position: absolute; left: 50%; top: 50%; transform: translate(calc(-50% + var(--nudge-x)), calc(-50% - 3px));
-    display: flex; flex-direction: column; align-items: center; gap: 4px;
-    font-family: var(--font-display); font-weight: 700; line-height: 1;
+  /* HH:MM:SS on one line, centred on the ring centre; every glyph is a fixed slot, so the box never changes. */
+  .hd-hms {
+    position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
+    display: inline-flex; font-family: var(--font-display); font-weight: 700; font-size: 40px; line-height: 1;
+    font-variant-numeric: tabular-nums; color: #e2ecf7;
   }
-  .hd-hm-block[data-lead-one] { --nudge-x: -6px; }
   .hd-tz {
-    position: absolute; left: 0; right: 0; bottom: calc(50% + 50px); text-align: center;
+    position: absolute; left: 0; right: 0; bottom: calc(50% + 32px); text-align: center;
     font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: #a9c1d9;
   }
-  /* Fixed boxes: "12:59" fits #d-hm and "59" fits the seconds, so the time never resizes as it ticks. */
-  #d-hm { display: inline-flex; justify-content: center; width: calc(4 * 0.84em + 0.3em); font-size: 58px; color: #e2ecf7; }
-  .hd-ampm { min-width: 3.3em; padding-left: 0.3em; text-align: center; font-size: 18px; letter-spacing: 0.3em; color: #67e8f9; }
-  /* Seconds: their own fixed slot under the block, so they never shift H:MM off centre. */
-  .hd-secs {
-    position: absolute; left: 50%; top: calc(50% + 54px); transform: translateX(-50%);
-    display: inline-flex; justify-content: center; width: calc(2 * 0.84em + 0.6em); padding: 2px 0.3em;
-    border: 1px solid rgba(34, 211, 238, 0.5); border-radius: 999px; background: rgba(34, 211, 238, 0.1);
-    font-family: var(--font-display); font-weight: 700; font-size: 24px; line-height: 1; color: #67e8f9;
-  }
-  .hd-secs:empty { display: none; }
   /* Orbitron's digits vary in width (a 1 is half a 0) and it has no tabular figures, so each glyph gets a slot. */
-  .hd-g { display: inline-block; width: 0.84em; text-align: center; }
-  .hd-g-colon { width: 0.3em; }
+  .hd-g { display: inline-block; width: 0.82em; text-align: center; }
+  .hd-g-colon { width: 0.26em; }
   /* Seconds marker: a white-ringed dot at the tip of the seconds arc. */
   .hd-sec-dot { fill: #22d3ee; stroke: #f0fdff; stroke-width: 3; filter: drop-shadow(0 0 4px rgba(34, 211, 238, 0.9)); }
 
@@ -669,26 +672,27 @@ body { padding-bottom: calc(var(--ticker-h) + env(safe-area-inset-bottom)); }
     position: absolute; border-radius: 50%; background: radial-gradient(circle, #0e2a45, #071828);
     display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;
   }
-  .hd-date { left: 0; top: 0; width: 148px; height: 148px; gap: 4px; border: 2px solid #38bdf8; box-shadow: 0 0 18px rgba(56, 189, 248, 0.35); }
+  /* Date bottom left, beside Top 3; weather top right, beside Forecast. */
+  .hd-date { left: 0; bottom: 30px; width: 148px; height: 148px; gap: 4px; border: 2px solid #38bdf8; box-shadow: 0 0 18px rgba(56, 189, 248, 0.35); }
   .hd-date-day { font-family: var(--font-display); font-weight: 900; font-size: 46px; line-height: 1; }
   .hd-date-month { padding: 2px 10px; background: #38bdf8; color: #04121f; font-family: var(--font-display); font-weight: 700; font-size: 12px; letter-spacing: 0.18em; text-transform: uppercase; }
   .hd-date-weekday { font-family: var(--font-display); font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: #a9c1d9; }
 
-  /* Weather sits top right, beside Forecast, under its More weather / Change location bar. */
-  .hd-wx { right: 0; top: 52px; width: 160px; height: 160px; padding: 10px; border: 2px solid #fb923c; box-shadow: 0 0 18px rgba(251, 146, 60, 0.3); }
+  .hd-wx { right: 0; top: 0; width: 160px; height: 160px; padding: 10px; border: 2px solid #fb923c; box-shadow: 0 0 18px rgba(251, 146, 60, 0.3); }
   .hd-wx-icon { width: 30px; height: 30px; }
   .hd-wx-temp { font-family: var(--font-display); font-weight: 900; font-size: 34px; line-height: 1.1; }
   .hd-wx-cond { font-weight: 700; font-size: 15px; letter-spacing: 0.1em; text-transform: uppercase; line-height: 1.1; }
   .hd-wx-hilo { font-family: var(--font-mono); font-size: 11px; color: #a9c1d9; }
   .hd-wx-msg { font-size: 14px; color: #cfe6f7; }
-  .hd-wx-bar { position: absolute; right: 0; top: 0; z-index: 2; display: flex; gap: 2px; padding: 3px; background: #0b2238; border: 1px solid rgba(251, 146, 60, 0.55); }
+  /* Centred on the clock's vertical centre line, under the rings. */
+  .hd-wx-bar { position: absolute; left: 50%; bottom: 0; transform: translateX(-50%); z-index: 2; white-space: nowrap; display: flex; gap: 2px; padding: 3px; background: #0b2238; border: 1px solid rgba(251, 146, 60, 0.55); }
   .hd-wx-btn {
     display: inline-flex; align-items: center; min-height: 40px; padding: 0 12px; border: 0; background: none; cursor: pointer;
     font-weight: 700; font-size: 15px; color: #fdba74; text-decoration: underline; text-underline-offset: 3px;
   }
   .hd-wx-btn:hover, .hd-wx-btn[aria-expanded="true"] { background: rgba(251, 146, 60, 0.15); color: #ffedd5; }
   .hd-pop {
-    position: absolute; right: 0; top: 54px; z-index: 3; width: 340px; padding: 16px 18px;
+    position: absolute; left: 50%; top: calc(100% + 6px); transform: translateX(-50%); z-index: 3; width: 340px; padding: 16px 18px;
     background: #0a1a2a; border: 1px solid rgba(251, 146, 60, 0.55); box-shadow: 0 16px 40px rgba(0, 0, 0, 0.55);
   }
   .hd-pop-title { font-family: var(--font-display); font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; color: #7dd3fc; }
@@ -703,7 +707,9 @@ body { padding-bottom: calc(var(--ticker-h) + env(safe-area-inset-bottom)); }
   .hd-pop-err { color: #fdba74; font-size: 15px; }
   .hd-pop-err:empty { display: none; }
 
-  .hd-legend { margin-top: -6px; display: flex; flex-wrap: wrap; justify-content: center; gap: 6px 16px; font-family: var(--font-mono); font-size: 12px; color: #cfe6f7; }
+  /* Fixed height (two lines) and fixed-width percentages, so the legend never shifts as the numbers change. */
+  .hd-legend { flex: none; height: 40px; display: flex; flex-wrap: wrap; align-content: center; justify-content: center; gap: 6px 16px; font-family: var(--font-mono); font-size: 12px; line-height: 17px; color: #cfe6f7; }
+  .hd-pct { display: inline-block; width: 4ch; text-align: right; font-variant-numeric: tabular-nums; color: #e2ecf7; }
   .hd-legend li { display: flex; align-items: center; gap: 6px; }
   .hd-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--c); }
   .hd-dot-sec { width: 12px; height: 12px; border: 2px solid #f0fdff; }
@@ -724,8 +730,18 @@ body { padding-bottom: calc(var(--ticker-h) + env(safe-area-inset-bottom)); }
 
   /* Now playing */
   .hd-music { background: linear-gradient(160deg, rgba(76, 29, 149, 0.55), rgba(14, 36, 58, 0.92) 55%, rgba(8, 47, 73, 0.9)); }
-  .hd-embed { border-radius: 12px; box-shadow: 0 0 24px rgba(167, 139, 250, 0.45); }
-  .hd-embed iframe { display: block; border: 0; border-radius: 12px; }
+  /* Now playing in the clock's style: a ring "disc" beside the title, and the player in a ringed gradient frame. */
+  .hd-music-head { display: flex; align-items: center; gap: 16px; margin-bottom: 12px; }
+  .hd-music-title { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; min-width: 0; }
+  .hd-disc { flex: none; width: 92px; height: 92px; filter: drop-shadow(0 0 10px rgba(167, 139, 250, 0.55)); }
+  .hd-disc-spin { transform-origin: 50px 50px; animation: hdspin 14s linear infinite; }
+  .hd-disc-spin2 { transform-origin: 50px 50px; animation: hdspin 30s linear infinite reverse; }
+  .hd-embed {
+    position: relative; padding: 3px; border-radius: 16px;
+    background: conic-gradient(from 210deg, #a78bfa, #38bdf8, #22d3ee, #a78bfa);
+    box-shadow: 0 0 22px rgba(167, 139, 250, 0.45), inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+  }
+  .hd-embed iframe { display: block; border: 0; border-radius: 13px; background: #120a2a; }
   .hd-eq { display: inline-flex; align-items: flex-end; gap: 2px; height: 14px; }
   .hd-eq span { display: block; width: 3px; height: 100%; border-radius: 2px; background: #a78bfa; transform-origin: bottom; animation: hdeq 1s ease-in-out infinite alternate; }
   .hd-eq span:nth-child(2) { animation-delay: 0.2s; }
@@ -758,13 +774,12 @@ body { padding-bottom: calc(var(--ticker-h) + env(safe-area-inset-bottom)); }
   .is-home .sys-status { padding: 0 12px; letter-spacing: 0.1em; }
   .is-home .top-actions .btn { padding: 0 14px; }
   .home-desk { --s: 0.82; }
-  .hd-main, .hd-bottom { gap: 22px; }
   .hd-fc { gap: 4px; }
   .hd-fc li { padding: 10px 2px; }
   .hd-fc-day { font-size: 10px; letter-spacing: 0.02em; }
 }
 @media (min-width: 1101px) and (prefers-reduced-motion: reduce) {
-  .hd-spin, .hd-spin2, .hd-eq span { animation: none; }
+  .hd-spin, .hd-spin2, .hd-disc-spin, .hd-disc-spin2, .hd-eq span { animation: none; }
 }
 
 /* ---------- Motion preferences ---------- */
@@ -819,7 +834,7 @@ body[data-auth="out"] { padding-bottom: 0; }
 /* Home's sample player: the same 152px box as the Spotify embed it stands in for. */
 .hd-fake-player {
   display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 6px 14px;
-  height: 152px; padding: 16px 18px; background: rgba(20, 10, 45, 0.6); overflow: hidden;
+  height: 152px; padding: 16px 18px; border-radius: 13px; background: #140c2c; overflow: hidden;
 }
 .hd-fake-now { display: flex; flex-direction: column; min-width: 0; }
 .hd-fake-label { font-family: var(--font-display); font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; color: #c4b5fd; }
