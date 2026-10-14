@@ -605,12 +605,16 @@ body { padding-bottom: calc(var(--ticker-h) + env(safe-area-inset-bottom)); }
 
   .hd-line { position: absolute; display: block; border-top: 1px solid var(--lc); width: var(--lw); }
   .hd-line::before { content: ""; position: absolute; top: -5px; width: 9px; height: 9px; border-radius: 50%; background: var(--dot); }
-  .hd-line-1 { --lc: rgba(103, 232, 249, 0.6); --dot: #67e8f9; --lw: 76px; left: -28px; top: 150px; }
-  .hd-line-2 { --lc: rgba(103, 232, 249, 0.6); --dot: #67e8f9; --lw: 60px; right: -28px; top: 110px; }
-  .hd-line-3 { --lc: rgba(167, 139, 250, 0.6); --dot: #a78bfa; --lw: 76px; right: -28px; top: 330px; }
-  .hd-line-4 { --lc: rgba(251, 146, 60, 0.6); --dot: #fb923c; --lw: 60px; left: -28px; top: 420px; }
-  .hd-line-1::before, .hd-line-4::before { left: -4px; }
-  .hd-line-2::before, .hd-line-3::before { right: -4px; }
+  /* Date and weather connectors run level with their circle's centre, from the circle's edge (they tuck under it)
+     to the panel beside it: short, horizontal, and clear of the rings. */
+  .hd-line-date { --lc: rgba(56, 189, 248, 0.7); --dot: #38bdf8; --lw: 40px; left: -28px; top: 74px; }
+  .hd-line-wx { --lc: rgba(251, 146, 60, 0.7); --dot: #fb923c; --lw: 40px; right: -28px; top: 132px; }
+  .hd-line-brain { --lc: rgba(167, 139, 250, 0.6); --dot: #a78bfa; --lw: 76px; right: -28px; top: 330px; }
+  .hd-line-date::before { left: -4px; }
+  .hd-line-wx::before, .hd-line-brain::before { right: -4px; }
+  /* The connectors land inside the top panel of each side column in every state (signed in, loading, loaded, demo):
+     those panels start level with the hub and never get shorter than this. */
+  .hd-col > .hd-panel:first-child { min-height: 200px; }
 
   .hd-time {
     position: absolute; left: 30px; top: 30px; width: 440px; height: 440px;
@@ -626,25 +630,26 @@ body { padding-bottom: calc(var(--ticker-h) + env(safe-area-inset-bottom)); }
     position: absolute; border-radius: 50%; background: radial-gradient(circle, #0e2a45, #071828);
     display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;
   }
-  .hd-date { right: 0; top: 0; width: 148px; height: 148px; gap: 4px; border: 2px solid #38bdf8; box-shadow: 0 0 18px rgba(56, 189, 248, 0.35); }
+  .hd-date { left: 0; top: 0; width: 148px; height: 148px; gap: 4px; border: 2px solid #38bdf8; box-shadow: 0 0 18px rgba(56, 189, 248, 0.35); }
   .hd-date-day { font-family: var(--font-display); font-weight: 900; font-size: 46px; line-height: 1; }
   .hd-date-month { padding: 2px 10px; background: #38bdf8; color: #04121f; font-family: var(--font-display); font-weight: 700; font-size: 12px; letter-spacing: 0.18em; text-transform: uppercase; }
   .hd-date-weekday { font-family: var(--font-display); font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: #a9c1d9; }
 
-  .hd-wx { left: 0; bottom: 24px; width: 160px; height: 160px; padding: 10px; border: 2px solid #fb923c; box-shadow: 0 0 18px rgba(251, 146, 60, 0.3); }
+  /* Weather sits top right, beside Forecast, under its More weather / Change location bar. */
+  .hd-wx { right: 0; top: 52px; width: 160px; height: 160px; padding: 10px; border: 2px solid #fb923c; box-shadow: 0 0 18px rgba(251, 146, 60, 0.3); }
   .hd-wx-icon { width: 30px; height: 30px; }
   .hd-wx-temp { font-family: var(--font-display); font-weight: 900; font-size: 34px; line-height: 1.1; }
   .hd-wx-cond { font-weight: 700; font-size: 15px; letter-spacing: 0.1em; text-transform: uppercase; line-height: 1.1; }
   .hd-wx-hilo { font-family: var(--font-mono); font-size: 11px; color: #a9c1d9; }
   .hd-wx-msg { font-size: 14px; color: #cfe6f7; }
-  .hd-wx-bar { position: absolute; left: 104px; bottom: 0; z-index: 2; display: flex; gap: 2px; padding: 3px; background: #0b2238; border: 1px solid rgba(251, 146, 60, 0.55); }
+  .hd-wx-bar { position: absolute; right: 0; top: 0; z-index: 2; display: flex; gap: 2px; padding: 3px; background: #0b2238; border: 1px solid rgba(251, 146, 60, 0.55); }
   .hd-wx-btn {
     display: inline-flex; align-items: center; min-height: 40px; padding: 0 12px; border: 0; background: none; cursor: pointer;
     font-weight: 700; font-size: 15px; color: #fdba74; text-decoration: underline; text-underline-offset: 3px;
   }
   .hd-wx-btn:hover, .hd-wx-btn[aria-expanded="true"] { background: rgba(251, 146, 60, 0.15); color: #ffedd5; }
   .hd-pop {
-    position: absolute; left: 104px; top: calc(100% + 6px); z-index: 3; width: 340px; padding: 16px 18px;
+    position: absolute; right: 0; top: 54px; z-index: 3; width: 340px; padding: 16px 18px;
     background: #0a1a2a; border: 1px solid rgba(251, 146, 60, 0.55); box-shadow: 0 16px 40px rgba(0, 0, 0, 0.55);
   }
   .hd-pop-title { font-family: var(--font-display); font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; color: #7dd3fc; }
