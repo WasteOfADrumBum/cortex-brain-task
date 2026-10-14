@@ -598,6 +598,18 @@ body { padding-bottom: calc(var(--ticker-h) + env(safe-area-inset-bottom)); }
   .hd-chips { display: inline-flex; flex-wrap: wrap; gap: 6px; }
   .hd-chip { padding: 1px 8px; border: 1px solid rgba(169, 193, 217, 0.5); border-radius: 999px; font-size: 13px; font-weight: 600; line-height: 1.4; color: #d5e3f0; background: rgba(255, 255, 255, 0.04); }
 
+  /* Dashboard key form in Top 3 */
+  .hd-key { display: flex; flex-direction: column; gap: 6px; margin-top: 12px; }
+  .hd-key[hidden] { display: none; }
+  .hd-key label { font-weight: 700; font-size: 16px; color: #e2ecf7; }
+  .hd-key-row { display: flex; gap: 8px; }
+  .hd-key input { flex: 1; min-width: 0; min-height: 44px; padding: 8px 12px; background: rgba(2, 8, 14, 0.7); border: 1px solid var(--line-strong); border-radius: var(--radius); color: #e2ecf7; }
+  .hd-key .btn { min-height: 44px; }
+  .hd-key-err { color: #fdba74; font-size: 15px; }
+  .hd-key-err:empty { display: none; }
+  #d-h-pri:focus { outline: none; }
+  #d-h-pri:focus-visible { outline: 2px solid #67e8f9; outline-offset: 4px; }
+
   /* Clock hub: a fixed 500px drawing, scaled down a little between 1101px and 1399px. */
   /* Above the briefing panel, so the weather pop-overs can overlap it. */
   .hd-hub-wrap { position: relative; z-index: 2; width: calc(var(--hub) * var(--s)); height: calc(var(--hub) * var(--s)); }

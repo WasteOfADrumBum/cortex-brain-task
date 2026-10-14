@@ -106,10 +106,19 @@
 
           <section class="hd-panel hd-top3" aria-labelledby="d-h-pri">
             <div class="hd-row">
-              <h2 class="hd-label" id="d-h-pri">Top 3 priorities</h2>
+              <h2 class="hd-label" id="d-h-pri" tabindex="-1">Top 3 priorities</h2>
               <span class="hd-meta">Critical this week</span>
             </div>
             <div id="d-tasks" aria-live="polite"><p class="hd-note">Loading tasks…</p></div>
+            <!-- Shown only when the tasks route asks for a key (never in /demo). Saves to the same dashKey the Planner uses. -->
+            <form class="hd-key" id="d-key-form" hidden>
+              <label for="d-key">Dashboard key</label>
+              <div class="hd-key-row">
+                <input id="d-key" type="password" autocomplete="current-password" spellcheck="false" required aria-describedby="d-key-err">
+                <button type="submit" class="btn btn-primary">Save</button>
+              </div>
+              <p class="hd-key-err" id="d-key-err" role="status"></p>
+            </form>
             <div class="hd-div"><a class="hd-link" href="/planner">All tasks</a></div>
           </section>
         </div>

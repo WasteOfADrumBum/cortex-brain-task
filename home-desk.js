@@ -170,8 +170,17 @@ const HomeDesk = (() => {
     if (t.due.length > 10) text += `, ${fmtTime(t.dueAt)}`;
     return text;
   }
+  // model.needKey: "missing" (no key saved) or "rejected" (the saved key got a 401). Shows the inline key form.
   function tasks(model) {
     const host = $("d-tasks");
+    const form = $("d-key-form");
+    const needKey = !Demo.on && model.needKey;
+    form.hidden = !needKey;
+    $("d-key-err").textContent = needKey === "rejected" ? "That key wasn't accepted. Check it and try again." : "";
+    if (needKey) {
+      host.innerHTML = '<p class="hd-note">Enter your dashboard key to see your top tasks and today\'s schedule here. It\'s the same key the Planner uses.</p>';
+      return;
+    }
     if (model.message) { host.innerHTML = `<p class="hd-note">${esc(model.message)}</p>`; return; }
     const today = sod(new Date());
     const crit = TaskRules.buckets(TaskRules.prepare(model.body).tasks, today).crit;
