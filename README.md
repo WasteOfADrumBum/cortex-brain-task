@@ -17,7 +17,17 @@ Six tabs in the shared top bar, one clean URL each (`vercel.json` turns on `clea
 
 Every Home panel has a plain heading and ends with a link to the place that has the detail. Each source fails on its own: a broken weather or calendar feed shows a message in its own panel.
 
-**Preview** shows Home, Vault and Ops with sample data before Drive is linked, and stays on while you move between tabs. `/?demo=1` opens in Preview.
+**Signed out**, Home, Finances, News, Vault and Ops show only a sign-in screen: no panels and no sample data. The Planner keeps its own dashboard key and shows nothing until the key and its routes work.
+
+## Demo (`/demo`)
+
+`/demo` is the portfolio version: every tab (`/demo`, `/demo/planner`, `/demo/finances`, `/demo/news`, `/demo/vault`, `/demo/ops`) runs the real pages with made-up sample data, so the layouts are the same as the real app on desktop and phone.
+
+- A banner on every demo page says "Demo with sample data. Nothing here is real."
+- Anything that would change data (Link Drive, weather location, Edit quick links, the music player) shows a "Demo only" message instead. Mark new write controls with `data-write="<what it does>"` and the demo handles them.
+- The demo never calls Drive, Todoist, Google Calendar or the weather service, and replaces your name, quick links, routines, weather place and playlist from `config.js`.
+- `vercel.json` rewrites the demo routes to the real pages and sends `X-Robots-Tag: noindex`. There is no sitemap. The old `/?demo=1` link redirects to `/demo`.
+- Sample data lives in `src/demo/`. It uses the same TypeScript types as the real data (`src/types.d.ts`); `npm test` type-checks the demo data and the `/api` routes against them, so the two can't drift apart. Finances and News sample data is ready for phases 4 and 5.
 
 ## Planner (At a glance)
 
@@ -28,7 +38,7 @@ One screen with your Todoist tasks, today hour by hour (6 AM to 10 PM) with open
 - **Big tasks**: label `@deep` (45 minutes or more)
 - **Everything else**: collapsed list, so nothing disappears; tasks with no size label are marked "Needs size"
 
-Tasks labeled `@system` (automated, like "Brain sweep ran") are left out of every bucket, count and Home. Label names live in `config/topics.json` (size labels and topic labels); `task-rules.js` holds the shared rules Home and the Planner both use. A label in the config that doesn't exist in Todoist is ignored. Home's Top 3 shows each task's topics as text chips, and tasks with a private topic (`@health`, `@money`) show only as "Health task" or "Money task" there; full titles stay in the Planner. Until the API is set up, the planner shows sample data.
+Tasks labeled `@system` (automated, like "Brain sweep ran") are left out of every bucket, count and Home. Label names live in `config/topics.json` (size labels and topic labels); `task-rules.js` holds the shared rules Home and the Planner both use. A label in the config that doesn't exist in Todoist is ignored. Home's Top 3 shows each task's topics as text chips, and tasks with a private topic (`@health`, `@money`) show only as "Health task" or "Money task" there; full titles stay in the Planner. Until the API is set up, the planner says what is missing and shows no tasks; sample data is only on `/demo/planner`.
 
 Set these in Vercel (Project → Settings → Environment Variables); `.env.example` explains each one:
 
@@ -48,7 +58,9 @@ Google's iCal feed can lag your live calendar by minutes to a few hours.
 | `finances.html`, `news.html`, `tab.js` | Placeholder tabs |
 | `planner.html`, `planner.css`, `planner.js` | Planner tab |
 | `header.js` | Shared top bar and tab menu |
-| `brain.js` | Shared Drive link, Preview, note types, titles and summaries |
+| `brain.js` | Shared sign-in screen, Drive link, note types, titles and summaries |
+| `src/demo/` | `/demo`: `mode.js` (banner, "Demo only" message, demo links and profile) and the sample data |
+| `src/types.d.ts`, `tsconfig.json`, `test/` | Shared data types and the checks `npm test` runs (no build step) |
 | `styles.css` | Styling for every tab |
 | `config/topics.json` | Todoist size and topic labels, and which topics are private on Home |
 | `task-rules.js` | Shared task rules: labels, Critical, Planner buckets, Home title privacy |
@@ -58,7 +70,7 @@ Google's iCal feed can lag your live calendar by minutes to a few hours.
 | `weather.js` | Weather from Open-Meteo |
 | `api/tasks.js` | Todoist tasks, labels, projects and sections for the Planner and Home (needs `DASH_KEY`) |
 | `api/calendar.js` | Google Calendar events from iCal feeds (needs `DASH_KEY`); also used by Home's schedule |
-| `vercel.json` | Clean URLs for the tabs |
+| `vercel.json` | Clean URLs for the tabs, `/demo` routes and their noindex header |
 | `.env.example` | The three planner settings to set in Vercel |
 
 ## Setup

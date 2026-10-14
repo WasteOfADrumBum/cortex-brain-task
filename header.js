@@ -14,6 +14,7 @@ const CortexHeader = (() => {
   ];
   const topbar = document.querySelector(".topbar");
   const page = topbar.dataset.page;
+  // In the demo (src/demo/mode.js) every tab link stays inside /demo.
 
   topbar.innerHTML = `
     <div class="brand">
@@ -33,12 +34,11 @@ const CortexHeader = (() => {
     </button>
     <div class="top-menu" id="top-menu">
       <nav class="views" aria-label="Tabs">
-        <ul>${TABS.map(([id, href, label]) => `<li><a href="${href}"${id === page ? ' aria-current="page"' : ""}>${label}</a></li>`).join("")}</ul>
+        <ul>${TABS.map(([id, href, label]) => `<li><a href="${Demo.path(href)}"${id === page ? ' aria-current="page"' : ""}>${label}</a></li>`).join("")}</ul>
       </nav>
       <div class="top-actions">
         <p class="menu-status" id="menu-status" aria-hidden="true">Status: Standby</p>
-        <button type="button" class="btn btn-ghost" id="btn-demo" aria-pressed="false">Preview</button>
-        <button type="button" class="btn btn-primary" id="btn-auth">Link Drive</button>
+        <button type="button" class="btn btn-primary" id="btn-auth"${Demo.on ? ' data-write="Linking Google Drive"' : ""}>Link Drive</button>
       </div>
     </div>`;
 

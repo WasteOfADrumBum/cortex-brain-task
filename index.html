@@ -12,7 +12,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;800;900&family=Rajdhani:wght@500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/styles.css">
 </head>
-<body class="is-home">
+<body class="is-home" data-auth="pending">
   <a class="skip-link" href="#main">Skip to content</a>
   <div class="backdrop" aria-hidden="true"></div>
 
@@ -51,13 +51,13 @@
             <div id="weather" aria-live="polite"><p class="muted">Loading weather…</p></div>
             <details class="weather-settings">
               <summary>Change location</summary>
-              <form id="weather-form">
+              <form id="weather-form" data-write="Changing the weather location">
                 <label for="weather-city">City or ZIP</label>
                 <div class="row">
                   <input id="weather-city" type="text" autocomplete="address-level2" required>
                   <button type="submit" class="btn btn-ghost">Set</button>
                 </div>
-                <button type="button" class="btn btn-ghost" id="weather-geo">Use my current location</button>
+                <button type="button" class="btn btn-ghost" id="weather-geo" data-write="Using your location">Use my current location</button>
               </form>
             </details>
           </div>
@@ -82,7 +82,7 @@
         <ul class="goto" id="goto"></ul>
         <h3 class="sub-title" id="h-links">Quick links</h3>
         <ul class="launchers" id="launchers" aria-labelledby="h-links"></ul>
-        <p class="panel-link"><a href="https://github.com/WasteOfADrumBum/cortex-brain-task/blob/main/config.js" target="_blank" rel="noopener">Edit quick links<span class="visually-hidden"> (opens in a new tab)</span></a></p>
+        <p class="panel-link"><a href="https://github.com/WasteOfADrumBum/cortex-brain-task/blob/main/config.js" target="_blank" rel="noopener" data-write="Editing quick links">Edit quick links<span class="visually-hidden"> (opens in a new tab)</span></a></p>
       </nav>
     </div>
 
@@ -167,13 +167,13 @@
                 <dl class="hd-pop-dl" id="d-wx-rows"></dl>
               </div>
               <div class="hd-pop" id="d-wx-loc" role="region" aria-label="Change location" hidden>
-                <form id="d-weather-form">
+                <form id="d-weather-form" data-write="Changing the weather location">
                   <label for="d-weather-city">City or ZIP</label>
                   <div class="hd-pop-row">
                     <input id="d-weather-city" type="text" autocomplete="address-level2" required>
                     <button type="submit" class="btn btn-ghost">Set</button>
                   </div>
-                  <button type="button" class="btn btn-ghost" id="d-weather-geo">Use my current location</button>
+                  <button type="button" class="btn btn-ghost" id="d-weather-geo" data-write="Using your location">Use my current location</button>
                   <p class="hd-pop-err" id="d-wx-err" role="status"></p>
                 </form>
               </div>
@@ -245,7 +245,7 @@
         <nav class="hd-panel" aria-labelledby="d-h-links">
           <h2 class="hd-label hd-label-solo" id="d-h-links">Quick links</h2>
           <ul class="hd-links" id="d-links"></ul>
-          <div class="hd-div"><a class="hd-link" href="https://github.com/WasteOfADrumBum/cortex-brain-task/blob/main/config.js" target="_blank" rel="noopener">Edit quick links<span class="visually-hidden"> (opens in a new tab)</span></a></div>
+          <div class="hd-div"><a class="hd-link" href="https://github.com/WasteOfADrumBum/cortex-brain-task/blob/main/config.js" target="_blank" rel="noopener" data-write="Editing quick links">Edit quick links<span class="visually-hidden"> (opens in a new tab)</span></a></div>
         </nav>
       </div>
     </div>
@@ -258,6 +258,7 @@
   </footer>
 
   <script src="/config.js"></script>
+  <script src="/src/demo/mode.js"></script>
   <script src="/header.js"></script>
   <script src="/hud.js"></script>
   <script src="/drive.js"></script>

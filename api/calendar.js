@@ -8,6 +8,8 @@ import IcalExpander from 'ical-expander';
 const json = (body, status = 200) =>
   new Response(JSON.stringify(body), { status, headers: { 'content-type': 'application/json', 'cache-control': 'no-store' } });
 
+// Each event is a CalendarEvent (src/types.d.ts), the same type the /demo sample calendar uses.
+/** @returns {import('../src/types').CalendarEvent} */
 const norm = (summary, s, e, calendar) => ({
   title: summary || 'Busy',
   allDay: s.isDate,
@@ -25,7 +27,7 @@ export async function GET(request) {
   const params = new URL(request.url).searchParams;
   const from = new Date(params.get('from') || Date.now());
   const to = new Date(params.get('to') || Date.now() + 42 * 864e5);
-  if (isNaN(from) || isNaN(to) || to - from > 100 * 864e5) return json({ error: 'Bad date range' }, 400);
+  if (isNaN(+from) || isNaN(+to) || +to - +from > 100 * 864e5) return json({ error: 'Bad date range' }, 400);
 
   const feeds = (process.env.GCAL_ICS_URLS || '').split(',').map(s => s.trim()).filter(Boolean);
   if (!feeds.length) return json({ error: 'GCAL_ICS_URLS is not set in Vercel' }, 500);
@@ -51,5 +53,7 @@ export async function GET(request) {
   const errors = settled.filter(r => r.status === 'rejected').map(r => r.reason?.message || 'Unknown error');
   if (failed.length === feeds.length) return json({ error: errors.join('. '), failed }, 502);
   // failed: 1-based feed numbers that were skipped; errors: why, in the same order.
-  return json({ events, failed, errors });
+  /** @type {import('../src/types').CalendarResponse} */
+  const body = { events, failed, errors };
+  return json(body);
 }

@@ -2,12 +2,27 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "cleanUrls": true,
   "trailingSlash": false,
+  "redirects": [
+    { "source": "/", "has": [{ "type": "query", "key": "demo" }], "destination": "/demo", "permanent": false }
+  ],
+  "rewrites": [
+    { "source": "/demo", "destination": "/index.html" },
+    { "source": "/demo/:tab(planner|finances|news|vault|ops)", "destination": "/:tab.html" }
+  ],
   "headers": [
     {
       "source": "/",
       "headers": [
         { "key": "Content-Security-Policy", "value": "frame-src 'self' https://open.spotify.com https://accounts.google.com" }
       ]
+    },
+    {
+      "source": "/demo",
+      "headers": [{ "key": "X-Robots-Tag", "value": "noindex" }]
+    },
+    {
+      "source": "/demo/:path*",
+      "headers": [{ "key": "X-Robots-Tag", "value": "noindex" }]
     }
   ]
 }

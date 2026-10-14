@@ -52,7 +52,8 @@
     ul.replaceChildren();
     if (state.mode === "idle") {
       $("files-filter").textContent = "";
-      ul.innerHTML = '<li class="empty">Link Drive (top bar) to see your notes, or press Preview for sample data.</li>';
+      ul.innerHTML = '<li class="empty"></li>';
+      ul.firstChild.textContent = Brain.idleText(state);
       return;
     }
     const list = visible();

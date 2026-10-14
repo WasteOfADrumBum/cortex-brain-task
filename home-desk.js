@@ -185,8 +185,7 @@ const HomeDesk = (() => {
   function brain(state) {
     const host = $("d-brain");
     if (state.mode === "idle") {
-      const why = state.drive === "unconfigured" ? "Add the Google client ID to config.js, then link Drive." : "Link Drive (top bar) to see your notes, or press Preview for sample data.";
-      host.innerHTML = `<p class="hd-note">${esc(why)}</p>`;
+      host.innerHTML = `<p class="hd-note">${esc(Brain.idleText(state))}</p>`;
       return;
     }
     const s = Brain.stats(state.files);
@@ -210,7 +209,22 @@ const HomeDesk = (() => {
   }
 
   // ---------- Now playing (Spotify embed) ----------
+  // The demo has no Spotify embed (that would be a real playlist): a same-size sample player whose controls show "Demo only".
+  async function demoMusic() {
+    const host = $("d-music");
+    const list = (await Demo.data()).playlist;
+    host.innerHTML = `
+      <div class="hd-embed hd-fake-player">
+        <p class="hd-fake-now"><span class="hd-fake-label">Sample playlist</span><span class="hd-fake-title">${esc(list[0].title)}</span><span class="hd-fake-artist">${esc(list[0].artist)} · ${esc(list[0].length)}</span></p>
+        <button type="button" class="btn btn-ghost" data-write="Playing music">Play</button>
+        <ol class="hd-fake-list" aria-label="Up next">${list.slice(1).map((t) => `<li>${esc(t.title)} <span>${esc(t.artist)}</span></li>`).join("")}</ol>
+      </div>
+      <div class="hd-div"><a class="hd-link" href="#demo-only" data-write="Opening Spotify">Open in Spotify</a></div>`;
+    $("d-eq").hidden = false;
+  }
+
   function music() {
+    if (Demo.on) { demoMusic(); return; }
     const raw = (CFG.spotifyPlaylistUrl || "").trim();
     const m = raw.match(/^https:\/\/open\.spotify\.com\/(?:intl-[a-z-]+\/)?(playlist|album|track|artist|show|episode)\/([A-Za-z0-9]+)/);
     const host = $("d-music");

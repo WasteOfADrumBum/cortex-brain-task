@@ -46,6 +46,8 @@ export async function GET(request) {
     if (r.error) { warnings.push(`Todoist ${name}: ${r.error}`); return null; }
     return r.items.map(map);
   };
+  // The response shape is TasksResponse in src/types.d.ts, the same type the /demo sample tasks use (checked by npm test).
+  /** @type {import('../src/types').Task[]} */
   const tasks = t.items.map(t => ({
     id: t.id,
     content: t.content,
@@ -57,11 +59,13 @@ export async function GET(request) {
     sectionId: t.section_id || null,
     url: `https://app.todoist.com/app/task/${t.id}`
   }));
-  return json({
+  /** @type {import('../src/types').TasksResponse} */
+  const body = {
     tasks,
     labels: extra('labels', l, x => x.name),
     projects: extra('projects', p, x => ({ id: x.id, name: x.name })),
     sections: extra('sections', s, x => ({ id: x.id, name: x.name, projectId: x.project_id })),
     warnings
-  });
+  };
+  return json(body);
 }

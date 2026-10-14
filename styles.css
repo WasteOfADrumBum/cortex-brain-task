@@ -693,3 +693,59 @@ body { padding-bottom: calc(var(--ticker-h) + env(safe-area-inset-bottom)); }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; }
 }
+
+/* ---------- Sign-in gate ---------- */
+/* Signed out, a page shows only the sign-in screen (built by brain.js): no tabs, no panels, no data.
+   "pending" covers the moment before brain.js decides, so nothing flashes. */
+body[data-auth="pending"] main > * { visibility: hidden; }
+body:not([data-auth="out"]) .signin { display: none; }
+body[data-auth="out"] main > :not(.signin),
+body[data-auth="out"] .top-menu,
+body[data-auth="out"] .menu-btn,
+body[data-auth="out"] .sys-status,
+body[data-auth="out"] .ticker { display: none !important; }
+body[data-auth="out"] { padding-bottom: 0; }
+.signin {
+  max-width: 460px; margin: clamp(32px, 12vh, 120px) auto 48px; padding: 32px 28px;
+  display: flex; flex-direction: column; align-items: center; gap: 14px; text-align: center;
+  background: var(--panel-solid); border: 1px solid var(--line-strong); border-radius: var(--radius); box-shadow: var(--glow);
+}
+.signin-mark { width: 72px; height: 72px; filter: drop-shadow(0 0 10px rgba(67, 217, 255, 0.6)); }
+.signin h1 { font-family: var(--font-display); font-weight: 800; font-size: clamp(1.3rem, 5vw, 1.7rem); letter-spacing: 0.14em; text-transform: uppercase; color: #f2fcff; }
+.signin-lede { color: var(--text); }
+.signin-btn { min-height: 48px; padding: 10px 24px; font-size: 13px; }
+.signin-note { min-height: 1.4em; color: var(--muted); font-size: 15px; }
+.signin-demo a { display: inline-flex; align-items: center; min-height: 44px; font-weight: 700; }
+
+/* ---------- Demo (/demo) ---------- */
+/* The banner sits under the top bar on every /demo page; the toast is the "Demo only" message. */
+.demo-bar { padding: 10px clamp(16px, 2.5vw, 32px) 0; }
+.is-home .demo-bar { max-width: 1464px; margin: 0 auto; }
+.demo-banner {
+  display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  padding: 8px 14px; border: 1px solid rgba(185, 162, 255, 0.55); border-radius: var(--radius);
+  background: rgba(185, 162, 255, 0.12); color: #f1ecff; font-weight: 600;
+}
+.demo-tag {
+  padding: 2px 8px; border-radius: 999px; background: #c9b8ff; color: #1a0f3d;
+  font-family: var(--font-display); font-size: 11px; font-weight: 800; letter-spacing: 0.14em; text-transform: uppercase;
+}
+.demo-toast {
+  position: fixed; left: 50%; bottom: calc(var(--ticker-h) + env(safe-area-inset-bottom) + 16px); z-index: 30;
+  transform: translateX(-50%); width: max-content; max-width: calc(100vw - 32px);
+  padding: 0; border: 0; border-radius: var(--radius); pointer-events: none;
+  background: var(--panel-solid); color: #f1ecff; font-weight: 600;
+}
+.demo-toast.is-on { padding: 12px 18px; border: 1px solid #b9a2ff; box-shadow: 0 12px 32px rgba(0, 0, 0, 0.55); }
+
+/* Home's sample player: the same 152px box as the Spotify embed it stands in for. */
+.hd-fake-player {
+  display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 6px 14px;
+  height: 152px; padding: 16px 18px; background: rgba(20, 10, 45, 0.6); overflow: hidden;
+}
+.hd-fake-now { display: flex; flex-direction: column; min-width: 0; }
+.hd-fake-label { font-family: var(--font-display); font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; color: #c4b5fd; }
+.hd-fake-title { font-size: 20px; font-weight: 700; color: #f5f3ff; }
+.hd-fake-artist { color: #ddd6fe; }
+.hd-fake-list { grid-column: 1 / -1; display: flex; gap: 16px; color: #ddd6fe; font-size: 15px; white-space: nowrap; overflow: hidden; }
+.hd-fake-list span { color: #c4b5fd; }
