@@ -55,6 +55,13 @@ window.CORTEX_CONFIG = {
   // A sweep counts as "ran this week" for this many days after the newest digest note.
   sweepIntervalDays: 7,
 
+  // Ops checklist: Todoist tasks (labeled @system) that each automation completes when it runs.
+  // The checklist shows the newest completion in the last 7 days, or a warning when there is none.
+  healthChecks: [
+    { name: "Brain sweep", task: "Brain sweep ran" },
+    { name: "Muse check", task: "Muse check ran" },
+  ],
+
   // Ops checklist: the brain inbox is healthy while fewer than this many notes are waiting.
   inboxLimit: 7,
 };

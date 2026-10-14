@@ -13,7 +13,7 @@ Six tabs in the shared top bar, one clean URL each (`vercel.json` turns on `clea
 | Finances | `/finances` | Placeholder until phase 4 |
 | News | `/news` | Placeholder until phase 5 |
 | Vault | `/vault` | Every note with its title and one-line summary (frontmatter `name` and `description`), type tag, filters, search and an in-app reader |
-| Ops | `/ops` | Second Brain checklist, notes changed over 30 days (with a table view), Drive storage. Project cards arrive in phase 3 |
+| Ops | `/ops` | Second Brain checklist (sweep and Muse check from Todoist), notes changed over 30 days (with a table view), Drive storage. Project cards arrive in phase 3 |
 
 Every Home panel has a plain heading and ends with a link to the place that has the detail. Each source fails on its own: a broken weather or calendar feed shows a message in its own panel.
 
@@ -69,6 +69,7 @@ Google's iCal feed can lag your live calendar by minutes to a few hours.
 | `drive.js` | Read-only Google Drive access |
 | `weather.js` | Weather from Open-Meteo |
 | `api/tasks.js` | Todoist tasks, labels, projects and sections for the Planner and Home (needs `DASH_KEY`) |
+| `api/checks.js` | Ops checklist health checks: the newest completion of "Brain sweep ran" and "Muse check ran" in the last 7 days, from Todoist's activity log (needs `DASH_KEY`) |
 | `api/calendar.js` | Google Calendar events from iCal feeds (needs `DASH_KEY`); also used by Home's schedule |
 | `vercel.json` | Clean URLs for the tabs, `/demo` routes and their noindex header |
 | `.env.example` | The three planner settings to set in Vercel |

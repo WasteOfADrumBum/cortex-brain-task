@@ -749,3 +749,4 @@ body[data-auth="out"] { padding-bottom: 0; }
 .hd-fake-artist { color: #ddd6fe; }
 .hd-fake-list { grid-column: 1 / -1; display: flex; gap: 16px; color: #ddd6fe; font-size: 15px; white-space: nowrap; overflow: hidden; }
 .hd-fake-list span { color: #c4b5fd; }
+.check-warn .check-icon { color: var(--amber); }
