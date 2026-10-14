@@ -166,12 +166,21 @@ table.month { width: 100%; min-width: 640px; border-collapse: collapse; table-la
 .month th { font-family: var(--font-display); font-size: 11px; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; text-align: left; padding: 6px 8px; color: var(--muted); }
 .month abbr { text-decoration: none; }
 .month td { vertical-align: top; border: 1px solid var(--line); height: 6.5rem; padding: 4px 6px; }
-/* Days outside this month: dimmer background instead of opacity, so text keeps AA contrast. */
-.month td.other { background: rgba(2, 8, 14, 0.55); color: var(--muted); }
-/* Days that have passed: a dimmer cell and muted text (still AA), plus a hidden "past" label in the markup. */
-.month td.past { background: rgba(1, 4, 8, 0.72); color: var(--muted); }
+/* Four day states, each told apart by more than colour (hidden labels in the markup):
+   this month upcoming = normal; this month past = dimmed cell, muted text;
+   other month = hatched, darker cell with a dimmer date (past ones also mute their events);
+   a cyan line marks where the month changes. All text stays above 4.5:1. */
+.month td.past { background: rgba(2, 8, 14, 0.5); color: var(--muted); }
 .month td.past .dnum { font-weight: 500; }
 .month td.past li.all { color: var(--muted); }
+.month td.other {
+  --other-date: #8fa9b5;
+  background: repeating-linear-gradient(135deg, rgba(0, 2, 5, 0.86) 0 6px, rgba(10, 26, 40, 0.86) 6px 7px);
+}
+.month td.other .dnum { color: var(--other-date); font-weight: 500; }
+.month td.other:not(.past) li.all { color: var(--cyan-soft); }
+.month td.mb-l { border-left: 2px solid var(--cyan); }
+.month td.mb-t { border-top: 2px solid var(--cyan); }
 .month td[aria-current="date"] { background: rgba(67, 217, 255, 0.12); outline: 2px solid var(--cyan); outline-offset: -2px; }
 .dnum { font-family: var(--font-display); font-weight: 700; font-size: 14px; }
 .month td[aria-current="date"] .dnum { color: var(--cyan-soft); }
