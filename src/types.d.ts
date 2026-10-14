@@ -29,6 +29,21 @@ export interface TasksResponse {
   warnings: string[];
 }
 
+// ---------- Ops checklist: health-check tasks (GET /api/checks) ----------
+export interface TodoistCheck {
+  /** The task title asked for, e.g. "Muse check ran". */
+  title: string;
+  /** ISO date-time of the newest completion in the window, or null when none. */
+  completedAt: string | null;
+  /** The task's description at that completion ("" when it has none). */
+  description: string;
+}
+export interface ChecksResponse {
+  /** Start of the 7-day window. */
+  since: string;
+  checks: TodoistCheck[];
+}
+
 // ---------- Planner and Home: Google Calendar (GET /api/calendar) ----------
 export interface CalendarEvent {
   title: string;
@@ -139,6 +154,7 @@ export interface DemoData {
   notes(now: Date): DriveFile[];
   storage: DriveStorage;
   tasks(today: Date): TasksResponse;
+  checks(now: Date, titles: string[]): ChecksResponse;
   calendar(from: Date, to: Date): CalendarResponse;
   weather(today: Date): WeatherResult;
   finances(today: Date): FinanceMonth;

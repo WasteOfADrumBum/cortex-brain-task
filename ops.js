@@ -1,4 +1,4 @@
-// Cortex Ops (phase 1): the Second Brain checklist, recent note activity and Drive storage.
+// Cortex Ops (phase 1): the Second Brain checklist (health checks from Todoist, inbox from Drive), recent note activity and Drive storage.
 // Project cards, deploys and pull requests arrive in phase 3.
 (() => {
   const CFG = window.CORTEX_CONFIG;
@@ -11,26 +11,60 @@
     yes: ["✓", "Done"],
     no: ["✗", "Not yet"],
     unknown: ["?", "Can't tell yet"],
+    warn: ["⚠", "Warning"],
     later: ["…", "Not set up yet"],
   };
+
+  // ---------- Health checks from Todoist ----------
+  // Each automation completes a Todoist task when it runs ("Brain sweep ran", "Muse check ran"; config.js healthChecks).
+  // /api/checks returns the newest completion of each in the last 7 days (same dashboard key as the Planner).
+  const HEALTH = CFG.healthChecks || [];
+  let checks = { state: "loading" }; // loading | ok { data } | error { message }
+
+  async function loadChecks() {
+    if (!HEALTH.length) return;
+    const titles = HEALTH.map((h) => h.task);
+    if (Demo.on) { checks = { state: "ok", data: (await Demo.data()).checks(new Date(), titles) }; renderChecklist(Brain.state); return; }
+    let key = "";
+    try { key = localStorage.getItem("dashKey") || ""; } catch { /* storage blocked */ }
+    const qs = titles.map((t) => `title=${encodeURIComponent(t)}`).join("&");
+    let res = null, body = null;
+    try { res = await fetch(`/api/checks?${qs}`, { headers: key ? { "x-dash-key": key } : {} }); } catch { /* offline */ }
+    try { body = await res?.json(); } catch { /* not JSON */ }
+    checks = !res ? { state: "error", message: "Couldn't reach Todoist (offline or blocked)." }
+      : res.status === 401 ? { state: "error", message: key ? "Your dashboard key wasn't accepted. Open the Planner to enter it again." : "Open the Planner once and enter your dashboard key so Cortex can read Todoist." }
+      : res.status === 404 ? { state: "error", message: "The checks route isn't deployed yet." }
+      : !res.ok || !body ? { state: "error", message: `Todoist unavailable: ${body?.error || `error ${res.status}`}.` }
+      : { state: "ok", data: body };
+    renderChecklist(Brain.state);
+  }
+
+  // "Brain sweep: Mon 4:02 AM · Health check for the Second Brain." or "Muse check: not seen in 7 days" with a warning.
+  function healthItem(h) {
+    if (checks.state !== "ok") {
+      return { label: `${h.name}: ${checks.state === "loading" ? "checking Todoist…" : "can't tell"}`, status: "unknown", detail: checks.message || "Loading." };
+    }
+    const c = checks.data.checks.find((x) => x.title.toLowerCase() === h.task.toLowerCase());
+    if (!c?.completedAt) {
+      return { label: `${h.name}: not seen in 7 days`, status: "warn", detail: `No completed "${h.task}" task in Todoist in the last 7 days.` };
+    }
+    const at = new Date(c.completedAt);
+    const desc = (c.description.split(/\r?\n/).map((l) => l.trim()).find(Boolean) || "");
+    const clip = desc.length > 140 ? `${desc.slice(0, 139).trimEnd()}…` : desc;
+    return {
+      label: `${h.name}: ${at.toLocaleDateString([], { weekday: "short" })} ${Brain.fmtTime(at)}${clip ? ` · ${clip}` : ""}`,
+      status: "yes",
+      detail: `"${h.task}" was completed in Todoist ${Brain.ago(c.completedAt)}.`,
+    };
+  }
 
   function renderChecklist(state) {
     const live = state.mode !== "idle";
     const s = live ? Brain.stats(state.files) : null;
     const limit = CFG.inboxLimit ?? 7;
-    const day = (d) => d.toLocaleDateString([], { weekday: "short", month: "short", day: "numeric" });
     const items = [
-      {
-        label: "Weekly sweep ran in the last 7 days",
-        status: !live ? "unknown" : s.sweepFresh ? "yes" : "no",
-        detail: !live ? Brain.idleText(state) : s.lastSweep ? `Newest digest: ${day(s.lastSweep)}.` : "No digest note found.",
-        link: live && s.lastDigest ? ["/vault?type=digest", "See digests"] : null,
-      },
-      {
-        label: "Muse check ran in the last 7 days",
-        status: "unknown",
-        detail: "Cortex can't see Muse's check yet. It needs a note or Todoist task that Muse leaves behind.",
-      },
+      // The sweep writes a digest note each run, so its item links to them.
+      ...HEALTH.map((h) => ({ ...healthItem(h), link: /sweep/i.test(h.task) && live && s.lastDigest ? ["/vault?type=digest", "See digests"] : null })),
       {
         label: `Brain inbox has under ${limit} notes waiting`,
         status: !live ? "unknown" : s.counts.inbox < limit ? "yes" : "no",
@@ -96,9 +130,12 @@
       : `<p class="big-line">${bytes(st.used)} used</p><p class="sub-line">This account has no storage limit.</p>`;
   }
 
+  let started = false;
   Brain.boot({
     storage: true,
     onUpdate(state) {
+      // Todoist is read only once signed in (or in the demo).
+      if (state.auth === "in" && !started) { started = true; loadChecks(); setInterval(loadChecks, 10 * 60000); }
       renderChecklist(state);
       renderActivity(state);
       renderStorage(state);

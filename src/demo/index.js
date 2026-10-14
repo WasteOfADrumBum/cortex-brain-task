@@ -2,6 +2,7 @@
 // Each export has the same type as the real data it stands in for (src/types.d.ts).
 import { notes, storage } from "./notes.js";
 import { tasks } from "./tasks.js";
+import { checks } from "./checks.js";
 import { calendar } from "./calendar.js";
 import { weather } from "./weather.js";
 import { finances } from "./finances.js";
@@ -15,5 +16,5 @@ const playlist = [
 ];
 
 /** @type {import("../types").DemoData} */
-const demo = { notes, storage, tasks, calendar, weather, finances, news, playlist };
+const demo = { notes, storage, tasks, checks, calendar, weather, finances, news, playlist };
 export default demo;
