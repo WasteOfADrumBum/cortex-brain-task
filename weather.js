@@ -53,6 +53,13 @@ const Weather = (() => {
     return { name: `${hit.name}${region}`, lat: hit.latitude, lon: hit.longitude };
   }
 
+  // "My location" comes from the browser as coordinates only. Open-Meteo, our location source, has no reverse
+  // lookup, so the place is named by a city name when one is saved, otherwise by its coordinates.
+  const isGeo = (loc) => loc.name === "My location";
+  function coords({ lat, lon }) {
+    return `${Math.abs(lat).toFixed(2)}° ${lat < 0 ? "S" : "N"}, ${Math.abs(lon).toFixed(2)}° ${lon < 0 ? "W" : "E"}`;
+  }
+
   function moonPhase(date) {
     const synodic = 29.530588853;
     const known = Date.UTC(2000, 0, 6, 18, 14);
@@ -146,7 +153,15 @@ const Weather = (() => {
         <dl class="wx-details"></dl>
         <div class="wx-forecast"></div>
       </details>`;
-    host.querySelector(".wx-loc").textContent = loc.name;
+    const locEl = host.querySelector(".wx-loc");
+    locEl.textContent = loc.name;
+    // "My location" also says which place it is.
+    if (isGeo(loc)) {
+      const place = document.createElement("span");
+      place.className = "wx-place";
+      place.textContent = loc.place || coords(loc);
+      locEl.append(place);
+    }
     host.querySelector(".wx-updated").textContent = `Updated ${new Date().toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}`;
     host.querySelector(".wx-temp").textContent = `${Math.round(c.temperature_2m)}${deg}`;
     host.querySelector(".wx-cond").textContent = cond;
