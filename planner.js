@@ -274,8 +274,11 @@ function renderMonth(today, evs) {
       const d = addDays(start, w * 7 + i), { all, timed } = eventsOn(d, evs);
       const list = [...all.map(e => ({ t: e.title, all: true })), ...timed.map(e => ({ t: e.title }))];
       const isToday = d.getTime() === today.getTime(), other = d.getMonth() !== today.getMonth(), past = d < today;
-      rows += `<td class="${[other && 'other', past && 'past'].filter(Boolean).join(' ')}"${isToday ? ' aria-current="date"' : ''}>
-        <span class="dnum"><span class="sr">${d.toLocaleDateString([], { weekday: 'long', month: 'long' })} </span>${d.getDate()}${past ? '<span class="sr">, past</span>' : ''}</span>
+      const side = other ? (d < today ? 'previous month' : 'next month') : '';
+      // A heavier line where the month changes: against the day to the left (same row) and the day above.
+      const edge = [i > 0 && addDays(d, -1).getMonth() !== d.getMonth() && 'mb-l', w > 0 && addDays(d, -7).getMonth() !== d.getMonth() && 'mb-t'];
+      rows += `<td class="${[other && 'other', past && 'past', ...edge].filter(Boolean).join(' ')}"${isToday ? ' aria-current="date"' : ''}>
+        <span class="dnum"><span class="sr">${d.toLocaleDateString([], { weekday: 'long', month: 'long' })} </span>${d.getDate()}${side ? `<span class="sr">, ${side}</span>` : ''}${past ? '<span class="sr">, past</span>' : ''}</span>
         ${list.length ? `<ul>${list.map((e, n) => `<li class="${e.all ? 'all' : ''}${n > 2 ? ' sr' : ''}">${esc(e.t)}</li>`).join('')}</ul>` : ''}
         ${list.length > 3 ? `<span class="more" aria-hidden="true">+${list.length - 3} more</span>` : ''}</td>`;
     }
