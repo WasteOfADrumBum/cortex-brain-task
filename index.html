@@ -135,18 +135,21 @@
                 <circle class="hd-arc" id="d-ring-min" cx="200" cy="200" transform="rotate(-90 200 200)" r="141" stroke="#A78BFA" stroke-width="8"/>
                 <circle class="hd-track" cx="200" cy="200" r="128" stroke-width="8"/>
                 <circle class="hd-arc" id="d-ring-sec" cx="200" cy="200" transform="rotate(-90 200 200)" r="128" stroke="#22D3EE" stroke-width="8"/>
+                <circle class="hd-sec-dot" id="d-sec-dot" cx="200" cy="72" r="8"/>
                 <circle cx="200" cy="200" r="112" fill="rgba(8,22,40,0.85)" stroke="rgba(56,189,248,0.3)" stroke-width="1"/>
                 <circle cx="200" cy="200" r="106" fill="none" stroke="#7DD3FC" stroke-opacity="0.45" stroke-width="6" stroke-dasharray="1 10.1" transform="rotate(-90 200 200)"/>
                 <circle cx="200" cy="200" r="106" fill="none" stroke="#E0F2FE" stroke-width="10" stroke-dasharray="2 53.5" transform="rotate(-91 200 200)"/>
               </svg>
 
               <!-- Not a live region: the ticking clock is never announced. -->
+              <!-- H:MM and AM/PM are one block centred in the inner ring; the zone above and the seconds below are
+                   positioned off that centre, so they never pull it sideways. -->
               <div class="hd-time" role="group" aria-label="Current time">
                 <span class="hd-tz" id="d-tz">Local time</span>
                 <span class="visually-hidden" id="d-time-sr"></span>
                 <!-- Each character sits in a fixed-width slot (see .hd-g), so a changing digit never moves the others. -->
-                <span class="hd-hms" aria-hidden="true"><span id="d-hm">--:--</span><span class="hd-secs" id="d-secs"></span></span>
-                <span class="hd-ampm" id="d-ampm" aria-hidden="true"></span>
+                <span class="hd-hm-block" aria-hidden="true"><span id="d-hm">--:--</span><span class="hd-ampm" id="d-ampm"></span></span>
+                <span class="hd-secs" id="d-secs" aria-hidden="true"></span>
               </div>
 
               <div class="hd-date" role="group" aria-label="Date">
@@ -187,7 +190,7 @@
             <li><span class="hd-dot" style="--c:#3B82F6" aria-hidden="true"></span>Month <span id="d-month-pct"></span></li>
             <li><span class="hd-dot" style="--c:#FB923C" aria-hidden="true"></span>Hour</li>
             <li><span class="hd-dot" style="--c:#A78BFA" aria-hidden="true"></span>Minute</li>
-            <li><span class="hd-dot" style="--c:#22D3EE" aria-hidden="true"></span>Second</li>
+            <li><span class="hd-dot hd-dot-sec" style="--c:#22D3EE" aria-hidden="true"></span>Second</li>
           </ul>
 
           <section class="hd-panel hd-wide" aria-labelledby="d-h-brief">

@@ -17,6 +17,7 @@ const HomeDesk = (() => {
     year: [$("d-ring-year"), 178], month: [$("d-ring-month"), 168], hour: [$("d-ring-hour"), 154],
     min: [$("d-ring-min"), 141], sec: [$("d-ring-sec"), 128],
   };
+  const secDot = $("d-sec-dot");
   // Same math as the mockup: the dash is the share of the circle that has elapsed.
   function setRing([node, r], p) {
     const c = 2 * Math.PI * r;
@@ -46,11 +47,15 @@ const HomeDesk = (() => {
     const yearP = (d - new Date(y, 0, 1)) / (new Date(y + 1, 0, 1) - new Date(y, 0, 1));
 
     setRing(rings.sec, (s + 1) / 60);
+    // The seconds marker rides the tip of the seconds arc.
+    const a = ((s + 1) / 60) * 2 * Math.PI;
+    secDot.setAttribute("cx", (200 + 128 * Math.sin(a)).toFixed(1));
+    secDot.setAttribute("cy", (200 - 128 * Math.cos(a)).toFixed(1));
     setRing(rings.min, (m + s / 60) / 60);
     setRing(rings.hour, ((h % 12) + m / 60) / 12);
     setRing(rings.month, monthP);
     setRing(rings.year, yearP);
-    $("d-secs").innerHTML = slots(`:${String(s).padStart(2, "0")}`);
+    $("d-secs").innerHTML = slots(String(s).padStart(2, "0"));
     if (m === lastMinute) return;
 
     // Everything below changes at most once a minute.
@@ -59,6 +64,7 @@ const HomeDesk = (() => {
     const hm = `${hh}:${String(m).padStart(2, "0")}`;
     const ampm = CFG.clock24h ? "" : h < 12 ? "AM" : "PM";
     $("d-hm").innerHTML = slots(hm);
+    $("d-hm").parentElement.toggleAttribute("data-lead-one", /^1\d:/.test(hm));
     $("d-ampm").textContent = ampm;
     $("d-time-sr").textContent = `${hm} ${ampm}`.trim();
     $("d-greeting").textContent = h < 12 ? "Good morning" : h < 17 ? "Good afternoon" : "Good evening";
