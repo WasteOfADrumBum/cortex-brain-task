@@ -612,15 +612,36 @@ body { padding-bottom: calc(var(--ticker-h) + env(safe-area-inset-bottom)); }
   .hd-line-1::before, .hd-line-4::before { left: -4px; }
   .hd-line-2::before, .hd-line-3::before { right: -4px; }
 
-  .hd-time {
-    position: absolute; left: 30px; top: 30px; width: 440px; height: 440px;
-    display: flex; flex-direction: column; align-items: center; justify-content: center;
+  .hd-time { position: absolute; left: 30px; top: 30px; width: 440px; height: 440px; }
+  /* The H:MM + AM/PM block is centred on the ring centre (220, 220), measured on the ink rather than the box:
+     Orbitron's digits sit low in their line box, and a leading "1" leaves its slot half empty on the left. */
+  .hd-hm-block {
+    --nudge-x: 0px;
+    position: absolute; left: 50%; top: 50%; transform: translate(calc(-50% + var(--nudge-x)), calc(-50% - 3px));
+    display: flex; flex-direction: column; align-items: center; gap: 4px;
+    font-family: var(--font-display); font-weight: 700; line-height: 1;
   }
-  .hd-tz { font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: #a9c1d9; }
-  .hd-hms { display: flex; align-items: baseline; font-family: var(--font-display); font-weight: 700; line-height: 1.05; font-variant-numeric: tabular-nums; }
-  #d-hm { font-size: 64px; color: #e2ecf7; }
-  .hd-secs { font-size: 22px; color: #22d3ee; }
-  .hd-ampm { font-family: var(--font-display); font-weight: 700; font-size: 18px; letter-spacing: 0.3em; color: #67e8f9; }
+  .hd-hm-block[data-lead-one] { --nudge-x: -6px; }
+  .hd-tz {
+    position: absolute; left: 0; right: 0; bottom: calc(50% + 50px); text-align: center;
+    font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: #a9c1d9;
+  }
+  /* Fixed boxes: "12:59" fits #d-hm and "59" fits the seconds, so the time never resizes as it ticks. */
+  #d-hm { display: inline-flex; justify-content: center; width: calc(4 * 0.84em + 0.3em); font-size: 58px; color: #e2ecf7; }
+  .hd-ampm { min-width: 3.3em; padding-left: 0.3em; text-align: center; font-size: 18px; letter-spacing: 0.3em; color: #67e8f9; }
+  /* Seconds: their own fixed slot under the block, so they never shift H:MM off centre. */
+  .hd-secs {
+    position: absolute; left: 50%; top: calc(50% + 54px); transform: translateX(-50%);
+    display: inline-flex; justify-content: center; width: calc(2 * 0.84em + 0.6em); padding: 2px 0.3em;
+    border: 1px solid rgba(34, 211, 238, 0.5); border-radius: 999px; background: rgba(34, 211, 238, 0.1);
+    font-family: var(--font-display); font-weight: 700; font-size: 24px; line-height: 1; color: #67e8f9;
+  }
+  .hd-secs:empty { display: none; }
+  /* Orbitron's digits vary in width (a 1 is half a 0) and it has no tabular figures, so each glyph gets a slot. */
+  .hd-g { display: inline-block; width: 0.84em; text-align: center; }
+  .hd-g-colon { width: 0.3em; }
+  /* Seconds marker: a white-ringed dot at the tip of the seconds arc. */
+  .hd-sec-dot { fill: #22d3ee; stroke: #f0fdff; stroke-width: 3; filter: drop-shadow(0 0 4px rgba(34, 211, 238, 0.9)); }
 
   .hd-date, .hd-wx {
     position: absolute; border-radius: 50%; background: radial-gradient(circle, #0e2a45, #071828);
@@ -662,6 +683,7 @@ body { padding-bottom: calc(var(--ticker-h) + env(safe-area-inset-bottom)); }
   .hd-legend { margin-top: -6px; display: flex; flex-wrap: wrap; justify-content: center; gap: 6px 16px; font-family: var(--font-mono); font-size: 12px; color: #cfe6f7; }
   .hd-legend li { display: flex; align-items: center; gap: 6px; }
   .hd-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--c); }
+  .hd-dot-sec { width: 12px; height: 12px; border: 2px solid #f0fdff; }
 
   /* Forecast */
   .hd-fc { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 6px; }
