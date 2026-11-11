@@ -4,6 +4,8 @@
 // Env: TODOIST_TOKEN (Todoist > Settings > Integrations > Developer), DASH_KEY (any long random string)
 // Labels, projects and sections are extras: if one of them fails it comes back as null with a warning, and tasks still load.
 
+import { keyMatches } from './_key.js';
+
 const json = (body, status = 200) =>
   new Response(JSON.stringify(body), { status, headers: { 'content-type': 'application/json', 'cache-control': 'no-store' } });
 
@@ -34,7 +36,7 @@ async function readAll(path) {
 
 export async function GET(request) {
   if (!process.env.DASH_KEY) return json({ error: 'DASH_KEY is not set in Vercel' }, 500);
-  if (request.headers.get('x-dash-key') !== process.env.DASH_KEY) {
+  if (!keyMatches(request.headers.get('x-dash-key'), process.env.DASH_KEY)) {
     return json({ error: 'Missing or wrong dashboard key' }, 401);
   }
   if (!process.env.TODOIST_TOKEN) return json({ error: 'TODOIST_TOKEN is not set in Vercel' }, 500);
