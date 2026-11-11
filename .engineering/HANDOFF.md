@@ -1,16 +1,16 @@
-<!-- generated from .engineering/state.json (revision 2) -->
+<!-- generated from .engineering/state.json (revision 3) -->
 
 # Handoff: cortex
 
 Read this, then **verify against GitHub** (branch head, open PRs, CI) before continuing. Nothing below is independently verified.
 
-- Checkpoint: revision 2, `closeout-59c2b29`, 2026-11-11T05:38:16Z by Claude Code
+- Checkpoint: revision 3, `cp-cortex-hardening-axe-2026-11-11`, 2026-11-11T13:08:00Z by Claude Code
 - Written by: a local edit that the agent then pushed; confirm the branch head matches
 - Uncommitted work outside this checkpoint: **none**
 
 ## Continue with
 
-Wait for Joshua Small sign-off on the hub closeout PR; do not tag a release before it.
+If the axe job reports violations, fix them in this PR before merging.
 
 ## Unfinished
 

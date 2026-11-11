@@ -21,5 +21,5 @@ Done in 1.0: spec phases 1 (tabs, routes and cleanup) and 2 (demo mode), plus th
 
 ## Hardening worth doing
 
-- Compare the dashboard key in the `/api` functions in constant time.
-- A browser accessibility check (axe) in CI, as the spec's "axe clean" criterion asks.
+- Done 2026-11-11: the `/api` functions compare the dashboard key in constant time (`api/_key.js`).
+- Done 2026-11-11: CI runs axe on every `/demo` tab at desktop and phone width (`npm run check:a11y`).

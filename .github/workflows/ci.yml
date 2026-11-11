@@ -1,7 +1,7 @@
 name: CI
 
-# Runs the test suite (type check + node:test) and a production dependency audit on every
-# change, so a broken PR is caught before Vercel deploys it. "CI gate" is the single status
+# Runs the test suite (type check + node:test), a production dependency audit and an axe scan of
+# every /demo tab on every change, so a broken PR is caught before Vercel deploys it. "CI gate" is the single status
 # to require in a main-branch ruleset or a Vercel Deployment Check.
 
 on:
@@ -35,11 +35,27 @@ jobs:
       - name: Production dependency audit
         run: npm audit --omit=dev --audit-level=high
 
+  a11y:
+    name: Accessibility (axe)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: npm run check:a11y
+
   gate:
     name: CI gate
-    needs: [test]
+    needs: [test, a11y]
     if: always()
     runs-on: ubuntu-24.04
     steps:
       - name: All required jobs passed
-        run: test "${{ needs.test.result }}" = success
+        run: test "${{ needs.test.result }}" = success && test "${{ needs.a11y.result }}" = success

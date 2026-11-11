@@ -5,6 +5,8 @@
 // date, so it never appears in the completed-tasks list. 7 days is also all the history a free Todoist plan keeps.
 // Env: TODOIST_TOKEN, DASH_KEY (same as /api/tasks)
 
+import { keyMatches } from './_key.js';
+
 const json = (body, status = 200) =>
   new Response(JSON.stringify(body), { status, headers: { 'content-type': 'application/json', 'cache-control': 'no-store' } });
 
@@ -13,7 +15,7 @@ const norm = s => String(s ?? '').trim().toLowerCase();
 
 export async function GET(request) {
   if (!process.env.DASH_KEY) return json({ error: 'DASH_KEY is not set in Vercel' }, 500);
-  if (request.headers.get('x-dash-key') !== process.env.DASH_KEY) {
+  if (!keyMatches(request.headers.get('x-dash-key'), process.env.DASH_KEY)) {
     return json({ error: 'Missing or wrong dashboard key' }, 401);
   }
   if (!process.env.TODOIST_TOKEN) return json({ error: 'TODOIST_TOKEN is not set in Vercel' }, 500);

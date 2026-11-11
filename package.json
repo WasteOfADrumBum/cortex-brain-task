@@ -11,10 +11,13 @@
   },
   "scripts": {
     "test": "tsc -p tsconfig.json && node --test test/*.test.js",
-    "check:routes": "node scripts/check-routes.mjs"
+    "check:routes": "node scripts/check-routes.mjs",
+    "check:a11y": "node scripts/axe-check.mjs"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",
+    "axe-core": "^4.14.0",
+    "playwright": "^1.65.0",
     "typescript": "^5.9.0"
   },
   "version": "1.0.0"

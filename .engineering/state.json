@@ -1,26 +1,27 @@
 {
   "stateVersion": 1,
-  "revision": 2,
-  "checkpointId": "closeout-59c2b29",
+  "revision": 3,
+  "checkpointId": "cp-cortex-hardening-axe-2026-11-11",
   "projectId": "cortex",
   "repository": "https://github.com/WasteOfADrumBum/cortex-brain-task",
   "hub": "https://github.com/WasteOfADrumBum/one-small-engineering",
   "recorded": {
-    "branch": "claude/cortex-1.0-closeout",
-    "commit": "59c2b290905114c1e5e5431502e427746e7ccacf",
-    "recordedAt": "2026-11-11T05:38:16Z"
+    "branch": "claude/hardening-axe",
+    "commit": "842d1e43e81a96dd787c7859c5b70b96e3441815",
+    "recordedAt": "2026-11-11T13:08:00Z"
   },
   "development": {
-    "milestone": "Cortex 1.0",
+    "milestone": "Cortex 1.0 (maintenance)",
     "activeTask": null,
-    "workingBranch": "claude/cortex-1.0-closeout",
+    "workingBranch": "claude/hardening-axe",
     "activePr": null,
     "lastCompleted": [
-      "Added CI (PR #36)",
-      "Relabeled later tabs as coming later, footer and package version 1.0, added ROADMAP.md"
+      "Cortex 1.0 approved by Joshua Small (hub PRs #187, #188)",
+      "Constant-time dashboard key check (api/_key.js) with a test",
+      "axe scan of every /demo tab in CI (npm run check:a11y), part of CI gate"
     ],
     "inProgress": [],
-    "nextAction": "Joshua reviews the 1.0 closeout package on the hub and signs off; then record gates and approval in the hub registry. No release tag before his sign-off."
+    "nextAction": "Merge the hardening PR once CI gate is green; then record the axe evidence in the hub registry (clears missing evidence)."
   },
   "decisions": {
     "made": [
@@ -52,10 +53,10 @@
       "tool": "Claude Code",
       "model": null
     },
-    "checkpointedAt": "2026-11-11T05:38:16Z",
+    "checkpointedAt": "2026-11-11T13:08:00Z",
     "unfinished": [],
     "blockers": [],
-    "continuation": "Wait for Joshua Small sign-off on the hub closeout PR; do not tag a release before it.",
+    "continuation": "If the axe job reports violations, fix them in this PR before merging.",
     "uncommittedWorkOutsideCheckpoint": "none",
     "persistedBy": "local-file"
   },
