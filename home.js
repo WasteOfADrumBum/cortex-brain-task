@@ -206,10 +206,10 @@
   // ---------- Go to: every tab, plus quick links ----------
   const TABS = [
     ["/planner", "Planner", "Schedule, open hours and task buckets", ""],
-    ["/finances", "Finances", "This month in detail, plus the year", "Arrives in phase 4"],
-    ["/news", "News", "Headlines by category", "Arrives in phase 5"],
+    ["/finances", "Finances", "This month in detail, plus the year", "Coming later"],
+    ["/news", "News", "Headlines by category", "Coming later"],
     ["/vault", "Vault", "Notes you can understand and find", ""],
-    ["/ops", "Ops", "Is everything healthy, and what shipped", "Project cards arrive in phase 3"],
+    ["/ops", "Ops", "Is everything healthy, and what shipped", "Project cards coming later"],
   ];
   function renderGoto() {
     $("goto").innerHTML = TABS.map(([href, label, job, soon]) => `

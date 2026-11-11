@@ -1,5 +1,5 @@
-// Sample month for the Finances tab (phase 4). Made up: no real income, bills or amounts.
-// The Finances view arrives in phase 4; this data is typed now so the demo has it ready.
+// Sample month for the Finances tab. Made up: no real income, bills or amounts.
+// The Finances view is on the roadmap (ROADMAP.md); this data is typed now so the demo has it ready.
 /** @typedef {import("../types").FinanceMonth} FinanceMonth */
 
 /**

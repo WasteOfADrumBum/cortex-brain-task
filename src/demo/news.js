@@ -1,5 +1,5 @@
-// Sample headlines for the News tab (phase 5). Made up: titles and sources are invented and link to example.com.
-// The News view arrives in phase 5; this data is typed now so the demo has it ready.
+// Sample headlines for the News tab. Made up: titles and sources are invented and link to example.com.
+// The News view is on the roadmap (ROADMAP.md); this data is typed now so the demo has it ready.
 /** @typedef {import("../types").NewsItem} NewsItem */
 
 /**
