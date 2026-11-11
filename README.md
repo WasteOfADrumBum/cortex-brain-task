@@ -1,6 +1,6 @@
 # Cortex
 
-A personal command center for the Second Brain in Google Drive. Plain HTML, CSS and JavaScript with no build step, plus small Vercel functions for the planner. The browser only ever asks for read-only Drive access (`drive.readonly`) and nothing depends on a home PC. The plan for version 2 is in [docs/cortex-v2-spec.md](docs/cortex-v2-spec.md).
+A personal command center for the Second Brain in Google Drive. Plain HTML, CSS and JavaScript with no build step, plus small Vercel functions for the planner. The browser only ever asks for read-only Drive access (`drive.readonly`) and nothing depends on a home PC. This is Cortex 1.0. What comes next is in [ROADMAP.md](ROADMAP.md), and the full build plan is in [docs/cortex-v2-spec.md](docs/cortex-v2-spec.md).
 
 ## Tabs
 
@@ -10,10 +10,10 @@ Six tabs in the shared top bar, one clean URL each (`vercel.json` turns on `clea
 | --- | --- | --- |
 | Home | `/` | Today strip (date, time, weather with today's high and low), today's schedule with the largest open block, Second Brain summary, links to every tab and your quick links |
 | Planner | `/planner` | Tasks, today, this week and this month (see below) |
-| Finances | `/finances` | Placeholder until phase 4 |
-| News | `/news` | Placeholder until phase 5 |
+| Finances | `/finances` | Coming later ([roadmap](ROADMAP.md)); the tab shows what it will hold |
+| News | `/news` | Coming later ([roadmap](ROADMAP.md)); the tab shows what it will hold |
 | Vault | `/vault` | Every note with its title and one-line summary (frontmatter `name` and `description`), type tag, filters, search and an in-app reader |
-| Ops | `/ops` | Second Brain checklist (sweep and Muse check from Todoist), notes changed over 30 days (with a table view), Drive storage. Project cards arrive in phase 3 |
+| Ops | `/ops` | Second Brain checklist (sweep and Muse check from Todoist), notes changed over 30 days (with a table view), Drive storage. Project cards are on the [roadmap](ROADMAP.md) |
 
 Every Home panel has a plain heading and ends with a link to the place that has the detail. Each source fails on its own: a broken weather or calendar feed shows a message in its own panel.
 
@@ -27,7 +27,7 @@ Every Home panel has a plain heading and ends with a link to the place that has 
 - Anything that would change data (Link Drive, weather location, Edit quick links, the music player) shows a "Demo only" message instead. Mark new write controls with `data-write="<what it does>"` and the demo handles them.
 - The demo never calls Drive, Todoist, Google Calendar or the weather service, and replaces your name, quick links, routines, weather place and playlist from `config.js`.
 - `vercel.json` rewrites the demo routes to the real pages and sends `X-Robots-Tag: noindex`. There is no sitemap. The old `/?demo=1` link redirects to `/demo`.
-- Sample data lives in `src/demo/`. It uses the same TypeScript types as the real data (`src/types.d.ts`); `npm test` type-checks the demo data and the `/api` routes against them, so the two can't drift apart. Finances and News sample data is ready for phases 4 and 5.
+- Sample data lives in `src/demo/`. It uses the same TypeScript types as the real data (`src/types.d.ts`); `npm test` type-checks the demo data and the `/api` routes against them, so the two can't drift apart. Finances and News sample data is ready for when those tabs are built.
 
 ## Planner (At a glance)
 

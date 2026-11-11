@@ -1,5 +1,5 @@
-// Cortex Ops (phase 1): the Second Brain checklist (health checks from Todoist, inbox from Drive), recent note activity and Drive storage.
-// Project cards, deploys and pull requests arrive in phase 3.
+// Cortex Ops: the Second Brain checklist (health checks from Todoist, inbox from Drive), recent note activity and Drive storage.
+// Project cards, deploys and pull requests are on the roadmap (ROADMAP.md).
 (() => {
   const CFG = window.CORTEX_CONFIG;
   const $ = (id) => document.getElementById(id);
@@ -71,8 +71,8 @@
         detail: !live ? Brain.idleText(state) : `${s.counts.inbox} ${s.counts.inbox === 1 ? "note is" : "notes are"} waiting to be filed.`,
         link: live ? ["/vault?type=inbox", "Open the inbox"] : null,
       },
-      { label: "Daily briefing exists for today", status: "later", detail: "Arrives with the Assistant in phase 6." },
-      { label: "Finance data updated in the last 35 days", status: "later", detail: "Arrives with the Finances tab in phase 4." },
+      { label: "Daily briefing exists for today", status: "later", detail: "Arrives with the Assistant, which is on the roadmap." },
+      { label: "Finance data updated in the last 35 days", status: "later", detail: "Arrives with the Finances tab, which is on the roadmap." },
     ];
     $("checklist").innerHTML = items.map((it) => {
       const [icon, word] = MARKS[it.status];
