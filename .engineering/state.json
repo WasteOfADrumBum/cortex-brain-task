@@ -1,41 +1,56 @@
 {
   "stateVersion": 1,
-  "revision": 0,
-  "checkpointId": "init-0000000",
+  "revision": 1,
+  "checkpointId": "ci-325bd08",
   "projectId": "cortex",
   "repository": "https://github.com/WasteOfADrumBum/cortex-brain-task",
   "hub": "https://github.com/WasteOfADrumBum/one-small-engineering",
   "recorded": {
-    "branch": "main",
-    "commit": null,
-    "recordedAt": null
+    "branch": "claude/add-ci",
+    "commit": "325bd08882c905cbcf5c33f715d622c529c1f3a0",
+    "recordedAt": "2026-11-11T04:13:22Z"
   },
   "development": {
     "milestone": null,
     "activeTask": null,
-    "workingBranch": null,
+    "workingBranch": "claude/add-ci",
     "activePr": null,
-    "lastCompleted": [],
+    "lastCompleted": [
+      "Added .github/workflows/ci.yml: npm test (tsc + node:test) and a production npm audit, with a single CI gate job"
+    ],
     "inProgress": [],
-    "nextAction": null
+    "nextAction": "Merge the CI PR, then Joshua decides what done means for Cortex (frozen v1 portfolio piece vs full v2 spec)."
   },
   "decisions": {
     "made": [],
     "constraints": [],
-    "unresolved": []
+    "unresolved": [
+      "Definition of done for Cortex: close the live v1 as a portfolio piece, or finish v2 phases 3 to 6 and the five spec questions"
+    ]
   },
   "verification": {
-    "testsRun": [],
+    "testsRun": [
+      {
+        "command": "npm test",
+        "result": "pass",
+        "commit": "325bd08882c905cbcf5c33f715d622c529c1f3a0",
+        "at": "2026-11-11T04:13:22Z",
+        "ciRunUrl": null
+      }
+    ],
     "unverifiedChanges": []
   },
   "handoff": {
-    "lastAgent": null,
-    "checkpointedAt": null,
+    "lastAgent": {
+      "tool": "Claude Code",
+      "model": null
+    },
+    "checkpointedAt": "2026-11-11T04:13:22Z",
     "unfinished": [],
     "blockers": [],
-    "continuation": null,
-    "uncommittedWorkOutsideCheckpoint": "unknown",
-    "persistedBy": "github-api"
+    "continuation": "After the CI PR merges, wait for Joshua to pick the done definition; record it in the hub registry.",
+    "uncommittedWorkOutsideCheckpoint": "none",
+    "persistedBy": "local-file"
   },
   "provenance": {
     "claims": "agent_reported",

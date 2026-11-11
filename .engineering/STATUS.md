@@ -1,4 +1,4 @@
-<!-- generated from .engineering/state.json (revision 0); edit state.json through a checkpoint, not this file -->
+<!-- generated from .engineering/state.json (revision 1); edit state.json through a checkpoint, not this file -->
 
 # cortex: development status
 
@@ -6,17 +6,17 @@ All values are **agent-reported**, not independently verified. Check GitHub befo
 
 - Milestone: unknown
 - Active task: none recorded
-- Branch: unknown
-- Recorded commit: unknown
-- Last checkpoint: never by unknown
+- Branch: `claude/add-ci`
+- Recorded commit: `325bd08` on `claude/add-ci`
+- Last checkpoint: 2026-11-11T04:13:22Z by Claude Code
 
 ## Next action
 
-_unknown_
+Merge the CI PR, then Joshua decides what done means for Cortex (frozen v1 portfolio piece vs full v2 spec).
 
 ## Completed
 
-_none recorded_
+- Added .github/workflows/ci.yml: npm test (tsc + node:test) and a production npm audit, with a single CI gate job
 
 ## In progress
 
@@ -24,7 +24,7 @@ _none recorded_
 
 ## Tests (agent-reported)
 
-_none recorded_
+- `npm test`: pass at `325bd08`, 2026-11-11T04:13:22Z
 
 ## Unverified changes
 
