@@ -1,40 +1,47 @@
 {
   "stateVersion": 1,
-  "revision": 1,
-  "checkpointId": "ci-325bd08",
+  "revision": 2,
+  "checkpointId": "closeout-59c2b29",
   "projectId": "cortex",
   "repository": "https://github.com/WasteOfADrumBum/cortex-brain-task",
   "hub": "https://github.com/WasteOfADrumBum/one-small-engineering",
   "recorded": {
-    "branch": "claude/add-ci",
-    "commit": "325bd08882c905cbcf5c33f715d622c529c1f3a0",
-    "recordedAt": "2026-11-11T04:13:22Z"
+    "branch": "claude/cortex-1.0-closeout",
+    "commit": "59c2b290905114c1e5e5431502e427746e7ccacf",
+    "recordedAt": "2026-11-11T05:38:16Z"
   },
   "development": {
-    "milestone": null,
+    "milestone": "Cortex 1.0",
     "activeTask": null,
-    "workingBranch": "claude/add-ci",
+    "workingBranch": "claude/cortex-1.0-closeout",
     "activePr": null,
     "lastCompleted": [
-      "Added .github/workflows/ci.yml: npm test (tsc + node:test) and a production npm audit, with a single CI gate job"
+      "Added CI (PR #36)",
+      "Relabeled later tabs as coming later, footer and package version 1.0, added ROADMAP.md"
     ],
     "inProgress": [],
-    "nextAction": "Merge the CI PR, then Joshua decides what done means for Cortex (frozen v1 portfolio piece vs full v2 spec)."
+    "nextAction": "Joshua reviews the 1.0 closeout package on the hub and signs off; then record gates and approval in the hub registry. No release tag before his sign-off."
   },
   "decisions": {
-    "made": [],
+    "made": [
+      {
+        "id": "ship-1-0",
+        "summary": "Ship the live Cortex as 1.0; spec phases 3 to 6 move to ROADMAP.md",
+        "decidedBy": "human",
+        "humanRef": "Joshua Small, project chat 2026-11-11 05:35 UTC: \"Ship as 1.0\"",
+        "recordedAt": "2026-11-11T05:38:16Z"
+      }
+    ],
     "constraints": [],
-    "unresolved": [
-      "Definition of done for Cortex: close the live v1 as a portfolio piece, or finish v2 phases 3 to 6 and the five spec questions"
-    ]
+    "unresolved": []
   },
   "verification": {
     "testsRun": [
       {
         "command": "npm test",
         "result": "pass",
-        "commit": "325bd08882c905cbcf5c33f715d622c529c1f3a0",
-        "at": "2026-11-11T04:13:22Z",
+        "commit": "59c2b290905114c1e5e5431502e427746e7ccacf",
+        "at": "2026-11-11T05:38:16Z",
         "ciRunUrl": null
       }
     ],
@@ -45,10 +52,10 @@
       "tool": "Claude Code",
       "model": null
     },
-    "checkpointedAt": "2026-11-11T04:13:22Z",
+    "checkpointedAt": "2026-11-11T05:38:16Z",
     "unfinished": [],
     "blockers": [],
-    "continuation": "After the CI PR merges, wait for Joshua to pick the done definition; record it in the hub registry.",
+    "continuation": "Wait for Joshua Small sign-off on the hub closeout PR; do not tag a release before it.",
     "uncommittedWorkOutsideCheckpoint": "none",
     "persistedBy": "local-file"
   },
