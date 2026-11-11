@@ -1,16 +1,16 @@
-<!-- generated from .engineering/state.json (revision 0) -->
+<!-- generated from .engineering/state.json (revision 1) -->
 
 # Handoff: cortex
 
 Read this, then **verify against GitHub** (branch head, open PRs, CI) before continuing. Nothing below is independently verified.
 
-- Checkpoint: revision 0, `init-0000000`, never by unknown
-- Written by: the hub writer (committed through the GitHub API)
-- Uncommitted work outside this checkpoint: **unknown** (do not assume it exists anywhere you can read)
+- Checkpoint: revision 1, `ci-325bd08`, 2026-11-11T04:13:22Z by Claude Code
+- Written by: a local edit that the agent then pushed; confirm the branch head matches
+- Uncommitted work outside this checkpoint: **none**
 
 ## Continue with
 
-_no instructions recorded_
+After the CI PR merges, wait for Joshua to pick the done definition; record it in the hub registry.
 
 ## Unfinished
 
@@ -30,4 +30,4 @@ _none recorded_
 
 ## Unresolved decisions
 
-_none recorded_
+- Definition of done for Cortex: close the live v1 as a portfolio piece, or finish v2 phases 3 to 6 and the five spec questions

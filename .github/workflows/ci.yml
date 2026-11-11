@@ -1,0 +1,45 @@
+name: CI
+
+# Runs the test suite (type check + node:test) and a production dependency audit on every
+# change, so a broken PR is caught before Vercel deploys it. "CI gate" is the single status
+# to require in a main-branch ruleset or a Vercel Deployment Check.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  test:
+    name: Type check and tests
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm test
+      - name: Production dependency audit
+        run: npm audit --omit=dev --audit-level=high
+
+  gate:
+    name: CI gate
+    needs: [test]
+    if: always()
+    runs-on: ubuntu-24.04
+    steps:
+      - name: All required jobs passed
+        run: test "${{ needs.test.result }}" = success
