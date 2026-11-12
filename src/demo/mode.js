@@ -9,8 +9,8 @@
 const Demo = (() => {
   const on = /^\/demo(\/|$)/.test(location.pathname);
 
-  // Tab routes that have a /demo twin: "/", "/planner", "/finances", "/news", "/vault", "/ops" (plus ?query or #hash).
-  const TAB = /^\/(?:planner|finances|news|vault|ops)?(?=$|[?#])/;
+  // Tab routes that have a /demo twin: "/", "/planner", "/finances", "/news", "/vault", "/ops", "/briefing" (plus ?query or #hash).
+  const TAB = /^\/(?:planner|finances|news|vault|ops|briefing)?(?=$|[?#])/;
   /** "/planner#day" -> "/demo/planner#day" in the demo; unchanged otherwise. @param {string} href */
   const path = (href) => (on && TAB.test(href) ? `/demo${href.replace(/^\/(?=$|[?#])/, "")}` : href);
 

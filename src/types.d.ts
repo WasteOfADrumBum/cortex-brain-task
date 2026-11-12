@@ -17,6 +17,8 @@ export interface Task {
   projectId: string | null;
   sectionId: string | null;
   url: string;
+  /** When the task last changed (ISO), for the "untouched" priority rule. Missing in older responses. */
+  updatedAt?: string | null;
 }
 export interface TodoistProject { id: string; name: string }
 export interface TodoistSection { id: string; name: string; projectId: string }
@@ -241,5 +243,74 @@ export interface DemoData {
   finances(today: Date): FinanceYear;
   news(now: Date): NewsResponse;
   ops(now: Date): OpsResponse;
+  briefing(now: Date): BriefingFile[];
   playlist: DemoTrack[];
+}
+
+// ---------- Assistant: briefing, priorities, approvals (src/briefing-lib.js, src/priorities-lib.js, src/approvals-lib.js) ----------
+
+interface ProposalBase {
+  /** Unique per proposal, e.g. "p-2026-10-13-1"; decisions are stored by it so a card never comes back. */
+  id: string;
+  /** Why the routine proposes it, shown on the card. */
+  reason: string;
+  /** The task or event name, for the card only. */
+  title: string;
+}
+export type Proposal =
+  | (ProposalBase & { action: "todoist.reschedule"; taskId: string; from: string; to: string })
+  | (ProposalBase & { action: "todoist.complete"; taskId: string })
+  | (ProposalBase & { action: "todoist.create"; content: string; due: string | null; priority: "p1" | "p2" | "p3" | "p4" })
+  | (ProposalBase & { action: "calendar.create"; calendarId: string; start: string; end: string })
+  | (ProposalBase & { action: "calendar.move"; calendarId: string; eventId: string; from: string; to: string });
+
+export interface Briefing {
+  date: string | null;
+  generated: string | null;
+  summary: string;
+  attention: string[];
+  email: string[];
+  proposals: Proposal[];
+  /** Proposals with an action v1 doesn't run; shown read-only as "Not supported". */
+  unsupported: { id: string; action: string; reason: string }[];
+  /** What couldn't be read, in words safe to show. */
+  problems: string[];
+}
+
+/** A briefing file as Drive lists it, with its text once read. */
+export interface BriefingFile {
+  name: string;
+  modifiedTime: string;
+  text?: string;
+}
+
+export interface PriorityConfig {
+  weights: Record<"overdue" | "dueToday" | "p1" | "p2" | "fitsBlock" | "quickPickup" | "untouched", number>;
+  estimates: { quick: number; deep: number };
+  quickMinutes: number;
+  bigBlockMinutes: number;
+  untouchedDays: number;
+}
+
+export type ApprovalStatus = "approved" | "rejected" | "stale" | "failed" | "undone";
+
+/** One decision in /Cortex/approvals/state.json. */
+export interface ApprovalRecord {
+  status: ApprovalStatus;
+  at: string;
+  action: string;
+  targetId: string | null;
+  /** In words safe to show: why it was stale or failed. */
+  note?: string;
+  /** Until when Undo is allowed (approved reschedules and moves only). */
+  undoUntil?: string;
+  /** The checked proposal that ran, kept so Undo reverses exactly what ran. */
+  proposal?: Proposal;
+}
+
+/** GET /api/approvals */
+export interface ApprovalsResponse {
+  /** False until the Google variables are set in Vercel; approving can't work before then. */
+  configured: boolean;
+  decisions: Record<string, { status: ApprovalStatus; at: string; note?: string }>;
 }

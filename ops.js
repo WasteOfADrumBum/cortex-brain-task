@@ -170,6 +170,37 @@
     return { label, status: fresh ? "yes" : "no", detail: `Last saved ${Brain.ago(finance.savedAt)}.`, link: ["/finances", "Open Finances"] };
   }
 
+  // ---------- Briefing: whether /Cortex/briefings has today's file (read in the browser with the Drive link) ----------
+  let brief = { state: "idle" }; // idle | loading | ok { today, latest } | error { message }
+  let briefMode = "";
+  async function loadBrief(state) {
+    const mode = Demo.on ? "demo" : state.mode === "live" && Drive.linked() ? "live" : "";
+    if (!mode || mode === briefMode) return;
+    briefMode = mode;
+    brief = { state: "loading" };
+    try {
+      const files = Demo.on ? (await Demo.data()).briefing(new Date()) : (await Drive.briefings()).files;
+      const d = new Date();
+      const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}.md`;
+      const names = files.map((f) => f.name).filter((n) => /^\d{4}-\d{2}-\d{2}\.md$/.test(n) && n <= key).sort();
+      brief = { state: "ok", today: names.includes(key), latest: names.pop() || null };
+    } catch (e) {
+      brief = { state: "error", message: `Couldn't read Cortex/briefings: ${e.message}` };
+      briefMode = "";
+    }
+    renderChecklist(Brain.state);
+  }
+  function briefItem(state) {
+    const label = "Daily briefing exists for today";
+    const link = ["/briefing", "Open the briefing"];
+    if (brief.state === "idle") return { label, status: "unknown", detail: state.mode === "idle" ? Brain.idleText(state) : "Checking Drive…", link };
+    if (brief.state === "loading") return { label, status: "unknown", detail: "Checking Cortex/briefings in Drive…", link };
+    if (brief.state === "error") return { label, status: "unknown", detail: brief.message, link };
+    if (brief.today) return { label, status: "yes", detail: "Today's briefing is in Drive.", link };
+    const last = brief.latest ? new Date(`${brief.latest.slice(0, 10)}T12:00`).toLocaleDateString([], { weekday: "long", month: "short", day: "numeric" }) : "";
+    return { label, status: "no", detail: last ? `The last one was for ${last}. The routine runs weekday mornings.` : "None found in Cortex/briefings yet. See docs/briefing-routine.md to set up the routine.", link };
+  }
+
   function renderChecklist(state) {
     const live = state.mode !== "idle";
     const s = live ? Brain.stats(state.files) : null;
@@ -183,7 +214,7 @@
         detail: !live ? Brain.idleText(state) : `${s.counts.inbox} ${s.counts.inbox === 1 ? "note is" : "notes are"} waiting to be filed.`,
         link: live ? ["/vault?type=inbox", "Open the inbox"] : null,
       },
-      { label: "Daily briefing exists for today", status: "later", detail: "Arrives with the Assistant, which is on the roadmap." },
+      briefItem(state),
       financeItem(),
     ];
     $("checklist").innerHTML = items.map((it) => {
@@ -253,6 +284,7 @@
         loadOps(); setInterval(loadOps, 5 * 60000);
         loadFinance();
       }
+      if (state.auth === "in") loadBrief(state);
       renderChecklist(state);
       renderActivity(state);
       renderStorage(state);

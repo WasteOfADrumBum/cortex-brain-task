@@ -7,7 +7,7 @@
   ],
   "rewrites": [
     { "source": "/demo", "destination": "/" },
-    { "source": "/demo/:tab(planner|finances|news|vault|ops)", "destination": "/:tab" }
+    { "source": "/demo/:tab(planner|finances|news|vault|ops|briefing)", "destination": "/:tab" }
   ],
   "headers": [
     {

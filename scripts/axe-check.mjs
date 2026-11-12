@@ -23,7 +23,7 @@ await new Promise((ok) => server.listen(0, "127.0.0.1", ok));
 const base = `http://127.0.0.1:${server.address().port}`;
 const axeSource = readFileSync(path.join(root, "node_modules/axe-core/axe.min.js"), "utf8");
 
-const pages = ["/demo", ...["planner", "finances", "news", "vault", "ops"].map((t) => `/demo/${t}`)];
+const pages = ["/demo", ...["planner", "finances", "news", "vault", "ops", "briefing"].map((t) => `/demo/${t}`)];
 const browser = await chromium.launch();
 let failed = 0;
 try {
