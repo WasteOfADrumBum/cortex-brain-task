@@ -1,26 +1,25 @@
 {
   "stateVersion": 1,
-  "revision": 6,
-  "checkpointId": "cp-cortex-phase-5-news-2026-11-12",
+  "revision": 7,
+  "checkpointId": "cp-2026-11-12-phase6",
   "projectId": "cortex",
   "repository": "https://github.com/WasteOfADrumBum/cortex-brain-task",
   "hub": "https://github.com/WasteOfADrumBum/one-small-engineering",
   "recorded": {
-    "branch": "claude/phase-5-news",
-    "commit": "305ad8622abb46b5811c1ecd11d454a9c136c83a",
-    "recordedAt": "2026-11-12T01:36:39Z"
+    "branch": "claude/phase-6-assistant",
+    "commit": "273adf181ff819a4295efdd8cc856831571c76b7",
+    "recordedAt": "2026-11-12T01:51:20Z"
   },
   "development": {
     "milestone": "Cortex v2 (after 1.0)",
     "activeTask": null,
-    "workingBranch": "claude/phase-5-news",
+    "workingBranch": "claude/phase-6-assistant",
     "activePr": null,
     "lastCompleted": [
-      "Phase 4 Finances (PR #40)",
-      "Phase 5 News: /api/news, News tab with filters, Home headlines, feed check in CI"
+      "Spec phase 6 Assistant: briefing reader (Home and /briefing), rule-based Top 3, approvals inbox with allowlist, stale check, audit log and 10-second undo, docs/briefing-routine.md. npm test 52/52 locally; axe runs in CI."
     ],
     "inProgress": [],
-    "nextAction": "Merge the phase 5 PR once CI gate is green and the feed check log shows which feeds work; then phase 6 (Assistant)."
+    "nextAction": "Merge PR for claude/phase-6-assistant once CI is green. Then Cortex is blocked on owner items (tokens, routine setup, two news categories, Vault legend)."
   },
   "decisions": {
     "made": [
@@ -52,15 +51,14 @@
       "tool": "Claude Code",
       "model": null
     },
-    "checkpointedAt": "2026-11-12T01:36:39Z",
+    "checkpointedAt": "2026-11-12T01:51:20Z",
     "unfinished": [],
     "blockers": [
-      "Vault legend needs owner wording for digest, profile and retired",
-      "Two news categories need owner-chosen sources",
-      "Saving finances needs Google OAuth client + refresh token in Vercel",
-      "Live Ops data needs GITHUB_TOKEN in Vercel"
+      "Live data needs owner env vars in Vercel: GITHUB_TOKEN (Ops), GOOGLE_CLIENT_ID/SECRET/REFRESH_TOKEN with drive.file and calendar.events (Finances, approvals)",
+      "Briefing routine must be created by the owner (docs/briefing-routine.md)",
+      "Open questions: Enterprise AI and Small Business & SaaS news sources, Vault legend wording, briefing time"
     ],
-    "continuation": "Merge the phase 5 PR once CI gate is green and the feed check log shows which feeds work; then phase 6 (Assistant).",
+    "continuation": "Merge PR for claude/phase-6-assistant once CI is green. Then Cortex is blocked on owner items (tokens, routine setup, two news categories, Vault legend).",
     "uncommittedWorkOutsideCheckpoint": "none",
     "persistedBy": "local-file"
   },

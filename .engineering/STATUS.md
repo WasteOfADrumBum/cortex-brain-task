@@ -1,4 +1,4 @@
-<!-- generated from .engineering/state.json (revision 6); edit state.json through a checkpoint, not this file -->
+<!-- generated from .engineering/state.json (revision 7); edit state.json through a checkpoint, not this file -->
 
 # cortex: development status
 
@@ -6,18 +6,17 @@ All values are **agent-reported**, not independently verified. Check GitHub befo
 
 - Milestone: Cortex v2 (after 1.0)
 - Active task: none recorded
-- Branch: `claude/phase-5-news`
-- Recorded commit: `305ad86` on `claude/phase-5-news`
-- Last checkpoint: 2026-11-12T01:36:39Z by Claude Code
+- Branch: `claude/phase-6-assistant`
+- Recorded commit: `273adf1` on `claude/phase-6-assistant`
+- Last checkpoint: 2026-11-12T01:51:20Z by Claude Code
 
 ## Next action
 
-Merge the phase 5 PR once CI gate is green and the feed check log shows which feeds work; then phase 6 (Assistant).
+Merge PR for claude/phase-6-assistant once CI is green. Then Cortex is blocked on owner items (tokens, routine setup, two news categories, Vault legend).
 
 ## Completed
 
-- Phase 4 Finances (PR #40)
-- Phase 5 News: /api/news, News tab with filters, Home headlines, feed check in CI
+- Spec phase 6 Assistant: briefing reader (Home and /briefing), rule-based Top 3, approvals inbox with allowlist, stale check, audit log and 10-second undo, docs/briefing-routine.md. npm test 52/52 locally; axe runs in CI.
 
 ## In progress
 

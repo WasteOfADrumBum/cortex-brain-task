@@ -1,16 +1,16 @@
-<!-- generated from .engineering/state.json (revision 6) -->
+<!-- generated from .engineering/state.json (revision 7) -->
 
 # Handoff: cortex
 
 Read this, then **verify against GitHub** (branch head, open PRs, CI) before continuing. Nothing below is independently verified.
 
-- Checkpoint: revision 6, `cp-cortex-phase-5-news-2026-11-12`, 2026-11-12T01:36:39Z by Claude Code
+- Checkpoint: revision 7, `cp-2026-11-12-phase6`, 2026-11-12T01:51:20Z by Claude Code
 - Written by: a local edit that the agent then pushed; confirm the branch head matches
 - Uncommitted work outside this checkpoint: **none**
 
 ## Continue with
 
-Merge the phase 5 PR once CI gate is green and the feed check log shows which feeds work; then phase 6 (Assistant).
+Merge PR for claude/phase-6-assistant once CI is green. Then Cortex is blocked on owner items (tokens, routine setup, two news categories, Vault legend).
 
 ## Unfinished
 
@@ -18,10 +18,9 @@ _none recorded_
 
 ## Blockers
 
-- Vault legend needs owner wording for digest, profile and retired
-- Two news categories need owner-chosen sources
-- Saving finances needs Google OAuth client + refresh token in Vercel
-- Live Ops data needs GITHUB_TOKEN in Vercel
+- Live data needs owner env vars in Vercel: GITHUB_TOKEN (Ops), GOOGLE_CLIENT_ID/SECRET/REFRESH_TOKEN with drive.file and calendar.events (Finances, approvals)
+- Briefing routine must be created by the owner (docs/briefing-routine.md)
+- Open questions: Enterprise AI and Small Business & SaaS news sources, Vault legend wording, briefing time
 
 ## Decisions
 
