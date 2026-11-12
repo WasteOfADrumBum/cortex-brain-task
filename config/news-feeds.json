@@ -1,0 +1,14 @@
+{
+  "groups": ["Work", "Life"],
+  "categories": [
+    { "name": "AI Tools & Agents", "group": "Work", "feeds": ["https://simonwillison.net/atom/everything/", "https://openai.com/news/rss.xml"] },
+    { "name": "Full-Stack Development", "group": "Work", "feeds": ["https://react.dev/rss.xml", "https://www.smashingmagazine.com/feed/"] },
+    { "name": "Cloud & DevOps", "group": "Work", "feeds": ["https://github.blog/feed/", "https://vercel.com/atom", "https://aws.amazon.com/blogs/aws/feed/"] },
+    { "name": "Software Careers", "group": "Work", "feeds": ["https://newsletter.pragmaticengineer.com/feed"] },
+    { "name": "Gaming & Technology", "group": "Life", "feeds": ["https://news.xbox.com/en-us/feed/", "https://www.theverge.com/rss/index.xml", "https://feeds.arstechnica.com/arstechnica/index"] },
+    { "name": "Photography", "group": "Life", "feeds": ["https://petapixel.com/feed/", "https://nikonrumors.com/feed/"] },
+    { "name": "Music & Audio", "group": "Life", "feeds": ["https://www.musicradar.com/rss"] }
+  ],
+  "perCategory": 8,
+  "homeGroups": ["Work"]
+}

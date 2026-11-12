@@ -151,6 +151,20 @@
       : { body });
   }
 
+  // ---------- Headlines (desktop Home): the News tab's route, newest 3 from Home's groups ----------
+  async function loadNews() {
+    if (Demo.on) { HomeDesk.news({ body: (await Demo.data()).news(new Date()) }); return; }
+    let key = "";
+    try { key = localStorage.getItem("dashKey") || ""; } catch { /* storage blocked */ }
+    let res = null, body = null;
+    try { res = await fetch("/api/news", { headers: key ? { "x-dash-key": key } : {} }); } catch { /* offline */ }
+    try { body = await res?.json(); } catch { /* not JSON */ }
+    HomeDesk.news(!res ? { message: "Couldn't reach the news feeds." }
+      : res.status === 401 ? { message: "Enter your dashboard key in Top 3 to see headlines." }
+      : !res.ok || !body ? { message: `Headlines unavailable: ${body?.error || `error ${res.status}`}.` }
+      : { body });
+  }
+
   // One failing source shows its own message here and leaves the rest of Home alone.
   async function loadSchedule() {
     const day = Brain.startOfDay(new Date());
@@ -198,7 +212,7 @@
     }
     input.value = "";
     $("d-key-err").textContent = "Checking the key…";
-    await Promise.all([loadSchedule(), loadTasks(), loadOps(), loadMoney()]);
+    await Promise.all([loadSchedule(), loadTasks(), loadOps(), loadMoney(), loadNews()]);
     // Accepted: the form is gone, so move focus to the Top 3 heading instead of losing it.
     if ($("d-key-form").hidden) $("d-h-pri").focus();
     else input.focus();
@@ -237,7 +251,7 @@
   const TABS = [
     ["/planner", "Planner", "Schedule, open hours and task buckets", ""],
     ["/finances", "Finances", "This month in detail, plus the year", ""],
-    ["/news", "News", "Headlines by category", "Coming later"],
+    ["/news", "News", "Headlines by category", ""],
     ["/vault", "Vault", "Notes you can understand and find", ""],
     ["/ops", "Ops", "Is everything healthy, and what shipped", ""],
   ];
@@ -275,6 +289,8 @@
     loadTasks();
     loadOps();
     loadMoney();
+    loadNews();
+    setInterval(loadNews, 30 * 60000);
     setInterval(() => Weather.refresh(wxHost), 15 * 60000);
     setInterval(() => { loadSchedule(); loadTasks(); loadOps(); loadMoney(); }, 10 * 60000);
   }

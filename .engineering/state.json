@@ -1,26 +1,26 @@
 {
   "stateVersion": 1,
-  "revision": 5,
-  "checkpointId": "cp-cortex-phase-4-finances-2026-11-12",
+  "revision": 6,
+  "checkpointId": "cp-cortex-phase-5-news-2026-11-12",
   "projectId": "cortex",
   "repository": "https://github.com/WasteOfADrumBum/cortex-brain-task",
   "hub": "https://github.com/WasteOfADrumBum/one-small-engineering",
   "recorded": {
-    "branch": "claude/phase-4-finances",
-    "commit": "5ee4589d2e91706edc1a8165a760712b676224c8",
-    "recordedAt": "2026-11-12T01:29:31Z"
+    "branch": "claude/phase-5-news",
+    "commit": "305ad8622abb46b5811c1ecd11d454a9c136c83a",
+    "recordedAt": "2026-11-12T01:36:39Z"
   },
   "development": {
     "milestone": "Cortex v2 (after 1.0)",
     "activeTask": null,
-    "workingBranch": "claude/phase-4-finances",
+    "workingBranch": "claude/phase-5-news",
     "activePr": null,
     "lastCompleted": [
-      "Phase 3 Ops tab (PR #39)",
-      "Phase 4 Finances: paste import, /api/finance, /api/ingest/finance, Drive store, This month and Year views, Home Money panel, Ops finance check"
+      "Phase 4 Finances (PR #40)",
+      "Phase 5 News: /api/news, News tab with filters, Home headlines, feed check in CI"
     ],
     "inProgress": [],
-    "nextAction": "Merge the phase 4 PR once CI gate is green; then phase 5 (News tab; Vault legend waits on owner wording)."
+    "nextAction": "Merge the phase 5 PR once CI gate is green and the feed check log shows which feeds work; then phase 6 (Assistant)."
   },
   "decisions": {
     "made": [
@@ -52,13 +52,15 @@
       "tool": "Claude Code",
       "model": null
     },
-    "checkpointedAt": "2026-11-12T01:29:31Z",
+    "checkpointedAt": "2026-11-12T01:36:39Z",
     "unfinished": [],
     "blockers": [
-      "Saving finances needs GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET and GOOGLE_REFRESH_TOKEN in Vercel (owner)",
-      "Live Ops data needs GITHUB_TOKEN in Vercel (owner)"
+      "Vault legend needs owner wording for digest, profile and retired",
+      "Two news categories need owner-chosen sources",
+      "Saving finances needs Google OAuth client + refresh token in Vercel",
+      "Live Ops data needs GITHUB_TOKEN in Vercel"
     ],
-    "continuation": "Merge the phase 4 PR once CI gate is green; then phase 5 (News tab; Vault legend waits on owner wording).",
+    "continuation": "Merge the phase 5 PR once CI gate is green and the feed check log shows which feeds work; then phase 6 (Assistant).",
     "uncommittedWorkOutsideCheckpoint": "none",
     "persistedBy": "local-file"
   },
