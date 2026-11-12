@@ -1,4 +1,4 @@
-<!-- generated from .engineering/state.json (revision 7); edit state.json through a checkpoint, not this file -->
+<!-- generated from .engineering/state.json (revision 8); edit state.json through a checkpoint, not this file -->
 
 # cortex: development status
 
@@ -6,17 +6,17 @@ All values are **agent-reported**, not independently verified. Check GitHub befo
 
 - Milestone: Cortex v2 (after 1.0)
 - Active task: none recorded
-- Branch: `claude/phase-6-assistant`
-- Recorded commit: `273adf1` on `claude/phase-6-assistant`
-- Last checkpoint: 2026-11-12T01:51:20Z by Claude Code
+- Branch: `claude/release-2.0.0`
+- Recorded commit: `8772de5` on `claude/release-2.0.0`
+- Last checkpoint: 2026-11-12T12:48:19Z by Claude Code
 
 ## Next action
 
-Merge PR for claude/phase-6-assistant once CI is green. Then Cortex is blocked on owner items (tokens, routine setup, two news categories, Vault legend).
+Joshua Small reviews the hub Cortex 2.0 release package, does the listed checks and signs off; then merge the release PR and record the approval in the hub.
 
 ## Completed
 
-- Spec phase 6 Assistant: briefing reader (Home and /briefing), rule-based Top 3, approvals inbox with allowlist, stale check, audit log and 10-second undo, docs/briefing-routine.md. npm test 52/52 locally; axe runs in CI.
+- Cortex 2.0.0 release prep: CHANGELOG, version 2.0.0, footer and docs on branch claude/release-2.0.0; hub release package and registry record prepared. npm test 52/52 locally.
 
 ## In progress
 
