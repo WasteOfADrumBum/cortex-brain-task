@@ -10,7 +10,7 @@ Six tabs in the shared top bar, one clean URL each (`vercel.json` turns on `clea
 | --- | --- | --- |
 | Home | `/` | Today strip (date, time, weather with today's high and low), today's schedule with the largest open block, Second Brain summary, links to every tab and your quick links |
 | Planner | `/planner` | Tasks, today, this week and this month (see below) |
-| Finances | `/finances` | Coming later ([roadmap](ROADMAP.md)); the tab shows what it will hold |
+| Finances | `/finances` | This month (in, out, net, bills by due date with overdue called out in words, money in), this year (one row per month, expandable), when the numbers were last saved, and **Update finances**: paste the JSON from the ChatGPT Finances report, check it, then save it to Drive |
 | News | `/news` | Coming later ([roadmap](ROADMAP.md)); the tab shows what it will hold |
 | Vault | `/vault` | Every note with its title and one-line summary (frontmatter `name` and `description`), type tag, filters, search and an in-app reader |
 | Ops | `/ops` | A card per project in `config/ops.json` (live deploy state, last deploy, open PRs, failed deploys in 7 days, last 3 merged PRs, npm version), shipping totals, merged PRs per week for 12 weeks (with a table view), then the Second Brain checklist (sweep and Muse check from Todoist), notes changed over 30 days and Drive storage |
@@ -27,7 +27,7 @@ Every Home panel has a plain heading and ends with a link to the place that has 
 - Anything that would change data (Link Drive, weather location, Edit quick links, the music player) shows a "Demo only" message instead. Mark new write controls with `data-write="<what it does>"` and the demo handles them.
 - The demo never calls Drive, Todoist, Google Calendar or the weather service, and replaces your name, quick links, routines, weather place and playlist from `config.js`.
 - `vercel.json` rewrites the demo routes to the real pages and sends `X-Robots-Tag: noindex`. There is no sitemap. The old `/?demo=1` link redirects to `/demo`.
-- Sample data lives in `src/demo/`. It uses the same TypeScript types as the real data (`src/types.d.ts`); `npm test` type-checks the demo data and the `/api` routes against them, so the two can't drift apart. Finances and News sample data is ready for when those tabs are built.
+- Sample data lives in `src/demo/`. It uses the same TypeScript types as the real data (`src/types.d.ts`); `npm test` type-checks the demo data and the `/api` routes against them, so the two can't drift apart. News sample data is ready for when that tab is built.
 
 ## Planner (At a glance)
 
@@ -45,6 +45,8 @@ Set these in Vercel (Project → Settings → Environment Variables); `.env.exam
 - `TODOIST_TOKEN`: Todoist → Settings → Integrations → Developer → API token
 - `GCAL_ICS_URLS`: each Google Calendar's "Secret address in iCal format", comma-separated. Anyone with one of these URLs can read that calendar.
 - `DASH_KEY`: any long random string. The planner asks for it once per device and remembers it there.
+- `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `GOOGLE_REFRESH_TOKEN` (for Finances): an OAuth "Web application" client and a refresh token with only the `drive.file` scope, so Cortex can see and change only the files it creates. Make the token once, either with `node scripts/get-refresh-token.mjs` on your computer (add `http://localhost:53682` as a redirect URI), or in the [OAuth Playground](https://developers.google.com/oauthplayground) with "Use your own OAuth credentials" ticked and the scope `https://www.googleapis.com/auth/drive.file` (add `https://developers.google.com/oauthplayground` as a redirect URI).
+- `CORTEX_INGEST_TOKEN` (optional, for automation): a long random string for `/api/ingest/finance`. The paste import doesn't need it.
 - `GITHUB_TOKEN` (for Ops): a fine-grained, read-only GitHub token limited to the repos in `config/ops.json`, with Metadata, Contents, Deployments and Pull requests set to read. Without it GitHub allows 60 calls an hour, which Ops can use up.
 
 Google's iCal feed can lag your live calendar by minutes to a few hours.
@@ -56,7 +58,8 @@ Google's iCal feed can lag your live calendar by minutes to a few hours.
 | `index.html`, `home.js` | Home tab |
 | `vault.html`, `vault.js` | Vault tab |
 | `ops.html`, `ops.js` | Ops tab |
-| `finances.html`, `news.html`, `tab.js` | Placeholder tabs |
+| `finances.html`, `finances.js` | Finances tab (paste import uses `src/finance-lib.js`, the same rules as the save routes) |
+| `news.html`, `tab.js` | Placeholder tab |
 | `planner.html`, `planner.css`, `planner.js` | Planner tab |
 | `header.js` | Shared top bar and tab menu |
 | `brain.js` | Shared sign-in screen, Drive link, note types, titles and summaries |
@@ -71,6 +74,9 @@ Google's iCal feed can lag your live calendar by minutes to a few hours.
 | `weather.js` | Weather from Open-Meteo |
 | `api/tasks.js` | Todoist tasks, labels, projects and sections for the Planner and Home (needs `DASH_KEY`) |
 | `api/ops.js` | Ops project cards, totals and 12-week chart from GitHub (production deployments Vercel reports, pull requests) and npm; cached 5 minutes (needs `DASH_KEY`; `GITHUB_TOKEN` recommended) |
+| `api/finance.js` | Finances: GET a year of saved months, POST a pasted month (needs `DASH_KEY` and the Drive variables) |
+| `api/ingest/finance.js` | Finance ingest for automation: POST one month with `Authorization: Bearer <CORTEX_INGEST_TOKEN>`; 422 names a bad field, 20 calls an hour |
+| `api/_drive.js`, `api/_finance-store.js` | Drive access with the `drive.file` scope; months saved as `/Cortex/finance/YYYY-MM.json` with the replaced copy as `.prev.json`, and a counts-only log in `/Cortex/logs/` |
 | `api/checks.js` | Ops checklist health checks: the newest completion of "Brain sweep ran" and "Muse check ran" in the last 7 days, from Todoist's activity log (needs `DASH_KEY`) |
 | `api/calendar.js` | Google Calendar events from iCal feeds (needs `DASH_KEY`); also used by Home's schedule |
 | `vercel.json` | Clean URLs for the tabs, `/demo` routes and their noindex header |

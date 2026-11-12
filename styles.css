@@ -164,6 +164,26 @@ button, input { font: inherit; color: inherit; }
 .pr-meta { font-family: var(--font-mono); font-size: 12px; color: var(--muted); }
 .pr-summary { color: var(--text); font-size: 15px; }
 .soon-panel { max-width: 1100px; }
+.fin-bar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--gap); margin-bottom: var(--gap); }
+.fin-month, .fin-year { margin-bottom: var(--gap); }
+.fin-table { width: 100%; border-collapse: collapse; font-size: 15px; }
+.fin-table th, .fin-table td { text-align: left; padding: 6px 8px; border-bottom: 1px solid rgba(67, 217, 255, 0.1); }
+.fin-table thead th { font-family: var(--font-display); font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); }
+.state-mark { display: inline-block; min-width: 1em; font-weight: 800; }
+.check-yes .state-mark { color: var(--green); }
+.check-no .state-mark { color: var(--red); }
+.check-unknown .state-mark { color: var(--amber); }
+.fin-income, .fin-warnings { list-style: disc; padding-left: 22px; }
+.fin-months { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.fin-months summary { cursor: pointer; display: flex; flex-wrap: wrap; gap: 4px 14px; min-height: 32px; align-items: center; }
+.fin-m-name { font-weight: 700; color: #f2fcff; }
+.fin-dialog { width: min(640px, calc(100vw - 32px)); padding: 18px; color: var(--text); background: var(--panel-solid); border: 1px solid var(--line-strong); border-radius: var(--radius); }
+.fin-dialog::backdrop { background: rgba(0, 0, 0, 0.6); }
+.fin-label { display: block; font-weight: 700; margin-bottom: 4px; }
+.fin-dialog textarea { width: 100%; margin-top: 8px; padding: 8px; font-family: var(--font-mono); font-size: 13px; color: var(--text); background: var(--bg-2); border: 1px solid var(--line-strong); border-radius: 4px; }
+.fin-dialog textarea:focus-visible { outline: 2px solid var(--cyan); outline-offset: 2px; }
+.fin-errors:empty { display: none; }
+.fin-buttons { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 12px; }
 @media (max-width: 900px) {
   .schedule-panel, .brain-panel { grid-column: span 12; }
   .ops-grid { grid-template-columns: minmax(0, 1fr); }

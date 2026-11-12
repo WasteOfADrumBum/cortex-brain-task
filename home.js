@@ -136,6 +136,21 @@
       : { body });
   }
 
+  // ---------- Money this month (desktop Home): the Finances tab's route and the same dashboard key ----------
+  async function loadMoney() {
+    if (Demo.on) { HomeDesk.money({ body: (await Demo.data()).finances(new Date()) }); return; }
+    let key = "";
+    try { key = localStorage.getItem("dashKey") || ""; } catch { /* storage blocked */ }
+    let res = null, body = null;
+    try { res = await fetch(`/api/finance?year=${new Date().getFullYear()}`, { headers: key ? { "x-dash-key": key } : {} }); } catch { /* offline */ }
+    try { body = await res?.json(); } catch { /* not JSON */ }
+    HomeDesk.money(!res ? { message: "Couldn't reach Cortex (offline or blocked)." }
+      : res.status === 401 ? { message: "Enter your dashboard key in Top 3 to see this month's money." }
+      : res.status === 404 ? { message: "The finance route isn't deployed yet." }
+      : !res.ok || !body ? { message: `Finances unavailable: ${body?.error || `error ${res.status}`}.` }
+      : { body });
+  }
+
   // One failing source shows its own message here and leaves the rest of Home alone.
   async function loadSchedule() {
     const day = Brain.startOfDay(new Date());
@@ -183,7 +198,7 @@
     }
     input.value = "";
     $("d-key-err").textContent = "Checking the key…";
-    await Promise.all([loadSchedule(), loadTasks(), loadOps()]);
+    await Promise.all([loadSchedule(), loadTasks(), loadOps(), loadMoney()]);
     // Accepted: the form is gone, so move focus to the Top 3 heading instead of losing it.
     if ($("d-key-form").hidden) $("d-h-pri").focus();
     else input.focus();
@@ -221,7 +236,7 @@
   // ---------- Go to: every tab, plus quick links ----------
   const TABS = [
     ["/planner", "Planner", "Schedule, open hours and task buckets", ""],
-    ["/finances", "Finances", "This month in detail, plus the year", "Coming later"],
+    ["/finances", "Finances", "This month in detail, plus the year", ""],
     ["/news", "News", "Headlines by category", "Coming later"],
     ["/vault", "Vault", "Notes you can understand and find", ""],
     ["/ops", "Ops", "Is everything healthy, and what shipped", ""],
@@ -259,8 +274,9 @@
     loadSchedule();
     loadTasks();
     loadOps();
+    loadMoney();
     setInterval(() => Weather.refresh(wxHost), 15 * 60000);
-    setInterval(() => { loadSchedule(); loadTasks(); loadOps(); }, 10 * 60000);
+    setInterval(() => { loadSchedule(); loadTasks(); loadOps(); loadMoney(); }, 10 * 60000);
   }
   Brain.boot({
     onUpdate(state) {

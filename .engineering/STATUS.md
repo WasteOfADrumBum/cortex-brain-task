@@ -1,4 +1,4 @@
-<!-- generated from .engineering/state.json (revision 4); edit state.json through a checkpoint, not this file -->
+<!-- generated from .engineering/state.json (revision 5); edit state.json through a checkpoint, not this file -->
 
 # cortex: development status
 
@@ -6,18 +6,18 @@ All values are **agent-reported**, not independently verified. Check GitHub befo
 
 - Milestone: Cortex v2 (after 1.0)
 - Active task: none recorded
-- Branch: `claude/phase-3-ops`
-- Recorded commit: `184a0f2` on `claude/phase-3-ops`
-- Last checkpoint: 2026-11-12T01:15:41Z by Claude Code
+- Branch: `claude/phase-4-finances`
+- Recorded commit: `5ee4589` on `claude/phase-4-finances`
+- Last checkpoint: 2026-11-12T01:29:31Z by Claude Code
 
 ## Next action
 
-Merge the phase 3 PR once CI gate (tests + axe on /demo/ops) is green; then start phase 4 (Finances ingest and views).
+Merge the phase 4 PR once CI gate is green; then phase 5 (News tab; Vault legend waits on owner wording).
 
 ## Completed
 
-- Hardening: constant-time key and axe in CI (PR #38)
-- Phase 3 Ops tab: /api/ops, project cards, totals, 12-week chart, Home Ops panel, demo data
+- Phase 3 Ops tab (PR #39)
+- Phase 4 Finances: paste import, /api/finance, /api/ingest/finance, Drive store, This month and Year views, Home Money panel, Ops finance check
 
 ## In progress
 

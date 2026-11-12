@@ -168,23 +168,32 @@ export interface OpsResponse {
   warnings: string[];
 }
 
-// ---------- Finances (phase 4): Drive finance/YYYY-MM.json ----------
-export interface FinanceItem {
-  name: string;
-  amount: number;
-  /** "YYYY-MM-DD". */
-  due?: string;
-  paid?: boolean;
+// ---------- Finances (phase 4): Drive /Cortex/finance/YYYY-MM.json, saved by /api/finance and /api/ingest/finance ----------
+/** One month as the ChatGPT Finances report outputs it (docs/cortex-v2-spec.md). Checked by src/finance-lib.js. */
+export interface FinanceIncome { name: string; amount: number; /** "YYYY-MM-DD" */ date: string }
+export interface FinanceBill { name: string; amount: number; /** "YYYY-MM-DD" */ due: string; paid: boolean; category?: string }
+export interface FinanceCoverage {
+  /** Nickname plus last 4 digits at most, e.g. "Checking ...4417". */
+  account: string;
+  status: "complete" | "delayed" | "unavailable";
 }
 export interface FinanceMonth {
   /** "YYYY-MM". */
   month: string;
-  currency: string;
-  income: FinanceItem[];
-  bills: FinanceItem[];
-  updatedAt: string;
+  periodStart: string;
+  periodEnd: string;
   source: string;
+  generatedAt: string;
+  totals: { in: number; out: number };
+  coverage: FinanceCoverage[];
+  income: FinanceIncome[];
+  bills: FinanceBill[];
+  notes?: string;
 }
+/** A saved month as /api/finance returns it: the month plus when Cortex saved it. */
+export interface SavedFinanceMonth extends FinanceMonth { savedAt: string }
+/** GET /api/finance?year=YYYY: every saved month of the year, oldest first. */
+export interface FinanceYear { year: number; months: SavedFinanceMonth[] }
 
 // ---------- News (phase 5): RSS headlines ----------
 export interface NewsItem {
@@ -217,7 +226,7 @@ export interface DemoData {
   checks(now: Date, titles: string[]): ChecksResponse;
   calendar(from: Date, to: Date): CalendarResponse;
   weather(today: Date): WeatherResult;
-  finances(today: Date): FinanceMonth;
+  finances(today: Date): FinanceYear;
   news(now: Date): NewsItem[];
   ops(now: Date): OpsResponse;
   playlist: DemoTrack[];
