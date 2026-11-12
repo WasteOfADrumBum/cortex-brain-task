@@ -1,0 +1,11 @@
+{
+  "projects": [
+    { "name": "Cortex", "repo": "WasteOfADrumBum/cortex-brain-task", "url": "https://cortex-brain-nu.vercel.app" },
+    { "name": "OneSmallUI", "repo": "WasteOfADrumBum/one-small-ui", "url": "https://one-small-ui.vercel.app", "npm": "@onesmall/ui" },
+    { "name": "Portfolio", "repo": "WasteOfADrumBum/joshsmall-site", "url": "https://onesmall.company" },
+    { "name": "One Small Studio", "repo": "WasteOfADrumBum/one-small-studio", "url": "https://studio.onesmall.company" },
+    { "name": "One Small Photo", "repo": "WasteOfADrumBum/one-small-photography", "url": "https://photo.onesmall.company" },
+    { "name": "ModsPack", "repo": "WasteOfADrumBum/one-small-mods-pack", "url": "https://one-small-mods-pack.vercel.app", "npm": "one-small-modspack" },
+    { "name": "Engineering Hub", "repo": "WasteOfADrumBum/one-small-engineering", "url": null }
+  ]
+}

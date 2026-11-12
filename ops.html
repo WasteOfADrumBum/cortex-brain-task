@@ -23,8 +23,36 @@
   <main id="main" class="page ops">
     <div class="page-head">
       <h1>Ops</h1>
-      <p class="page-lede">Is everything I run healthy, and what shipped. Project cards with deploys and pull requests are coming later; for now this tab checks the Second Brain.</p>
+      <p class="page-lede">Is everything I run healthy, and what shipped: each project's live deploy and latest pull requests, then the Second Brain checks.</p>
     </div>
+
+    <section class="panel totals-panel" aria-labelledby="h-totals">
+      <h2 class="panel-title" id="h-totals">Shipping at a glance</h2>
+      <ul class="totals" id="ops-totals"><li class="panel-note">Loading projects…</li></ul>
+      <p class="panel-note" id="ops-note" hidden></p>
+    </section>
+
+    <section class="projects" aria-labelledby="h-projects">
+      <h2 class="sub-title" id="h-projects">Projects</h2>
+      <ul class="project-cards" id="ops-cards"></ul>
+    </section>
+
+    <section class="panel ships-panel" aria-labelledby="h-ships">
+      <h2 class="panel-title" id="h-ships">Merged pull requests per week</h2>
+      <p class="sub-line">The last 12 weeks, all projects together. The table splits them by project.</p>
+      <div class="activity" id="ships"></div>
+      <p class="activity-caption" id="ships-caption"></p>
+      <details class="data-table" id="ships-table-wrap" hidden>
+        <summary>Show as a table</summary>
+        <div class="table-scroll" tabindex="0" role="region" aria-labelledby="ships-table-caption">
+          <table id="ships-table">
+            <caption id="ships-table-caption">Merged pull requests per week, by project</caption>
+            <thead></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </details>
+    </section>
 
     <div class="ops-grid">
       <section class="panel checklist-panel" aria-labelledby="h-check">

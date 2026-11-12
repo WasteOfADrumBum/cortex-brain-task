@@ -1,5 +1,6 @@
-// Cortex Ops: the Second Brain checklist (health checks from Todoist, inbox from Drive), recent note activity and Drive storage.
-// Project cards, deploys and pull requests are on the roadmap (ROADMAP.md).
+// Cortex Ops: project cards (live deploy, open and latest merged pull requests, npm version) from /api/ops, the
+// shipping totals and 12-week chart, then the Second Brain checklist (health checks from Todoist, inbox from Drive),
+// recent note activity and Drive storage.
 (() => {
   const CFG = window.CORTEX_CONFIG;
   const $ = (id) => document.getElementById(id);
@@ -14,6 +15,94 @@
     warn: ["⚠", "Warning"],
     later: ["…", "Not set up yet"],
   };
+
+  // ---------- Projects from /api/ops (GitHub and npm, same dashboard key as the Planner) ----------
+  // Deploy state is a word plus an icon; the icon colour only repeats it.
+  const DEPLOY = {
+    healthy: ["✓", "Healthy", "yes"],
+    building: ["…", "Building", "unknown"],
+    failed: ["✗", "Failed", "no"],
+    unknown: ["?", "Can't tell", "later"],
+    none: ["–", "No deploys", "later"],
+  };
+  const plural = (n, word) => `${n} ${word}${n === 1 ? "" : "s"}`;
+  const day = (iso) => new Date(iso).toLocaleDateString([], { month: "short", day: "numeric" });
+
+  async function loadOps() {
+    if (Demo.on) { renderOps({ body: (await Demo.data()).ops(new Date()) }); return; }
+    let key = "";
+    try { key = localStorage.getItem("dashKey") || ""; } catch { /* storage blocked */ }
+    let res = null, body = null;
+    try { res = await fetch("/api/ops", { headers: key ? { "x-dash-key": key } : {} }); } catch { /* offline */ }
+    try { body = await res?.json(); } catch { /* not JSON */ }
+    renderOps(!res ? { message: "Couldn't reach GitHub (offline or blocked)." }
+      : res.status === 401 ? { message: key ? "Your dashboard key wasn't accepted. Open the Planner to enter it again." : "Open the Planner once and enter your dashboard key so Cortex can read your projects." }
+      : res.status === 404 ? { message: "The Ops route isn't deployed yet." }
+      : !res.ok || !body ? { message: `Projects unavailable: ${body?.error || `error ${res.status}`}.` }
+      : { body });
+  }
+
+  function card(p) {
+    const [icon, word, cls] = DEPLOY[p.deploy ? p.deploy.state : "none"];
+    const deployLine = p.error ? esc(p.error)
+      : p.deploy ? `${p.deploy.at ? `Deployed ${esc(Brain.ago(p.deploy.at))}` : "Deployed"}${p.deploy.message ? `: ${esc(p.deploy.message)}` : ""}`
+      : "This project has no live site.";
+    const facts = p.error ? [] : [
+      `${plural(p.openPrs ?? 0, "open pull request")}`,
+      `${plural(p.failedLast7Days ?? 0, "failed deploy")} in the last 7 days`,
+    ];
+    if (p.npm) facts.push(`npm ${p.npm.name} ${p.npm.version ? `v${p.npm.version}` : "(version unavailable)"}`);
+    const prs = p.mergedPrs.map((pr) => `<li>
+        <a href="${esc(pr.url)}" target="_blank" rel="noopener">${esc(pr.title)}<span class="visually-hidden"> (opens in a new tab)</span></a>
+        <span class="pr-meta">merged ${esc(day(pr.mergedAt))}</span>
+        ${pr.summary ? `<span class="pr-summary">${esc(pr.summary)}</span>` : ""}
+      </li>`).join("");
+    const name = p.url
+      ? `<a href="${esc(p.url)}" target="_blank" rel="noopener">${esc(p.name)}<span class="visually-hidden"> (live site, opens in a new tab)</span></a>`
+      : esc(p.name);
+    return `<li class="panel project-card">
+      <h3 class="project-name">${name}</h3>
+      <p class="project-state check-${cls}"><span class="check-icon" aria-hidden="true">${icon}</span><span><strong>${word}.</strong> ${deployLine}</span></p>
+      ${facts.length ? `<p class="project-facts">${facts.map(esc).join(" · ")}</p>` : ""}
+      ${prs ? `<h4 class="project-sub">Last merged</h4><ul class="pr-list">${prs}</ul>` : p.error ? "" : '<p class="panel-note">No merged pull requests yet.</p>'}
+      <p class="panel-link"><a href="https://github.com/${esc(p.repo)}" target="_blank" rel="noopener">Open on GitHub<span class="visually-hidden"> (opens in a new tab)</span></a></p>
+    </li>`;
+  }
+
+  function renderOps(model) {
+    const note = $("ops-note");
+    if (!model.body) {
+      $("ops-totals").innerHTML = `<li class="panel-note">${esc(model.message)}</li>`;
+      $("ops-cards").innerHTML = "";
+      $("ships-caption").textContent = "";
+      $("ships").replaceChildren();
+      $("ships-table-wrap").hidden = true;
+      note.hidden = true;
+      return;
+    }
+    const { projects, totals: t, weeks, warnings } = model.body;
+    const tile = (n, label) => `<li><span class="total-num">${n ?? "?"}</span><span class="total-label">${label}</span></li>`;
+    $("ops-totals").innerHTML = [
+      tile(t.mergedWeek, "pull requests merged this week"),
+      tile(t.mergedMonth, "merged this month"),
+      tile(t.deploysWeek, "live deploys this week"),
+      tile(t.failedWeek, "failed deploys, last 7 days"),
+    ].join("");
+    note.hidden = !warnings.length;
+    note.textContent = warnings.length ? `Some projects couldn't be read: ${warnings.join("; ")}.` : "";
+    $("ops-cards").innerHTML = projects.map(card).join("");
+
+    const names = projects.map((p) => p.name);
+    const sums = weeks.map((w) => names.reduce((n, k) => n + (w.counts[k] || 0), 0));
+    HUD.bars($("ships"), sums, [[0, day(weeks[0].start)], [6, day(weeks[6].start)], [11, "This week"]]);
+    const total = sums.reduce((a, b) => a + b, 0);
+    const peak = sums.indexOf(Math.max(...sums));
+    $("ships-caption").textContent = `${plural(total, "pull request")} merged in the last 12 weeks${total ? `. Busiest week: ${day(weeks[peak].start)} with ${sums[peak]}.` : "."}`;
+    const table = $("ships-table");
+    table.tHead.innerHTML = `<tr><th scope="col">Week of</th>${names.map((n) => `<th scope="col">${esc(n)}</th>`).join("")}<th scope="col">Total</th></tr>`;
+    table.tBodies[0].innerHTML = weeks.map((w, i) => `<tr><th scope="row">${esc(day(w.start))}</th>${names.map((n) => `<td>${w.counts[n] || 0}</td>`).join("")}<td>${sums[i]}</td></tr>`).reverse().join("");
+    $("ships-table-wrap").hidden = false;
+  }
 
   // ---------- Health checks from Todoist ----------
   // Each automation completes a Todoist task when it runs ("Brain sweep ran", "Muse check ran"; config.js healthChecks).
@@ -135,7 +224,11 @@
     storage: true,
     onUpdate(state) {
       // Todoist is read only once signed in (or in the demo).
-      if (state.auth === "in" && !started) { started = true; loadChecks(); setInterval(loadChecks, 10 * 60000); }
+      if (state.auth === "in" && !started) {
+        started = true;
+        loadChecks(); setInterval(loadChecks, 10 * 60000);
+        loadOps(); setInterval(loadOps, 5 * 60000);
+      }
       renderChecklist(state);
       renderActivity(state);
       renderStorage(state);

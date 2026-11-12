@@ -1,27 +1,26 @@
 {
   "stateVersion": 1,
-  "revision": 3,
-  "checkpointId": "cp-cortex-hardening-axe-2026-11-11",
+  "revision": 4,
+  "checkpointId": "cp-cortex-phase-3-ops-2026-11-12",
   "projectId": "cortex",
   "repository": "https://github.com/WasteOfADrumBum/cortex-brain-task",
   "hub": "https://github.com/WasteOfADrumBum/one-small-engineering",
   "recorded": {
-    "branch": "claude/hardening-axe",
-    "commit": "842d1e43e81a96dd787c7859c5b70b96e3441815",
-    "recordedAt": "2026-11-11T13:08:00Z"
+    "branch": "claude/phase-3-ops",
+    "commit": "184a0f27daad029c846ff137618e80686f419ac0",
+    "recordedAt": "2026-11-12T01:15:41Z"
   },
   "development": {
-    "milestone": "Cortex 1.0 (maintenance)",
+    "milestone": "Cortex v2 (after 1.0)",
     "activeTask": null,
-    "workingBranch": "claude/hardening-axe",
+    "workingBranch": "claude/phase-3-ops",
     "activePr": null,
     "lastCompleted": [
-      "Cortex 1.0 approved by Joshua Small (hub PRs #187, #188)",
-      "Constant-time dashboard key check (api/_key.js) with a test",
-      "axe scan of every /demo tab in CI (npm run check:a11y), part of CI gate"
+      "Hardening: constant-time key and axe in CI (PR #38)",
+      "Phase 3 Ops tab: /api/ops, project cards, totals, 12-week chart, Home Ops panel, demo data"
     ],
     "inProgress": [],
-    "nextAction": "Merge the hardening PR once CI gate is green; then record the axe evidence in the hub registry (clears missing evidence)."
+    "nextAction": "Merge the phase 3 PR once CI gate (tests + axe on /demo/ops) is green; then start phase 4 (Finances ingest and views)."
   },
   "decisions": {
     "made": [
@@ -53,10 +52,12 @@
       "tool": "Claude Code",
       "model": null
     },
-    "checkpointedAt": "2026-11-11T13:08:00Z",
+    "checkpointedAt": "2026-11-12T01:15:41Z",
     "unfinished": [],
-    "blockers": [],
-    "continuation": "If the axe job reports violations, fix them in this PR before merging.",
+    "blockers": [
+      "Live Ops data needs GITHUB_TOKEN set in Vercel by the owner (read-only fine-grained token)"
+    ],
+    "continuation": "Merge the phase 3 PR once CI gate (tests + axe on /demo/ops) is green; then start phase 4 (Finances ingest and views).",
     "uncommittedWorkOutsideCheckpoint": "none",
     "persistedBy": "local-file"
   },

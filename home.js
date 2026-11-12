@@ -121,6 +121,21 @@
     show({ body });
   }
 
+  // ---------- Ops health (desktop Home): the Ops tab's route and the same dashboard key ----------
+  async function loadOps() {
+    if (Demo.on) { HomeDesk.ops({ body: (await Demo.data()).ops(new Date()) }); return; }
+    let key = "";
+    try { key = localStorage.getItem("dashKey") || ""; } catch { /* storage blocked */ }
+    let res = null, body = null;
+    try { res = await fetch("/api/ops", { headers: key ? { "x-dash-key": key } : {} }); } catch { /* offline */ }
+    try { body = await res?.json(); } catch { /* not JSON */ }
+    HomeDesk.ops(!res ? { message: "Couldn't reach GitHub (offline or blocked)." }
+      : res.status === 401 ? { message: "Enter your dashboard key in Top 3 to see your projects." }
+      : res.status === 404 ? { message: "The Ops route isn't deployed yet." }
+      : !res.ok || !body ? { message: `Projects unavailable: ${body?.error || `error ${res.status}`}.` }
+      : { body });
+  }
+
   // One failing source shows its own message here and leaves the rest of Home alone.
   async function loadSchedule() {
     const day = Brain.startOfDay(new Date());
@@ -168,7 +183,7 @@
     }
     input.value = "";
     $("d-key-err").textContent = "Checking the key…";
-    await Promise.all([loadSchedule(), loadTasks()]);
+    await Promise.all([loadSchedule(), loadTasks(), loadOps()]);
     // Accepted: the form is gone, so move focus to the Top 3 heading instead of losing it.
     if ($("d-key-form").hidden) $("d-h-pri").focus();
     else input.focus();
@@ -209,7 +224,7 @@
     ["/finances", "Finances", "This month in detail, plus the year", "Coming later"],
     ["/news", "News", "Headlines by category", "Coming later"],
     ["/vault", "Vault", "Notes you can understand and find", ""],
-    ["/ops", "Ops", "Is everything healthy, and what shipped", "Project cards coming later"],
+    ["/ops", "Ops", "Is everything healthy, and what shipped", ""],
   ];
   function renderGoto() {
     $("goto").innerHTML = TABS.map(([href, label, job, soon]) => `
@@ -243,8 +258,9 @@
     Weather.refresh(wxHost).then(forecastLink);
     loadSchedule();
     loadTasks();
+    loadOps();
     setInterval(() => Weather.refresh(wxHost), 15 * 60000);
-    setInterval(() => { loadSchedule(); loadTasks(); }, 10 * 60000);
+    setInterval(() => { loadSchedule(); loadTasks(); loadOps(); }, 10 * 60000);
   }
   Brain.boot({
     onUpdate(state) {
