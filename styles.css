@@ -146,6 +146,23 @@ button, input { font: inherit; color: inherit; }
 .goto-panel { grid-column: span 12; }
 .ops-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: var(--gap); align-items: start; }
 .checklist-panel { grid-row: span 2; }
+.totals-panel, .ships-panel, .projects { margin-bottom: var(--gap); }
+.totals { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: var(--gap); }
+.totals li { display: flex; flex-direction: column; gap: 2px; }
+.total-num { font-family: var(--font-display); font-size: 28px; font-weight: 800; color: #f2fcff; }
+.total-label { color: var(--muted); }
+.project-cards { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr)); gap: var(--gap); }
+.project-name { font-family: var(--font-display); font-size: 15px; letter-spacing: 0.06em; margin: 0 0 10px; }
+.project-name a { display: inline-flex; align-items: center; min-height: 32px; }
+.project-state { display: flex; gap: 10px; align-items: flex-start; }
+.project-state .check-icon { flex: none; }
+.project-facts { margin-top: 8px; color: var(--muted); }
+.project-sub { margin: 14px 0 6px; font-family: var(--font-display); font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--muted); }
+.pr-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.pr-list li { display: flex; flex-direction: column; }
+.pr-list a { font-weight: 700; min-height: 24px; }
+.pr-meta { font-family: var(--font-mono); font-size: 12px; color: var(--muted); }
+.pr-summary { color: var(--text); font-size: 15px; }
 .soon-panel { max-width: 1100px; }
 @media (max-width: 900px) {
   .schedule-panel, .brain-panel { grid-column: span 12; }

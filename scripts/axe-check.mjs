@@ -1,6 +1,6 @@
 // Accessibility check: serves this folder the way Vercel does (test/routes.js reads vercel.json), opens every
 // /demo tab in Chromium and runs axe-core with the WCAG 2.0-2.2 A and AA rules. The demo uses sample data and
-// needs no sign-in, so it covers every tab's real markup. Exits 1 on any violation.
+// needs no sign-in, so it covers every tab's real markup. Exits 1 on any violation or any script error on a page.
 // Usage: npm run check:a11y   (CI installs Chromium with `npx playwright install --with-deps chromium`)
 import { createServer } from "node:http";
 import { readFileSync } from "node:fs";
@@ -29,14 +29,20 @@ let failed = 0;
 try {
   for (const viewport of [{ width: 1280, height: 800 }, { width: 390, height: 844 }]) {
     const page = await browser.newPage({ viewport });
+    /** @type {string[]} */
+    const errors = [];
+    page.on("pageerror", (e) => errors.push(e.message));
     for (const p of pages) {
+      errors.length = 0;
       await page.goto(base + p, { waitUntil: "networkidle" });
       await page.addScriptTag({ content: axeSource });
       const { violations } = await page.evaluate(() =>
         // @ts-ignore axe is injected above
         window.axe.run(document, { runOnly: { type: "tag", values: ["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"] } }));
       const label = `${p} at ${viewport.width}px`;
-      if (!violations.length) { console.log(`ok   ${label}`); continue; }
+      // A script error can leave a tab half drawn and still pass axe, so it fails the check too.
+      if (errors.length) { failed += errors.length; console.log(`FAIL ${label}: script error: ${errors.join("; ")}`); }
+      if (!violations.length) { if (!errors.length) console.log(`ok   ${label}`); continue; }
       failed += violations.length;
       console.log(`FAIL ${label}`);
       for (const v of violations) console.log(`  ${v.id} (${v.impact}): ${v.help}\n    ${v.nodes.slice(0, 3).map((n) => n.target.join(" ")).join("\n    ")}`);

@@ -13,7 +13,7 @@ Six tabs in the shared top bar, one clean URL each (`vercel.json` turns on `clea
 | Finances | `/finances` | Coming later ([roadmap](ROADMAP.md)); the tab shows what it will hold |
 | News | `/news` | Coming later ([roadmap](ROADMAP.md)); the tab shows what it will hold |
 | Vault | `/vault` | Every note with its title and one-line summary (frontmatter `name` and `description`), type tag, filters, search and an in-app reader |
-| Ops | `/ops` | Second Brain checklist (sweep and Muse check from Todoist), notes changed over 30 days (with a table view), Drive storage. Project cards are on the [roadmap](ROADMAP.md) |
+| Ops | `/ops` | A card per project in `config/ops.json` (live deploy state, last deploy, open PRs, failed deploys in 7 days, last 3 merged PRs, npm version), shipping totals, merged PRs per week for 12 weeks (with a table view), then the Second Brain checklist (sweep and Muse check from Todoist), notes changed over 30 days and Drive storage |
 
 Every Home panel has a plain heading and ends with a link to the place that has the detail. Each source fails on its own: a broken weather or calendar feed shows a message in its own panel.
 
@@ -45,6 +45,7 @@ Set these in Vercel (Project → Settings → Environment Variables); `.env.exam
 - `TODOIST_TOKEN`: Todoist → Settings → Integrations → Developer → API token
 - `GCAL_ICS_URLS`: each Google Calendar's "Secret address in iCal format", comma-separated. Anyone with one of these URLs can read that calendar.
 - `DASH_KEY`: any long random string. The planner asks for it once per device and remembers it there.
+- `GITHUB_TOKEN` (for Ops): a fine-grained, read-only GitHub token limited to the repos in `config/ops.json`, with Metadata, Contents, Deployments and Pull requests set to read. Without it GitHub allows 60 calls an hour, which Ops can use up.
 
 Google's iCal feed can lag your live calendar by minutes to a few hours.
 
@@ -69,6 +70,7 @@ Google's iCal feed can lag your live calendar by minutes to a few hours.
 | `drive.js` | Read-only Google Drive access |
 | `weather.js` | Weather from Open-Meteo |
 | `api/tasks.js` | Todoist tasks, labels, projects and sections for the Planner and Home (needs `DASH_KEY`) |
+| `api/ops.js` | Ops project cards, totals and 12-week chart from GitHub (production deployments Vercel reports, pull requests) and npm; cached 5 minutes (needs `DASH_KEY`; `GITHUB_TOKEN` recommended) |
 | `api/checks.js` | Ops checklist health checks: the newest completion of "Brain sweep ran" and "Muse check ran" in the last 7 days, from Todoist's activity log (needs `DASH_KEY`) |
 | `api/calendar.js` | Google Calendar events from iCal feeds (needs `DASH_KEY`); also used by Home's schedule |
 | `vercel.json` | Clean URLs for the tabs, `/demo` routes and their noindex header |

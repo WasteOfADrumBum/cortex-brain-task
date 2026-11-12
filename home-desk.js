@@ -236,6 +236,28 @@ const HomeDesk = (() => {
       </ul>`;
   }
 
+  // ---------- Ops health ----------
+  // model: { body: OpsResponse } from home.js, or { message }. One line per project: state word, then last deploy.
+  const ICON_BAD = '<svg class="hd-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke="#F87171" stroke-width="2.6" stroke-linecap="round"/></svg>';
+  function ops(model) {
+    const host = $("d-ops");
+    const meta = $("d-ops-meta");
+    if (!model.body) { host.innerHTML = `<p class="hd-note">${esc(model.message)}</p>`; meta.textContent = ""; return; }
+    const { projects, totals } = model.body;
+    const words = { healthy: "Healthy", building: "Building", failed: "Failed", unknown: "Can't tell" };
+    const icons = { healthy: ICON_OK, building: ICON_OPEN, failed: ICON_BAD, unknown: ICON_WARN };
+    const live = projects.filter((p) => p.deploy || p.error);
+    const failing = live.filter((p) => p.error || p.deploy.state === "failed").length;
+    meta.textContent = failing ? `${failing} need${failing === 1 ? "s" : ""} a look` : "All healthy";
+    host.innerHTML = `
+      <p class="hd-big">${totals.mergedWeek} PR${totals.mergedWeek === 1 ? "" : "s"} merged <span class="hd-accent">this week</span></p>
+      <ul class="hd-checks">${live.map((p) => {
+        const st = p.error ? "unknown" : p.deploy.state;
+        const when = p.error ? p.error : p.deploy.at ? `deployed ${Brain.ago(p.deploy.at)}` : "";
+        return `<li>${icons[st]}<span><strong>${esc(p.name)}</strong>: ${words[st]}${when ? `, ${esc(when)}` : ""}</span></li>`;
+      }).join("")}</ul>`;
+  }
+
   // ---------- Now playing (Spotify embed) ----------
   // The demo has no Spotify embed (that would be a real playlist): a same-size sample player whose controls show "Demo only".
   async function demoMusic() {
@@ -318,5 +340,5 @@ const HomeDesk = (() => {
 
   music();
   links();
-  return { tick, schedule, tasks, brain, bindWeather };
+  return { tick, schedule, tasks, brain, ops, bindWeather };
 })();

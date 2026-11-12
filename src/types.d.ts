@@ -108,6 +108,66 @@ export interface WeatherData {
 }
 export interface WeatherResult { data: WeatherData; units: "fahrenheit" | "celsius" }
 
+// ---------- Ops (phase 3): GET /api/ops ----------
+/** Production deploy state, shown as a word and an icon, never colour alone. */
+export type DeployState = "healthy" | "building" | "failed" | "unknown";
+export interface OpsPr {
+  title: string;
+  mergedAt: string;
+  /** First line of the PR description ("" when it has none). */
+  summary: string;
+  url: string;
+}
+export interface OpsDeploy {
+  state: DeployState;
+  /** ISO date-time of the newest status. */
+  at: string | null;
+  /** First line of the deployed commit's message. */
+  message: string;
+  url: string | null;
+}
+export interface OpsProject {
+  name: string;
+  /** "owner/name" on GitHub. */
+  repo: string;
+  /** The live site, or null when the project has none. */
+  url: string | null;
+  /** null when the repo has no production deploys. */
+  deploy: OpsDeploy | null;
+  /** Newest first, at most 3. */
+  mergedPrs: OpsPr[];
+  openPrs: number | null;
+  failedLast7Days: number | null;
+  /** Present when the project ships an npm package; version is null when the registry can't be read. */
+  npm: { name: string; version: string | null } | null;
+  /** Why the card has no GitHub data. */
+  error?: string;
+}
+export interface OpsWeek {
+  /** Monday of the week, "YYYY-MM-DD" (UTC). */
+  start: string;
+  /** Merged PRs that week per project name. */
+  counts: Record<string, number>;
+}
+export interface OpsTotals {
+  /** Since Monday (UTC). */
+  mergedWeek: number;
+  /** Since the 1st of this month (UTC). */
+  mergedMonth: number;
+  /** Production deploys since Monday. */
+  deploysWeek: number;
+  /** Failed production deploys in the last 7 days; null when a project couldn't be read. */
+  failedWeek: number | null;
+}
+export interface OpsResponse {
+  generatedAt: string;
+  projects: OpsProject[];
+  totals: OpsTotals;
+  /** The last 12 weeks, oldest first. */
+  weeks: OpsWeek[];
+  warnings: string[];
+}
+
 // ---------- Finances (phase 4): Drive finance/YYYY-MM.json ----------
 export interface FinanceItem {
   name: string;
@@ -159,5 +219,6 @@ export interface DemoData {
   weather(today: Date): WeatherResult;
   finances(today: Date): FinanceMonth;
   news(now: Date): NewsItem[];
+  ops(now: Date): OpsResponse;
   playlist: DemoTrack[];
 }

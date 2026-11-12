@@ -7,6 +7,7 @@ import { calendar } from "./calendar.js";
 import { weather } from "./weather.js";
 import { finances } from "./finances.js";
 import { news } from "./news.js";
+import { ops } from "./ops.js";
 
 /** @type {import("../types").DemoTrack[]} */
 const playlist = [
@@ -16,5 +17,5 @@ const playlist = [
 ];
 
 /** @type {import("../types").DemoData} */
-const demo = { notes, storage, tasks, checks, calendar, weather, finances, news, playlist };
+const demo = { notes, storage, tasks, checks, calendar, weather, finances, news, ops, playlist };
 export default demo;
