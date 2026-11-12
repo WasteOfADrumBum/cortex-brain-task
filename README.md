@@ -11,7 +11,7 @@ Six tabs in the shared top bar, one clean URL each (`vercel.json` turns on `clea
 | Home | `/` | Today strip (date, time, weather with today's high and low), today's schedule with the largest open block, Second Brain summary, links to every tab and your quick links |
 | Planner | `/planner` | Tasks, today, this week and this month (see below) |
 | Finances | `/finances` | This month (in, out, net, bills by due date with overdue called out in words, money in), this year (one row per month, expandable), when the numbers were last saved, and **Update finances**: paste the JSON from the ChatGPT Finances report, check it, then save it to Drive |
-| News | `/news` | Coming later ([roadmap](ROADMAP.md)); the tab shows what it will hold |
+| News | `/news` | Headlines from the free RSS feeds in `config/news-feeds.json`, one section per category, with a filter bar (All, Work, Life, each category). Broken feeds are skipped and named. Home shows the newest 3 Work headlines |
 | Vault | `/vault` | Every note with its title and one-line summary (frontmatter `name` and `description`), type tag, filters, search and an in-app reader |
 | Ops | `/ops` | A card per project in `config/ops.json` (live deploy state, last deploy, open PRs, failed deploys in 7 days, last 3 merged PRs, npm version), shipping totals, merged PRs per week for 12 weeks (with a table view), then the Second Brain checklist (sweep and Muse check from Todoist), notes changed over 30 days and Drive storage |
 
@@ -27,7 +27,7 @@ Every Home panel has a plain heading and ends with a link to the place that has 
 - Anything that would change data (Link Drive, weather location, Edit quick links, the music player) shows a "Demo only" message instead. Mark new write controls with `data-write="<what it does>"` and the demo handles them.
 - The demo never calls Drive, Todoist, Google Calendar or the weather service, and replaces your name, quick links, routines, weather place and playlist from `config.js`.
 - `vercel.json` rewrites the demo routes to the real pages and sends `X-Robots-Tag: noindex`. There is no sitemap. The old `/?demo=1` link redirects to `/demo`.
-- Sample data lives in `src/demo/`. It uses the same TypeScript types as the real data (`src/types.d.ts`); `npm test` type-checks the demo data and the `/api` routes against them, so the two can't drift apart. News sample data is ready for when that tab is built.
+- Sample data lives in `src/demo/`. It uses the same TypeScript types as the real data (`src/types.d.ts`); `npm test` type-checks the demo data and the `/api` routes against them, so the two can't drift apart. 
 
 ## Planner (At a glance)
 
@@ -59,7 +59,7 @@ Google's iCal feed can lag your live calendar by minutes to a few hours.
 | `vault.html`, `vault.js` | Vault tab |
 | `ops.html`, `ops.js` | Ops tab |
 | `finances.html`, `finances.js` | Finances tab (paste import uses `src/finance-lib.js`, the same rules as the save routes) |
-| `news.html`, `tab.js` | Placeholder tab |
+| `news.html`, `news.js` | News tab |
 | `planner.html`, `planner.css`, `planner.js` | Planner tab |
 | `header.js` | Shared top bar and tab menu |
 | `brain.js` | Shared sign-in screen, Drive link, note types, titles and summaries |
@@ -74,6 +74,7 @@ Google's iCal feed can lag your live calendar by minutes to a few hours.
 | `weather.js` | Weather from Open-Meteo |
 | `api/tasks.js` | Todoist tasks, labels, projects and sections for the Planner and Home (needs `DASH_KEY`) |
 | `api/ops.js` | Ops project cards, totals and 12-week chart from GitHub (production deployments Vercel reports, pull requests) and npm; cached 5 minutes (needs `DASH_KEY`; `GITHUB_TOKEN` recommended) |
+| `api/news.js` | News headlines from `config/news-feeds.json` (RSS and Atom parsed by `src/news-lib.js`), cached 30 minutes (needs `DASH_KEY`). `npm run check:feeds` lists which feeds work; CI runs it for information only |
 | `api/finance.js` | Finances: GET a year of saved months, POST a pasted month (needs `DASH_KEY` and the Drive variables) |
 | `api/ingest/finance.js` | Finance ingest for automation: POST one month with `Authorization: Bearer <CORTEX_INGEST_TOKEN>`; 422 names a bad field, 20 calls an hour |
 | `api/_drive.js`, `api/_finance-store.js` | Drive access with the `drive.file` scope; months saved as `/Cortex/finance/YYYY-MM.json` with the replaced copy as `.prev.json`, and a counts-only log in `/Cortex/logs/` |

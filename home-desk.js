@@ -285,6 +285,18 @@ const HomeDesk = (() => {
       </ul>`;
   }
 
+  // ---------- Headlines: the newest 3 from Home's groups (Work) ----------
+  function news(model) {
+    const host = $("d-news");
+    $("d-news-meta").textContent = "";
+    if (!model.body) { host.innerHTML = `<p class="hd-note">${esc(model.message)}</p>`; return; }
+    const top = model.body.items.filter((i) => model.body.homeGroups.includes(i.group)).slice(0, 3);
+    host.innerHTML = top.length ? `<ul class="hd-news">${top.map((i) => `<li>
+        <a href="${esc(i.url)}" target="_blank" rel="noopener">${esc(i.title)}<span class="visually-hidden"> (opens in a new tab)</span></a>
+        <span class="hd-news-meta">${esc(i.source)} · ${esc(Brain.ago(i.publishedAt))}</span></li>`).join("")}</ul>`
+      : '<p class="hd-note">No headlines right now.</p>';
+  }
+
   // ---------- Now playing (Spotify embed) ----------
   // The demo has no Spotify embed (that would be a real playlist): a same-size sample player whose controls show "Demo only".
   async function demoMusic() {
@@ -367,5 +379,5 @@ const HomeDesk = (() => {
 
   music();
   links();
-  return { tick, schedule, tasks, brain, ops, money, bindWeather };
+  return { tick, schedule, tasks, brain, ops, money, news, bindWeather };
 })();

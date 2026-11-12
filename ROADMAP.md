@@ -4,13 +4,13 @@ Cortex 1.0 is what is live today: Home, Planner, Vault, the Ops Second Brain che
 
 Done in 1.0: spec phases 1 (tabs, routes and cleanup) and 2 (demo mode), plus the Vault list, reader and search from phase 5.
 
-Done since 1.0: spec phases 3 (Ops project cards) and 4 (Finances), see below.
+Done since 1.0: spec phases 3 (Ops project cards), 4 (Finances) and the News part of 5, see below.
 
 ## Next
 
 1. Done 2026-11-12: **Ops project cards** (spec phase 3): `config/ops.json`, `/api/ops`, a card per project with health, last deploy and the last 3 PRs, a totals strip, a 12-week shipping chart and the Home Ops panel. Health comes from the production deployments Vercel reports to GitHub, so no Vercel token is needed. Live data needs `GITHUB_TOKEN` in Vercel (read-only).
 2. Done 2026-11-12: **Finances** (spec phase 4): the This month and Year views, paste-in import of the ChatGPT Finances JSON saved to Drive, the authenticated ingest endpoint with its schema, account-number guard and rate limit, and the Home Money panel. Saving needs the Drive variables in Vercel (README); the endpoint is ready for the email automation once the open question below is answered.
-3. **News** (spec phase 5): an RSS route, the News tab by category and the Home Headlines panel.
+3. Done 2026-11-12: **News** (spec phase 5): an RSS route, the News tab by category and the Home Headlines panel. Enterprise AI and Small Business & SaaS are left out until their sources are chosen (open question below). The Vault type legend also waits on its wording.
 4. **Assistant** (spec phase 6): the daily Claude briefing written to Drive, rule-based Top 3, an approvals inbox for Todoist and Calendar with an allowlist, audit log and undo.
 
 ## Open questions for Joshua (needed before the matching item)

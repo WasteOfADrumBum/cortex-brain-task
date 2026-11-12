@@ -164,6 +164,13 @@ button, input { font: inherit; color: inherit; }
 .pr-meta { font-family: var(--font-mono); font-size: 12px; color: var(--muted); }
 .pr-summary { color: var(--text); font-size: 15px; }
 .soon-panel { max-width: 1100px; }
+.news-bar { margin-bottom: var(--gap); }
+.chip[aria-pressed="true"] { background: rgba(67, 217, 255, 0.18); border-color: var(--cyan); color: #f2fcff; }
+.news-section { margin-bottom: var(--gap); }
+.news-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+.news-list li { display: flex; flex-direction: column; }
+.news-list a { font-weight: 700; min-height: 24px; }
+.news-meta { font-family: var(--font-mono); font-size: 12px; color: var(--muted); }
 .fin-bar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--gap); margin-bottom: var(--gap); }
 .fin-month, .fin-year { margin-bottom: var(--gap); }
 .fin-table { width: 100%; border-collapse: collapse; font-size: 15px; }
@@ -781,6 +788,10 @@ body { padding-bottom: calc(var(--ticker-h) + env(safe-area-inset-bottom)); }
   .hd-fc-lo { font-size: 14px; color: #a9c1d9; }
 
   /* Second brain */
+  .hd-news { display: flex; flex-direction: column; gap: 8px; margin-top: 10px; font-size: 15px; }
+  .hd-news li { display: flex; flex-direction: column; }
+  .hd-news a { font-weight: 700; min-height: 24px; }
+  .hd-news-meta { font-family: var(--font-mono); font-size: 12px; color: #a9c1d9; }
   .hd-checks { display: flex; flex-direction: column; gap: 6px; margin-top: 10px; font-size: 16px; }
   .hd-checks li { display: flex; gap: 10px; align-items: flex-start; }
   .hd-ico { flex: none; width: 16px; height: 16px; margin-top: 3px; }

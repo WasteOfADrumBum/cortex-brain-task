@@ -12,7 +12,8 @@
   "scripts": {
     "test": "tsc -p tsconfig.json && node --test test/*.test.js",
     "check:routes": "node scripts/check-routes.mjs",
-    "check:a11y": "node scripts/axe-check.mjs"
+    "check:a11y": "node scripts/axe-check.mjs",
+    "check:feeds": "node scripts/check-feeds.mjs"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",

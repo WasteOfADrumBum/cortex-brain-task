@@ -204,6 +204,18 @@ export interface NewsItem {
   group: "Work" | "Life";
   publishedAt: string;
 }
+export interface NewsCategory { name: string; group: "Work" | "Life" }
+export interface NewsResponse {
+  generatedAt: string;
+  /** In config order: one section per category. */
+  categories: NewsCategory[];
+  /** Newest first, duplicates removed, at most perCategory per category. */
+  items: NewsItem[];
+  /** Feeds that were skipped, by category and host. */
+  failed: { category: string; feed: string }[];
+  /** Groups Home's headlines come from. */
+  homeGroups: ("Work" | "Life")[];
+}
 
 // ---------- Config values the demo replaces (config.js) ----------
 export interface Launcher { label: string; code?: string; url: string }
@@ -227,7 +239,7 @@ export interface DemoData {
   calendar(from: Date, to: Date): CalendarResponse;
   weather(today: Date): WeatherResult;
   finances(today: Date): FinanceYear;
-  news(now: Date): NewsItem[];
+  news(now: Date): NewsResponse;
   ops(now: Date): OpsResponse;
   playlist: DemoTrack[];
 }

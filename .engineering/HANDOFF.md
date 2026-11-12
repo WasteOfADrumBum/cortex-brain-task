@@ -1,16 +1,16 @@
-<!-- generated from .engineering/state.json (revision 5) -->
+<!-- generated from .engineering/state.json (revision 6) -->
 
 # Handoff: cortex
 
 Read this, then **verify against GitHub** (branch head, open PRs, CI) before continuing. Nothing below is independently verified.
 
-- Checkpoint: revision 5, `cp-cortex-phase-4-finances-2026-11-12`, 2026-11-12T01:29:31Z by Claude Code
+- Checkpoint: revision 6, `cp-cortex-phase-5-news-2026-11-12`, 2026-11-12T01:36:39Z by Claude Code
 - Written by: a local edit that the agent then pushed; confirm the branch head matches
 - Uncommitted work outside this checkpoint: **none**
 
 ## Continue with
 
-Merge the phase 4 PR once CI gate is green; then phase 5 (News tab; Vault legend waits on owner wording).
+Merge the phase 5 PR once CI gate is green and the feed check log shows which feeds work; then phase 6 (Assistant).
 
 ## Unfinished
 
@@ -18,8 +18,10 @@ _none recorded_
 
 ## Blockers
 
-- Saving finances needs GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET and GOOGLE_REFRESH_TOKEN in Vercel (owner)
-- Live Ops data needs GITHUB_TOKEN in Vercel (owner)
+- Vault legend needs owner wording for digest, profile and retired
+- Two news categories need owner-chosen sources
+- Saving finances needs Google OAuth client + refresh token in Vercel
+- Live Ops data needs GITHUB_TOKEN in Vercel
 
 ## Decisions
 
