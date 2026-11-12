@@ -1,5 +1,6 @@
-// One-time setup for saving finances to Drive: prints a Google refresh token with only the drive.file scope
-// (Cortex can see and change only files it creates). Run it on your own computer, never on a server:
+// One-time setup for saving finances to Drive and for approved Calendar changes: prints a Google refresh token with
+// two scopes, drive.file (Cortex can see and change only files it creates) and calendar.events (read and change
+// events, used only when you approve a proposal). Run it on your own computer, never on a server:
 //   GOOGLE_CLIENT_ID=... GOOGLE_CLIENT_SECRET=... node scripts/get-refresh-token.mjs
 // The client must be an OAuth "Web application" client with http://localhost:53682 as an authorized redirect URI.
 // Then put GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET and the printed GOOGLE_REFRESH_TOKEN in Vercel. Treat the
@@ -12,7 +13,7 @@ const redirect = "http://localhost:53682";
 const auth = new URL("https://accounts.google.com/o/oauth2/v2/auth");
 auth.search = new URLSearchParams({
   client_id: id, redirect_uri: redirect, response_type: "code", access_type: "offline", prompt: "consent",
-  scope: "https://www.googleapis.com/auth/drive.file",
+  scope: "https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/calendar.events",
 }).toString();
 
 const server = createServer(async (req, res) => {

@@ -163,5 +163,23 @@ const Drive = (() => {
     return request(`${API}/files/${encodeURIComponent(file.id)}?alt=media&supportsAllDrives=true`, true);
   }
 
-  return { init, signIn, signOut, linked, hasSession, loadBrain, storage, searchContent, readFile, configured };
+  // Morning briefings: the Markdown files the Claude routine writes to /Cortex/briefings (docs/briefing-routine.md).
+  // Finds a "briefings" folder whose parent is named "Cortex" and returns its .md files, newest name first, with
+  // the folder's link. Returns { files: [], folder: null } when there is no such folder yet.
+  async function briefings() {
+    const dirs = await list(`name = 'briefings' and mimeType = '${FOLDER}' and trashed = false`);
+    for (const d of dirs) {
+      const parents = d.parents || [];
+      for (const p of parents) {
+        const parent = await request(`${API}/files/${encodeURIComponent(p)}?fields=name&supportsAllDrives=true`);
+        if (parent.name !== "Cortex") continue;
+        const files = (await list(`'${quote(d.id)}' in parents and trashed = false and name contains '.md'`))
+          .sort((a, b) => b.name.localeCompare(a.name));
+        return { files, folder: d };
+      }
+    }
+    return { files: [], folder: null };
+  }
+
+  return { init, signIn, signOut, linked, hasSession, loadBrain, storage, searchContent, readFile, briefings, configured };
 })();

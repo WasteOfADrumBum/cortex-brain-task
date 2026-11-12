@@ -59,7 +59,8 @@ export async function GET(request) {
     labels: t.labels || [],
     projectId: t.project_id || null,
     sectionId: t.section_id || null,
-    url: `https://app.todoist.com/app/task/${t.id}`
+    url: `https://app.todoist.com/app/task/${t.id}`,
+    updatedAt: t.updated_at || null // for the "untouched" priority rule on Home
   }));
   /** @type {import('../src/types').TasksResponse} */
   const body = {

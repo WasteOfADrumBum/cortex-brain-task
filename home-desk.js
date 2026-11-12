@@ -190,11 +190,11 @@ const HomeDesk = (() => {
     }
     if (model.message) { host.innerHTML = `<p class="hd-note">${esc(model.message)}</p>`; return; }
     const today = sod(new Date());
-    const crit = TaskRules.buckets(TaskRules.prepare(model.body).tasks, today).crit;
-    if (!crit.length) { host.innerHTML = '<p class="hd-note">Nothing critical this week. Pick something up in the Planner.</p>'; return; }
-    const top = crit.slice(0, 3);
-    host.innerHTML = `<ol class="hd-pri">${top.map((t, i) => {
-      const meta = [dueText(t, today), 5 - t.priority <= 2 ? `P${5 - t.priority}` : "", t.duration ? fmtDur(t.duration) : ""].filter(Boolean).join(" · ");
+    // Ranked by home.js with src/priorities-lib.js; the strongest rule a task met is its "why".
+    const top = model.ranked || [];
+    if (!top.length) { host.innerHTML = '<p class="hd-note">Nothing stands out today. Pick something up in the Planner.</p>'; return; }
+    host.innerHTML = `<ol class="hd-pri">${top.map(({ task: t, why, minutes }, i) => {
+      const meta = [why, dueText(t, today), minutes ? `about ${fmtDur(minutes)}` : ""].filter(Boolean).join(" · ");
       const url = t.url || `https://app.todoist.com/app/task/${encodeURIComponent(t.id)}`;
       // Topic chips are plain text; private topics (Health, Money) also replace the title with "<Topic> task".
       const chips = t.topics.length
@@ -203,7 +203,7 @@ const HomeDesk = (() => {
       return `<li class="acc-${PRI_ACCENTS[i]}"><span class="hd-pri-n" aria-hidden="true">${i + 1}</span><span class="hd-pri-text">
         <span class="hd-pri-head"><a class="hd-pri-title" href="${esc(url)}" target="_blank" rel="noopener">${esc(TaskRules.homeTitle(t))}<span class="visually-hidden"> (opens Todoist)</span></a>${chips}</span>
         <span class="hd-pri-meta">${esc(meta)}</span></span></li>`;
-    }).join("")}</ol>${crit.length > 3 ? `<p class="hd-more">${crit.length - 3} more critical in the Planner</p>` : ""}`;
+    }).join("")}</ol>${model.total > top.length ? `<p class="hd-more">${model.total - top.length} more open in the Planner</p>` : ""}`;
   }
 
   // ---------- Second brain ----------

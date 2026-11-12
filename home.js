@@ -61,6 +61,7 @@
     const all = evs.filter((e) => e.allDay && e.start < next && e.end > day);
     const timed = evs.filter((e) => !e.allDay && e.start < next && e.end > day).sort((a, b) => a.start - b.start);
     const open = largestOpen(day, timed);
+    setOpen(open ? open.mins : null);
     const upcoming = timed.filter((e) => e.end > new Date());
     HomeDesk.schedule({ timed, all, upcoming, open, note });
     const shown = upcoming.slice(0, 5);
@@ -83,13 +84,33 @@
 
   // deskText: the desktop panel's own wording, where it differs from the phone's.
   function scheduleMessage(text, deskText = text) {
+    setOpen(null);
     $("schedule-body").innerHTML = `<p class="panel-note">${esc(text)}</p>`;
     HomeDesk.schedule({ message: deskText });
   }
 
   // ---------- Top 3 priorities (desktop Home): the same tasks route and dashboard key as the Planner ----------
+  // Ranked by the rules in config/priorities.json (src/priorities-lib.js). "Fits today's largest open block" needs
+  // the schedule, so the list is ranked again when the schedule arrives.
+  let openMins = null, lastTasks = null;
+  const prio = Promise.all([
+    import("/src/priorities-lib.js"),
+    fetch("/config/priorities.json").then((r) => (r.ok ? r.json() : null)).catch(() => null),
+  ]);
+  async function show(model) {
+    lastTasks = model;
+    if (!model.body) { HomeDesk.tasks(model); return; }
+    const [{ rank }, config] = await prio;
+    const tasks = TaskRules.prepare(model.body).tasks;
+    const today = Brain.startOfDay(new Date());
+    HomeDesk.tasks({ ...model, ranked: rank(tasks, { today, now: new Date(), openMinutes: openMins, config: config || undefined }), total: tasks.length });
+  }
+  function setOpen(mins) {
+    openMins = mins;
+    if (lastTasks?.body) show(lastTasks);
+  }
+
   async function loadTasks() {
-    const show = (model) => HomeDesk.tasks(model);
     if (Demo.on) {
       const demo = await Demo.data();
       try { await TaskRules.ready(); } catch (e) { show({ message: e.message }); return; }
@@ -251,6 +272,7 @@
   const TABS = [
     ["/planner", "Planner", "Schedule, open hours and task buckets", ""],
     ["/finances", "Finances", "This month in detail, plus the year", ""],
+    ["/briefing", "Briefing", "This morning's briefing and approvals", ""],
     ["/news", "News", "Headlines by category", ""],
     ["/vault", "Vault", "Notes you can understand and find", ""],
     ["/ops", "Ops", "Is everything healthy, and what shipped", ""],
@@ -298,6 +320,7 @@
     onUpdate(state) {
       renderBrain(state);
       if (state.auth === "in" && !started) start();
+      window.HomeAssistant?.update(state);
     },
   });
 })();

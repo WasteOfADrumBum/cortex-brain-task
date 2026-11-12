@@ -1,9 +1,11 @@
 // Server-side Google Drive access for Cortex's own files, with the drive.file scope (Cortex sees only files it
-// created). Used by the finance routes. Files starting with "_" are not Vercel functions.
+// created). Used by the finance and approvals routes; the same Google token also carries the calendar.events scope
+// for approved Calendar changes (api/_gcal.js). Files starting with "_" are not Vercel functions.
 // Env: GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET (an OAuth "Web application" client) and GOOGLE_REFRESH_TOKEN
 // (made once with scripts/get-refresh-token.mjs). Nothing here is cached between instances except folder ids.
+import { UpstreamError } from './_upstream.js';
 
-export class DriveError extends Error {}
+export class DriveError extends UpstreamError {}
 
 const API = 'https://www.googleapis.com/drive/v3';
 const UPLOAD = 'https://www.googleapis.com/upload/drive/v3';
@@ -13,7 +15,8 @@ export const driveConfigured = () => !!(process.env.GOOGLE_CLIENT_ID && process.
 
 /** @type {{ token: string, until: number } | null} */
 let access = null;
-async function token() {
+/** A Google access token from the refresh token, reused until it is a minute from expiring. */
+export async function googleToken() {
   if (access && Date.now() < access.until) return access.token;
   if (!driveConfigured()) throw new DriveError('Drive saving is not set up yet (GOOGLE_REFRESH_TOKEN is missing in Vercel)');
   let res;
@@ -39,7 +42,7 @@ async function token() {
 
 /** fetch with the Drive token; throws DriveError on failure. */
 async function call(/** @type {string} */ url, /** @type {RequestInit} */ init = {}) {
-  const t = await token();
+  const t = await googleToken();
   let res;
   try {
     res = await fetch(url, { ...init, headers: { ...(init.headers || {}), authorization: `Bearer ${t}` } });

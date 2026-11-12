@@ -171,6 +171,28 @@ button, input { font: inherit; color: inherit; }
 .news-list li { display: flex; flex-direction: column; }
 .news-list a { font-weight: 700; min-height: 24px; }
 .news-meta { font-family: var(--font-mono); font-size: 12px; color: var(--muted); }
+/* Assistant: briefing text and approval cards (Briefing page and Home's briefing panel) */
+.br-summary { font-size: 17px; line-height: 1.5; margin: 0 0 10px; }
+.br-sub, .ap-sub { font-family: var(--font-display); font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); margin: 14px 0 6px; }
+.br-list { list-style: disc; padding-left: 22px; margin: 0; display: flex; flex-direction: column; gap: 4px; }
+.br-attn { margin: 0 0 8px; }
+.ap-count { font-weight: 700; margin: 8px 0; }
+.ap-count:focus { outline: 2px solid var(--cyan, #43d9ff); outline-offset: 2px; }
+.ap-blocked, .ap-note { color: #ffd58a; margin: 4px 0; }
+.ap-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+.ap-card { border: 1px solid rgba(67, 217, 255, 0.25); border-radius: 8px; padding: 10px 12px; background: rgba(4, 14, 24, 0.6); }
+.ap-card p { margin: 0 0 4px; }
+.ap-verb { font-weight: 700; }
+.ap-target { color: #e6f6ff; }
+.ap-change { font-family: var(--font-mono); font-size: 14px; }
+.ap-reason { color: #a9c1d9; }
+.ap-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+.ap-actions .btn { min-height: 44px; }
+.ap-undo { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-top: 10px; padding: 8px 10px; border: 1px dashed rgba(67, 217, 255, 0.4); border-radius: 8px; }
+.ap-undo[hidden] { display: none; }
+.ap-undo .btn { min-height: 44px; }
+.hd-sublabel { font-family: var(--font-display); font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: #a9c1d9; margin: 14px 0 6px; }
+.hd-div .hd-link + .hd-link { margin-left: 20px; }
 .fin-bar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--gap); margin-bottom: var(--gap); }
 .fin-month, .fin-year { margin-bottom: var(--gap); }
 .fin-table { width: 100%; border-collapse: collapse; font-size: 15px; }

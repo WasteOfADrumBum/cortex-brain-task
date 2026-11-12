@@ -33,6 +33,8 @@ export function tasks(today) {
       id: `demo-${i + 1}`, content, priority, due: dueOn, duration, labels, projectId, sectionId: null,
       // Demo tasks have no Todoist page, so they link to Todoist's home page.
       url: "https://todoist.com/",
+      // The case study hasn't been touched for three weeks, so the demo shows the "untouched" priority rule.
+      updatedAt: new Date(today.getTime() - (i === 7 ? 21 : 2) * 864e5).toISOString(),
     })),
     labels: ["quick", "deep", "system", "development", "photography", "music", "family", "house", "car", "health", "money", "brain"],
     projects: [{ id: "p-inbox", name: "Inbox" }, { id: "p-work", name: "Work" }, { id: "p-home", name: "Home" }],

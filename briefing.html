@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Briefing · Cortex</title>
+  <meta name="description" content="Cortex Briefing: this morning's briefing and the changes it proposes, each waiting for your approval.">
+  <meta name="theme-color" content="#04080e">
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;800&family=Rajdhani:wght@500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body data-auth="pending">
+  <a class="skip-link" href="#main">Skip to content</a>
+  <div class="backdrop" aria-hidden="true"></div>
+
+  <header class="topbar" data-page="briefing"></header>
+
+  <p class="notice" id="notice" role="alert" hidden></p>
+
+  <main id="main" class="page briefing">
+    <div class="page-head">
+      <h1>Briefing</h1>
+      <p class="page-lede">This morning's briefing from the Claude routine, and the changes it proposes. Nothing changes in Todoist or Calendar until you approve it.</p>
+    </div>
+
+    <section class="panel br-panel" aria-labelledby="h-br">
+      <h2 class="panel-title" id="h-br">Today's briefing</h2>
+      <p class="panel-note" id="br-status" role="status">Loading…</p>
+      <div id="br-body"></div>
+      <p class="panel-link" id="br-folder" hidden></p>
+    </section>
+
+    <section class="panel ap-panel" aria-labelledby="h-ap">
+      <h2 class="panel-title" id="h-ap" tabindex="-1">Approvals</h2>
+      <p class="panel-note">Cortex can add, reschedule or complete Todoist tasks and add or move Calendar events. It never deletes. Before anything runs, it checks the task or event hasn't changed since the briefing was written.</p>
+      <div id="ap-body"><p class="panel-note">Loading…</p></div>
+    </section>
+  </main>
+
+  <footer class="ticker">
+    <span>Cortex 1.0</span>
+    <span>Scope: drive.readonly</span>
+    <span id="ticker-sync">Last sync: never</span>
+  </footer>
+
+  <script src="/config.js"></script>
+  <script src="/src/demo/mode.js"></script>
+  <script src="/header.js"></script>
+  <script src="/drive.js"></script>
+  <script src="/brain.js"></script>
+  <script type="module" src="/briefing.js"></script>
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+</body>
+</html>

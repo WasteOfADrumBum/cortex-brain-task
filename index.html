@@ -194,7 +194,7 @@
         <section class="hd-panel hd-a-top3" aria-labelledby="d-h-pri">
           <div class="hd-row">
             <h2 class="hd-label" id="d-h-pri" tabindex="-1">Top 3 priorities</h2>
-            <span class="hd-meta">Critical this week</span>
+            <span class="hd-meta">Ranked by rules</span>
           </div>
           <div class="hd-body">
             <div id="d-tasks" aria-live="polite"><p class="hd-note">Loading tasks…</p></div>
@@ -219,14 +219,16 @@
 
         <section class="hd-panel hd-a-brief" aria-labelledby="d-h-brief">
           <div class="hd-row">
-            <h2 class="hd-label" id="d-h-brief">Briefing and headlines</h2>
+            <h2 class="hd-label" id="d-h-brief" tabindex="-1">Briefing and headlines</h2>
             <span class="hd-meta" id="d-news-meta"></span>
           </div>
           <div class="hd-body">
-            <p class="hd-soon">The morning briefing and approvals come with the Assistant.</p>
+            <div id="d-brief" aria-live="polite"><p class="hd-note">Loading the briefing…</p></div>
+            <div id="d-approvals"></div>
+            <h3 class="hd-sublabel">Headlines</h3>
             <div id="d-news"><p class="hd-note">Loading headlines…</p></div>
           </div>
-          <div class="hd-div"><a class="hd-link" href="/news">Open News</a></div>
+          <div class="hd-div"><a class="hd-link" href="/briefing">Open the briefing</a><a class="hd-link" href="/news">Open News</a></div>
         </section>
 
         <section class="hd-panel hd-a-ops" aria-labelledby="d-h-ops">
@@ -293,6 +295,7 @@
   <script src="/task-rules.js"></script>
   <script src="/home-desk.js"></script>
   <script src="/home.js"></script>
+  <script type="module" src="/home-assistant.js"></script>
   <script src="https://accounts.google.com/gsi/client" async defer></script>
 </body>
 </html>

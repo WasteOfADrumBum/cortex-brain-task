@@ -1,0 +1,16 @@
+{
+  "_about": "Rule weights for Home's Top 3 (src/priorities-lib.js). A task's score is the sum of the rules it meets; the strongest rule it meets is shown as the reason. Minutes are estimates for tasks with no Todoist duration.",
+  "weights": {
+    "overdue": 50,
+    "dueToday": 30,
+    "p1": 25,
+    "p2": 10,
+    "fitsBlock": 15,
+    "quickPickup": 10,
+    "untouched": 5
+  },
+  "estimates": { "quick": 30, "deep": 90 },
+  "quickMinutes": 15,
+  "bigBlockMinutes": 60,
+  "untouchedDays": 14
+}
