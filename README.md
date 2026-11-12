@@ -1,6 +1,6 @@
 # Cortex
 
-A personal command center for the Second Brain in Google Drive. Plain HTML, CSS and JavaScript with no build step, plus small Vercel functions for the planner. The browser only ever asks for read-only Drive access (`drive.readonly`) and nothing depends on a home PC. This is Cortex 1.0. What comes next is in [ROADMAP.md](ROADMAP.md), and the full build plan is in [docs/cortex-v2-spec.md](docs/cortex-v2-spec.md).
+A personal command center for the Second Brain in Google Drive. Plain HTML, CSS and JavaScript with no build step, plus small Vercel functions. The browser only ever asks for read-only Drive access (`drive.readonly`) and nothing depends on a home PC. The server can save Cortex's own files to Drive (`drive.file`) and change Todoist or Calendar, but only for a proposal the owner approves. This is Cortex 2.0; what changed is in [CHANGELOG.md](CHANGELOG.md), what comes next in [ROADMAP.md](ROADMAP.md), and the full build plan in [docs/cortex-v2-spec.md](docs/cortex-v2-spec.md).
 
 ## Tabs
 
