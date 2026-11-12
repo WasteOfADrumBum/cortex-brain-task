@@ -15,5 +15,5 @@
     // src/demo/mode.js imports the sample data by its URL on the site ("/src/demo/index.js").
     "paths": { "/src/*": ["./src/*"] }
   },
-  "include": ["src/**/*.js", "src/**/*.d.ts", "api/*.js"]
+  "include": ["src/**/*.js", "src/**/*.d.ts", "api/**/*.js"]
 }

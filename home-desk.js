@@ -258,6 +258,33 @@ const HomeDesk = (() => {
       }).join("")}</ul>`;
   }
 
+  // ---------- Money this month ----------
+  // model: { body: FinanceYear } from home.js, or { message }. In and out, bills due in 7 days, bills paid.
+  const fmtMoney = (n) => n.toLocaleString([], { style: "currency", currency: "USD", maximumFractionDigits: 0 });
+  function money(model) {
+    const host = $("d-money");
+    const meta = $("d-money-meta");
+    if (!model.body) { host.innerHTML = `<p class="hd-note">${esc(model.message)}</p>`; meta.textContent = ""; return; }
+    const now = new Date();
+    const ym = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
+    const m = model.body.months.find((x) => x.month === ym);
+    if (!m) { host.innerHTML = '<p class="hd-note">No numbers for this month yet. Paste the report in Finances.</p>'; meta.textContent = ""; return; }
+    const today = `${ym}-${String(now.getDate()).padStart(2, "0")}`;
+    const week = new Date(now.getTime() + 7 * 864e5);
+    const weekEnd = `${week.getFullYear()}-${String(week.getMonth() + 1).padStart(2, "0")}-${String(week.getDate()).padStart(2, "0")}`;
+    const unpaid = m.bills.filter((b) => !b.paid);
+    const overdue = unpaid.filter((b) => b.due < today);
+    const soon = unpaid.filter((b) => b.due >= today && b.due <= weekEnd);
+    meta.textContent = overdue.length ? `${overdue.length} overdue` : `Saved ${Brain.ago(m.savedAt)}`;
+    host.innerHTML = `
+      <p class="hd-big">In ${fmtMoney(m.totals.in)} · <span class="hd-accent">Out ${fmtMoney(m.totals.out)}</span></p>
+      <ul class="hd-checks">
+        <li>${overdue.length ? ICON_WARN : ICON_OK}<span>${overdue.length ? `Overdue: ${esc(overdue.map((b) => b.name).join(", "))}` : "No overdue bills"}</span></li>
+        <li>${soon.length ? ICON_OPEN : ICON_OK}<span>${soon.length ? `Due in 7 days: ${esc(soon.map((b) => b.name).join(", "))}` : "Nothing due in the next 7 days"}</span></li>
+        <li>${ICON_OK}<span>${m.bills.length - unpaid.length} of ${m.bills.length} bills paid</span></li>
+      </ul>`;
+  }
+
   // ---------- Now playing (Spotify embed) ----------
   // The demo has no Spotify embed (that would be a real playlist): a same-size sample player whose controls show "Demo only".
   async function demoMusic() {
@@ -340,5 +367,5 @@ const HomeDesk = (() => {
 
   music();
   links();
-  return { tick, schedule, tasks, brain, ops, bindWeather };
+  return { tick, schedule, tasks, brain, ops, money, bindWeather };
 })();
