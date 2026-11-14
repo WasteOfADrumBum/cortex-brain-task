@@ -1,16 +1,16 @@
-<!-- generated from .engineering/state.json (revision 7) -->
+<!-- generated from .engineering/state.json (revision 8) -->
 
 # Handoff: cortex
 
 Read this, then **verify against GitHub** (branch head, open PRs, CI) before continuing. Nothing below is independently verified.
 
-- Checkpoint: revision 7, `cp-2026-11-12-phase6`, 2026-11-12T01:51:20Z by Claude Code
+- Checkpoint: revision 8, `cp-2026-11-12-release-2-0-prep`, 2026-11-12T12:48:19Z by Claude Code
 - Written by: a local edit that the agent then pushed; confirm the branch head matches
 - Uncommitted work outside this checkpoint: **none**
 
 ## Continue with
 
-Merge PR for claude/phase-6-assistant once CI is green. Then Cortex is blocked on owner items (tokens, routine setup, two news categories, Vault legend).
+Joshua Small reviews the hub Cortex 2.0 release package, does the listed checks and signs off; then merge the release PR and record the approval in the hub.
 
 ## Unfinished
 
@@ -18,9 +18,8 @@ _none recorded_
 
 ## Blockers
 
-- Live data needs owner env vars in Vercel: GITHUB_TOKEN (Ops), GOOGLE_CLIENT_ID/SECRET/REFRESH_TOKEN with drive.file and calendar.events (Finances, approvals)
-- Briefing routine must be created by the owner (docs/briefing-routine.md)
-- Open questions: Enterprise AI and Small Business & SaaS news sources, Vault legend wording, briefing time
+- Release approval belongs to Joshua Small
+- Live checks of Finances saving, approvals and Ops data need his Google token (drive.file, calendar.events) and GITHUB_TOKEN in Vercel, and the briefing routine set up
 
 ## Decisions
 

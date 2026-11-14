@@ -1,25 +1,25 @@
 {
   "stateVersion": 1,
-  "revision": 7,
-  "checkpointId": "cp-2026-11-12-phase6",
+  "revision": 8,
+  "checkpointId": "cp-2026-11-12-release-2-0-prep",
   "projectId": "cortex",
   "repository": "https://github.com/WasteOfADrumBum/cortex-brain-task",
   "hub": "https://github.com/WasteOfADrumBum/one-small-engineering",
   "recorded": {
-    "branch": "claude/phase-6-assistant",
-    "commit": "273adf181ff819a4295efdd8cc856831571c76b7",
-    "recordedAt": "2026-11-12T01:51:20Z"
+    "branch": "claude/release-2.0.0",
+    "commit": "8772de53e303b81f5668fe0d3091b3a52439eeda",
+    "recordedAt": "2026-11-12T12:48:19Z"
   },
   "development": {
     "milestone": "Cortex v2 (after 1.0)",
     "activeTask": null,
-    "workingBranch": "claude/phase-6-assistant",
+    "workingBranch": "claude/release-2.0.0",
     "activePr": null,
     "lastCompleted": [
-      "Spec phase 6 Assistant: briefing reader (Home and /briefing), rule-based Top 3, approvals inbox with allowlist, stale check, audit log and 10-second undo, docs/briefing-routine.md. npm test 52/52 locally; axe runs in CI."
+      "Cortex 2.0.0 release prep: CHANGELOG, version 2.0.0, footer and docs on branch claude/release-2.0.0; hub release package and registry record prepared. npm test 52/52 locally."
     ],
     "inProgress": [],
-    "nextAction": "Merge PR for claude/phase-6-assistant once CI is green. Then Cortex is blocked on owner items (tokens, routine setup, two news categories, Vault legend)."
+    "nextAction": "Joshua Small reviews the hub Cortex 2.0 release package, does the listed checks and signs off; then merge the release PR and record the approval in the hub."
   },
   "decisions": {
     "made": [
@@ -51,14 +51,13 @@
       "tool": "Claude Code",
       "model": null
     },
-    "checkpointedAt": "2026-11-12T01:51:20Z",
+    "checkpointedAt": "2026-11-12T12:48:19Z",
     "unfinished": [],
     "blockers": [
-      "Live data needs owner env vars in Vercel: GITHUB_TOKEN (Ops), GOOGLE_CLIENT_ID/SECRET/REFRESH_TOKEN with drive.file and calendar.events (Finances, approvals)",
-      "Briefing routine must be created by the owner (docs/briefing-routine.md)",
-      "Open questions: Enterprise AI and Small Business & SaaS news sources, Vault legend wording, briefing time"
+      "Release approval belongs to Joshua Small",
+      "Live checks of Finances saving, approvals and Ops data need his Google token (drive.file, calendar.events) and GITHUB_TOKEN in Vercel, and the briefing routine set up"
     ],
-    "continuation": "Merge PR for claude/phase-6-assistant once CI is green. Then Cortex is blocked on owner items (tokens, routine setup, two news categories, Vault legend).",
+    "continuation": "Joshua Small reviews the hub Cortex 2.0 release package, does the listed checks and signs off; then merge the release PR and record the approval in the hub.",
     "uncommittedWorkOutsideCheckpoint": "none",
     "persistedBy": "local-file"
   },

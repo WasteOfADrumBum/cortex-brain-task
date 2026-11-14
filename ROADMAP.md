@@ -1,10 +1,10 @@
 # Cortex roadmap
 
-Cortex 1.0 is what is live today: Home, Planner, Vault, the Ops Second Brain checklist and the `/demo` portfolio version. Everything below is planned, not promised, and none of it reopens 1.0. The detailed plan, with acceptance criteria for each item, is in [docs/cortex-v2-spec.md](docs/cortex-v2-spec.md) under "Build phases".
+Cortex 2.0 is what is live today: Home, Planner, Finances, News, Vault, Ops, the Briefing page and the `/demo` portfolio version (see [CHANGELOG.md](CHANGELOG.md)). Everything below is planned, not promised. The detailed plan, with acceptance criteria for each item, is in [docs/cortex-v2-spec.md](docs/cortex-v2-spec.md) under "Build phases".
 
 Done in 1.0: spec phases 1 (tabs, routes and cleanup) and 2 (demo mode), plus the Vault list, reader and search from phase 5.
 
-Done since 1.0: spec phases 3 (Ops project cards), 4 (Finances), the News part of 5, and 6 (Assistant), see below.
+Done in 2.0: spec phases 3 (Ops project cards), 4 (Finances), the News part of 5, and 6 (Assistant), see below.
 
 ## Next
 
