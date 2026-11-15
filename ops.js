@@ -104,6 +104,47 @@
     $("ships-table-wrap").hidden = false;
   }
 
+  // ---------- Connections from /api/setup (which Vercel variables are set; names only) ----------
+  const CONNECT = {
+    ready: ["✓", "Connected", "yes"],
+    missing: ["…", "Not connected yet", "later"],
+    optional: ["–", "Optional, not set up", "later"],
+  };
+
+  async function loadSetup() {
+    let rows = null, message = "";
+    if (Demo.on) rows = (await Demo.data()).setup();
+    else {
+      let key = "";
+      try { key = localStorage.getItem("dashKey") || ""; } catch { /* storage blocked */ }
+      let res = null, body = null;
+      try { res = await fetch("/api/setup", { headers: key ? { "x-dash-key": key } : {} }); } catch { /* offline */ }
+      try { body = await res?.json(); } catch { /* not JSON */ }
+      message = !res ? "Couldn't reach Cortex (offline or blocked)."
+        : res.status === 401 ? (key ? "Your dashboard key wasn't accepted. Open the Planner to enter it again." : "Open the Planner once and enter your dashboard key so Cortex can check its connections.")
+        : res.status === 404 ? "The setup route isn't deployed yet."
+        : !res.ok || !Array.isArray(body?.connections) ? `Connections unavailable: ${body?.error || `error ${res.status}`}.`
+        : "";
+      if (!message) rows = body.connections;
+    }
+    renderConnections(rows, message);
+  }
+
+  function renderConnections(rows, message) {
+    if (!rows) { $("connections").innerHTML = `<li class="panel-note">${esc(message)}</li>`; return; }
+    $("connections").innerHTML = rows.map((c) => {
+      const [icon, word, cls] = CONNECT[c.ready ? "ready" : c.optional ? "optional" : "missing"];
+      const need = c.ready ? "" : ` Add ${c.missing.join(", ")} in Vercel.`;
+      return `<li class="check check-${cls}">
+        <span class="check-icon" aria-hidden="true">${icon}</span>
+        <span class="check-text">
+          <span class="check-label">${esc(c.label)}</span>
+          <span class="check-state">${word}. <span class="check-detail">${esc(c.unlocks)}${esc(need)}</span></span>
+        </span>
+      </li>`;
+    }).join("");
+  }
+
   // ---------- Health checks from Todoist ----------
   // Each automation completes a Todoist task when it runs ("Brain sweep ran", "Muse check ran"; config.js healthChecks).
   // /api/checks returns the newest completion of each in the last 7 days (same dashboard key as the Planner).
@@ -272,6 +313,9 @@
          <p class="sub-line"><span class="state-icon" aria-hidden="true">${level === "yes" ? "✓" : "!"}</span> ${words}: ${bytes(Math.max(0, st.limit - st.used))} free. This counts Drive, Gmail and Photos together.</p>`
       : `<p class="big-line">${bytes(st.used)} used</p><p class="sub-line">This account has no storage limit.</p>`;
   }
+
+  // Connections use the dashboard key only, so they load whether or not Drive is linked.
+  loadSetup();
 
   let started = false;
   Brain.boot({

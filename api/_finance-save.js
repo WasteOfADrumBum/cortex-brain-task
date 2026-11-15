@@ -2,7 +2,7 @@
 // Error answers name the field but never echo the posted values.
 import { validateFinance, shrinkWarnings } from '../src/finance-lib.js';
 import { readMonth, saveMonth } from './_finance-store.js';
-import { DriveError, driveConfigured } from './_drive.js';
+import { DriveError, driveConfigured, driveNotSetUp } from './_drive.js';
 
 export const json = (/** @type {unknown} */ body, status = 200) =>
   new Response(JSON.stringify(body), { status, headers: { 'content-type': 'application/json', 'cache-control': 'no-store' } });
@@ -25,7 +25,7 @@ export async function readBody(/** @type {Request} */ request) {
 export async function checkAndSave(payload, { confirm, via }) {
   const checked = validateFinance(payload);
   if ('field' in checked) return json({ error: checked.message, field: checked.field }, 422);
-  if (!driveConfigured()) return json({ error: 'Drive saving is not set up yet (GOOGLE_REFRESH_TOKEN is missing in Vercel)' }, 503);
+  if (!driveConfigured()) return json({ error: driveNotSetUp() }, 503);
   try {
     const prev = await readMonth(checked.value.month);
     const warnings = shrinkWarnings(prev, checked.value);

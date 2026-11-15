@@ -4,6 +4,7 @@
 // Env: GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET (an OAuth "Web application" client) and GOOGLE_REFRESH_TOKEN
 // (made once with scripts/get-refresh-token.mjs). Nothing here is cached between instances except folder ids.
 import { UpstreamError } from './_upstream.js';
+import { connections } from '../src/setup-lib.js';
 
 export class DriveError extends UpstreamError {}
 
@@ -13,12 +14,18 @@ const FOLDER = 'application/vnd.google-apps.folder';
 
 export const driveConfigured = () => !!(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET && process.env.GOOGLE_REFRESH_TOKEN);
 
+/** What to tell the page when the Google variables aren't all set, naming only the ones that are missing. */
+export function driveNotSetUp(what = 'Drive saving') {
+  const missing = connections(process.env).find((c) => c.id === 'google')?.missing ?? [];
+  return `${what} is not set up yet: add ${missing.join(', ') || 'the Google variables'} in Vercel`;
+}
+
 /** @type {{ token: string, until: number } | null} */
 let access = null;
 /** A Google access token from the refresh token, reused until it is a minute from expiring. */
 export async function googleToken() {
   if (access && Date.now() < access.until) return access.token;
-  if (!driveConfigured()) throw new DriveError('Drive saving is not set up yet (GOOGLE_REFRESH_TOKEN is missing in Vercel)');
+  if (!driveConfigured()) throw new DriveError(driveNotSetUp());
   let res;
   try {
     res = await fetch('https://oauth2.googleapis.com/token', {
