@@ -22,6 +22,7 @@ async function load() {
   const msg = !res ? "Couldn't reach Cortex (offline or blocked)."
     : res.status === 401 ? (key() ? "Your dashboard key wasn't accepted. Open the Planner to enter it again." : "Open the Planner once and enter your dashboard key so Cortex can read your finances.")
     : res.status === 404 ? "The finance route isn't deployed yet."
+    : res.status === 503 ? `Finances isn't connected yet. ${body?.error ? `${body.error}.` : ""} The Connections panel on the Ops tab shows what's missing.`
     : !res.ok || !body ? `Finances unavailable: ${body?.error || `error ${res.status}`}.`
     : "";
   if (msg) { message(msg); return; }

@@ -41,7 +41,9 @@ One screen with your Todoist tasks, today hour by hour (6 AM to 10 PM) with open
 
 Tasks labeled `@system` (automated, like "Brain sweep ran") are left out of every bucket, count and Home. Label names live in `config/topics.json` (size labels and topic labels); `task-rules.js` holds the shared rules Home and the Planner both use. A label in the config that doesn't exist in Todoist is ignored. Home's Top 3 shows each task's topics as text chips, and tasks with a private topic (`@health`, `@money`) show only as "Health task" or "Money task" there; full titles stay in the Planner. Until the API is set up, the planner says what is missing and shows no tasks; sample data is only on `/demo/planner`.
 
-Set these in Vercel (Project → Settings → Environment Variables); `.env.example` explains each one:
+### Server settings (Vercel)
+
+Set these in Vercel (Project → Settings → Environment Variables); `.env.example` explains each one. The **Connections** panel on the Ops tab shows which are set and what each one unlocks (it reports names only, never values):
 
 - `TODOIST_TOKEN`: Todoist → Settings → Integrations → Developer → API token
 - `GCAL_ICS_URLS`: each Google Calendar's "Secret address in iCal format", comma-separated. Anyone with one of these URLs can read that calendar.

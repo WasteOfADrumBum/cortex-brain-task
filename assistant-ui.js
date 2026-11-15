@@ -78,7 +78,7 @@ export function mountApprovals(host, opts) {
   const decided = opts.decisions.decisions || {};
   const canAct = Demo.on || opts.decisions.configured === true;
   const blockedNote = opts.decisions.message || (opts.decisions.configured === false
-    ? "Approving isn't set up yet: the Google variables in Vercel are still missing (see the README). You can read the proposals in the meantime."
+    ? "Approving isn't connected yet: the Google variables are still missing in Vercel. The Connections panel on the Ops tab shows which. You can read the proposals in the meantime."
     : "");
   const live = document.createElement("p");
   live.className = "ap-live visually-hidden";
