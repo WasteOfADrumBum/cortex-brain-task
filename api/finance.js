@@ -7,7 +7,7 @@ import { keyMatches } from './_key.js';
 import { allow } from './_rate.js';
 import { json, readBody, checkAndSave } from './_finance-save.js';
 import { readYear } from './_finance-store.js';
-import { DriveError, driveConfigured } from './_drive.js';
+import { DriveError, driveConfigured, driveNotSetUp } from './_drive.js';
 
 function denied(/** @type {Request} */ request) {
   if (!process.env.DASH_KEY) return json({ error: 'DASH_KEY is not set in Vercel' }, 500);
@@ -20,7 +20,7 @@ export async function GET(/** @type {Request} */ request) {
   if (no) return no;
   const year = Number(new URL(request.url).searchParams.get('year') || new Date().getFullYear());
   if (!Number.isInteger(year) || year < 2000 || year > 2100) return json({ error: 'year must be like 2026' }, 400);
-  if (!driveConfigured()) return json({ error: 'Drive saving is not set up yet (GOOGLE_REFRESH_TOKEN is missing in Vercel)' }, 503);
+  if (!driveConfigured()) return json({ error: driveNotSetUp() }, 503);
   try {
     return json({ year, months: await readYear(year) });
   } catch (e) {

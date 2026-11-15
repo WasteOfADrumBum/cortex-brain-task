@@ -244,7 +244,20 @@ export interface DemoData {
   news(now: Date): NewsResponse;
   ops(now: Date): OpsResponse;
   briefing(now: Date): BriefingFile[];
+  setup(): Connection[];
   playlist: DemoTrack[];
+}
+
+// ---------- Connections (src/setup-lib.js, /api/setup) ----------
+
+export interface Connection {
+  id: string;
+  label: string;
+  unlocks: string;
+  optional: boolean;
+  ready: boolean;
+  /** Names of the Vercel variables still missing; never their values. */
+  missing: string[];
 }
 
 // ---------- Assistant: briefing, priorities, approvals (src/briefing-lib.js, src/priorities-lib.js, src/approvals-lib.js) ----------

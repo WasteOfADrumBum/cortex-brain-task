@@ -2,6 +2,16 @@
 
 All notable changes to Cortex. Versions follow [Semantic Versioning](https://semver.org/); Cortex is a web app, so a major version means new tabs or a new kind of access, not a breaking API.
 
+## [Unreleased]
+
+### Added
+
+- **Connections panel** on the Ops tab: which server connections are set up (Todoist and Calendar, GitHub, Google, finance automation), what each one unlocks, and the Vercel variable names still missing. `/api/setup` reports names and true/false only, never values.
+
+### Changed
+
+- "Not set up yet" messages in Finances and approvals now name only the Google variables that are actually missing and point to the Connections panel.
+
 ## [2.0.0] - unreleased
 
 Cortex 2.0 adds the four tabs that were "coming later" in 1.0 (spec phases 3 to 6) and, for the first time, lets Cortex save data and make changes, always on the owner's approval.

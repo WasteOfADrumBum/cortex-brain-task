@@ -9,14 +9,13 @@
 import { keyMatches } from './_key.js';
 import { allow } from './_rate.js';
 import { json, readBody } from './_finance-save.js';
-import { driveConfigured } from './_drive.js';
+import { driveConfigured, driveNotSetUp } from './_drive.js';
 import { UpstreamError } from './_upstream.js';
 import { readState, writeState, audit } from './_approvals-store.js';
 import { decide } from './_approvals-run.js';
 import * as todoist from './_todoist.js';
 import * as calendar from './_gcal.js';
 
-const NOT_SET_UP = 'Approving is not set up yet: GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET and GOOGLE_REFRESH_TOKEN are needed in Vercel';
 
 function denied(/** @type {Request} */ request) {
   if (!process.env.DASH_KEY) return json({ error: 'DASH_KEY is not set in Vercel' }, 500);
@@ -43,7 +42,7 @@ export async function POST(/** @type {Request} */ request) {
   const no = denied(request);
   if (no) return no;
   if (!allow('approvals', 60)) return json({ error: 'Too many decisions this hour; try again later' }, 429);
-  if (!driveConfigured()) return json({ error: NOT_SET_UP }, 503);
+  if (!driveConfigured()) return json({ error: driveNotSetUp('Approving') }, 503);
   const body = await readBody(request);
   if ('res' in body) return body.res;
   try {
