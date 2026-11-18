@@ -1,7 +1,10 @@
-// Google Drive access (read-only) via Google Identity Services.
+// Google Drive access (read-only). Sign-in sends the whole page to Google and back (OAuth 2.0 for client-side web
+// apps, response_type=token), instead of a popup: Google's popup could finish without ever handing the token back
+// to the page, which left Cortex on the sign-in screen with no message.
 const Drive = (() => {
   const SCOPE = "https://www.googleapis.com/auth/drive.readonly";
   const API = "https://www.googleapis.com/drive/v3";
+  const AUTH = "https://accounts.google.com/o/oauth2/v2/auth";
   const FIELDS = "nextPageToken,files(id,name,mimeType,createdTime,modifiedTime,webViewLink,parents)";
   const FOLDER = "application/vnd.google-apps.folder";
 
@@ -9,16 +12,23 @@ const Drive = (() => {
   // doesn't drop the link. It is read-only and never leaves this origin except to Google.
   const SESSION_KEY = "cortex.drive.session";
   const LINKED_KEY = "cortex.drive.linked";
+  // The sign-in in flight: a random state value and the page to return to. Kept for this tab only.
+  const PENDING_KEY = "cortex.drive.pending";
 
-  let tokenClient = null;
   let token = null;
   let expiresAt = 0;
+  let lastError = "";
   let onChange = () => {};
 
   const store = {
     get(k) { try { return localStorage.getItem(k); } catch { return null; } },
     set(k, v) { try { localStorage.setItem(k, v); } catch { /* storage unavailable */ } },
     del(k) { try { localStorage.removeItem(k); } catch { /* storage unavailable */ } },
+  };
+  const tab = {
+    get(k) { try { return sessionStorage.getItem(k); } catch { return null; } },
+    set(k, v) { try { sessionStorage.setItem(k, v); return true; } catch { return false; } },
+    del(k) { try { sessionStorage.removeItem(k); } catch { /* storage unavailable */ } },
   };
   function saveSession() {
     store.set(SESSION_KEY, JSON.stringify({ token, expiresAt }));
@@ -40,46 +50,97 @@ const Drive = (() => {
   function configured() {
     return Boolean((window.CORTEX_CONFIG.googleClientId || "").trim());
   }
+  // Google sends the page back here. It must be listed under the client's Authorized redirect URIs.
+  const redirectUri = () => `${location.origin}/`;
 
-  function waitForGis(timeoutMs = 10000) {
-    return new Promise((resolve, reject) => {
-      const start = Date.now();
-      (function check() {
-        if (window.google?.accounts?.oauth2) return resolve();
-        if (Date.now() - start > timeoutMs) return reject(new Error("Google sign-in did not load. Check your connection or content blockers."));
-        setTimeout(check, 150);
-      })();
-    });
+  // Google's error codes in plain words. Anything else is shown as Google sent it.
+  const ERRORS = {
+    access_denied: "Sign-in was cancelled, or Google didn't allow it. Try again and choose Continue on each Google screen.",
+    redirect_uri_mismatch: "Google doesn't know this address yet. Add it to the client's Authorized redirect URIs (see README).",
+    invalid_client: "Google doesn't recognise the client ID in config.js.",
+    unauthorized_client: "This Google client can't sign in from the browser. Check that it is a Web application client.",
+  };
+
+  /**
+   * Reads Google's answer from the address after a sign-in. Pure: no storage, no page changes.
+   * @param {string} hash location.hash, with or without the leading #
+   * @param {{state: string, path: string} | null} pending what signIn stored for this tab
+   * @param {number} now Date.now()
+   * @returns {null | {error: string} | {token: string, expiresAt: number, path: string}}
+   */
+  function readReturn(hash, pending, now) {
+    const p = new URLSearchParams(String(hash || "").replace(/^#/, ""));
+    if (!p.has("access_token") && !p.has("error")) return null;
+    if (!pending || !pending.state || p.get("state") !== pending.state) {
+      return { error: "That sign-in didn't start from this tab, so Cortex ignored it. Sign in again." };
+    }
+    if (p.has("error")) return { error: ERRORS[p.get("error")] || `Google said: ${p.get("error")}` };
+    const scopes = (p.get("scope") || "").split(" ");
+    if (!scopes.includes(SCOPE)) {
+      return { error: "Google didn't give Cortex read access to Drive. Sign in again and allow Drive access." };
+    }
+    return {
+      token: p.get("access_token"),
+      expiresAt: now + (Number(p.get("expires_in")) || 3600) * 1000,
+      path: pending.path && pending.path.startsWith("/") && !pending.path.startsWith("//") ? pending.path : "/",
+    };
   }
+
+  // Runs as soon as this script loads, so pages see the new session on first paint.
+  // The token is taken out of the address straight away so it isn't left in history or bookmarks.
+  (function finishSignIn() {
+    let pending = null;
+    try { pending = JSON.parse(tab.get(PENDING_KEY) || "null"); } catch { /* corrupt entry */ }
+    const r = readReturn(location.hash, pending, Date.now());
+    if (!r) return;
+    tab.del(PENDING_KEY);
+    history.replaceState(null, "", location.pathname + location.search);
+    if ("error" in r) { lastError = r.error; return; }
+    token = r.token;
+    expiresAt = r.expiresAt;
+    saveSession();
+    if (r.path !== location.pathname + location.search) location.replace(r.path);
+  })();
 
   async function init(changeHandler) {
     onChange = changeHandler;
     if (!configured()) return "unconfigured";
-    await waitForGis();
-    tokenClient = google.accounts.oauth2.initTokenClient({
-      client_id: window.CORTEX_CONFIG.googleClientId.trim(),
-      scope: SCOPE,
-      callback: (resp) => {
-        if (resp.error) { dropToken(); onChange("error", resp.error_description || resp.error); return; }
-        token = resp.access_token;
-        expiresAt = Date.now() + (Number(resp.expires_in) || 3600) * 1000;
-        saveSession();
-        onChange("linked");
-      },
-      error_callback: (err) => onChange("error", err?.message || "Sign-in was closed before it finished."),
-    });
+    if (lastError) return "error";
     if (restoreSession()) return "linked";
     return store.get(LINKED_KEY) ? "expired" : "ready";
   }
 
   function signIn() {
-    if (!tokenClient) return;
+    if (!configured()) return;
+    const state = Array.from(crypto.getRandomValues(new Uint8Array(16)), (b) => b.toString(16).padStart(2, "0")).join("");
+    if (!tab.set(PENDING_KEY, JSON.stringify({ state, path: location.pathname + location.search }))) {
+      lastError = "This browser is blocking site storage, which sign-in needs. Allow it for this site and try again.";
+      onChange("error", lastError);
+      return;
+    }
+    const params = new URLSearchParams({
+      client_id: window.CORTEX_CONFIG.googleClientId.trim(),
+      redirect_uri: redirectUri(),
+      response_type: "token",
+      scope: SCOPE,
+      include_granted_scopes: "true",
+      state,
+    });
     // After the first consent, skip the consent screen and just confirm the account.
-    tokenClient.requestAccessToken({ prompt: store.get(LINKED_KEY) ? "" : "consent" });
+    if (!store.get(LINKED_KEY)) params.set("prompt", "consent");
+    location.assign(`${AUTH}?${params}`);
   }
 
   function signOut() {
-    if (token && window.google?.accounts?.oauth2) google.accounts.oauth2.revoke(token, () => {});
+    if (token) {
+      // Tell Google to forget this token. Fire and forget: the page signs out either way.
+      fetch("https://oauth2.googleapis.com/revoke", {
+        method: "POST",
+        mode: "no-cors",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: new URLSearchParams({ token }),
+      }).catch(() => {});
+    }
     dropToken();
     store.del(LINKED_KEY);
     onChange("signed-out");
@@ -181,5 +242,5 @@ const Drive = (() => {
     return { files: [], folder: null };
   }
 
-  return { init, signIn, signOut, linked, hasSession, loadBrain, storage, searchContent, readFile, briefings, configured };
+  return { init, signIn, signOut, linked, hasSession, readReturn, error: () => lastError, loadBrain, storage, searchContent, readFile, briefings, configured };
 })();

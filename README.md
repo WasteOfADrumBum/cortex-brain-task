@@ -101,7 +101,7 @@ Google's iCal feed can lag your live calendar by minutes to a few hours.
 2. **Create a Google OAuth client** at console.cloud.google.com:
    1. Create a project, then enable the **Google Drive API**.
    2. Under Google Auth Platform, set up the consent screen (External), add yourself as a test user, and add the `.../auth/drive.readonly` scope.
-   3. Create a **Web application** client. Under Authorized JavaScript origins add the site URL exactly, with no trailing slash (for example `https://cortex-brain-task-forge3.vercel.app`).
+   3. Create a **Web application** client. Under **Authorized redirect URIs** add the site URL with a trailing slash (for example `https://cortex.onesmall.company/`). Sign-in sends the page to Google and back to that address. Add one for each address you open Cortex at.
 3. **Paste the Client ID** (ends in `.apps.googleusercontent.com`) into `googleClientId` in `config.js`. The client secret is not used.
 4. Open the site and press **Link Drive**.
 

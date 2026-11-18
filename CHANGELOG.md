@@ -10,6 +10,7 @@ All notable changes to Cortex. Versions follow [Semantic Versioning](https://sem
 
 ### Changed
 
+- **Sign-in goes to Google and back in the same tab** instead of a popup. Google's popup could finish without handing the sign-in back, which left Cortex on the sign-in screen with no message. The Google client now needs the site URL (with a trailing slash) under Authorized redirect URIs. Any sign-in failure now says why on the sign-in screen.
 - "Not set up yet" messages in Finances and approvals now name only the Google variables that are actually missing and point to the Connections panel.
 
 ## [2.0.0] - unreleased

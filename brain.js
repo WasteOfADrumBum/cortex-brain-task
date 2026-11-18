@@ -299,6 +299,7 @@ const Brain = (() => {
 
     Drive.init(onDriveChange).then((r) => {
       state.drive = r;
+      if (r === "error") state.error = Drive.error();
       if (r === "linked") { setAuth("in"); sync(); return; }
       if (state.mode !== "live") setAuth("out");
       update();
