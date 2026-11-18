@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Privacy policy · Cortex</title>
+  <meta name="description" content="How Cortex, Joshua Small's personal dashboard, uses Google Drive and Google Calendar access.">
+  <meta name="theme-color" content="#04080e">
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;800&family=Rajdhani:wght@500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+  <div class="backdrop" aria-hidden="true"></div>
+
+  <main id="main" class="page privacy">
+    <div class="page-head">
+      <h1>Privacy policy</h1>
+      <p class="page-lede">Cortex is a personal dashboard owned and used by one person, Joshua Small. This page explains what it does with Google data. Last updated November 18, 2026.</p>
+    </div>
+
+    <section class="panel" aria-labelledby="h-who">
+      <h2 class="panel-title" id="h-who">Who uses Cortex</h2>
+      <p>Cortex has a single user, its owner. It has no public sign-up, no other accounts and no advertising. It does not collect information about visitors.</p>
+    </section>
+
+    <section class="panel" aria-labelledby="h-google">
+      <h2 class="panel-title" id="h-google">What Cortex does with Google data</h2>
+      <ul>
+        <li><strong>Google Drive, only files Cortex creates</strong> (<code>drive.file</code>): Cortex saves its own files in the owner's Drive, such as monthly finance summaries under <code>/Cortex/finance</code>, the state of approvals and a log of approved changes. It cannot see or change any other Drive file through this access.</li>
+        <li><strong>Google Drive, read-only in the browser</strong> (<code>drive.readonly</code>): when the owner links Drive, the browser reads the owner's notes and morning briefings to show them on the dashboard. Nothing is changed.</li>
+        <li><strong>Google Calendar events</strong> (<code>calendar.events</code>): used only when the owner approves a proposed change, to add or move that one event. Cortex never deletes events.</li>
+      </ul>
+    </section>
+
+    <section class="panel" aria-labelledby="h-share">
+      <h2 class="panel-title" id="h-share">Sharing and storage</h2>
+      <ul>
+        <li>Google data is not sold, shared, or transferred to anyone, and it is not used for advertising or to train AI models.</li>
+        <li>Data stays in the owner's own Google account. The server keeps only access tokens, as private settings on its host, and does not keep copies of files or events.</li>
+        <li>Use of information received from Google APIs follows the <a href="https://developers.google.com/terms/api-services-user-data-policy">Google API Services User Data Policy</a>, including its Limited Use requirements.</li>
+      </ul>
+    </section>
+
+    <section class="panel" aria-labelledby="h-control">
+      <h2 class="panel-title" id="h-control">Removing access</h2>
+      <p>Access can be removed at any time from the Google Account's <a href="https://myaccount.google.com/connections">Third-party apps and services</a> page. Files Cortex created stay in Drive until deleted there.</p>
+    </section>
+
+    <section class="panel" aria-labelledby="h-contact">
+      <h2 class="panel-title" id="h-contact">Contact</h2>
+      <p>Questions about this policy can be sent to the support email shown on Cortex's Google sign-in screen.</p>
+      <p><a href="/">Back to Cortex</a></p>
+    </section>
+  </main>
+</body>
+</html>
