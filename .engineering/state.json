@@ -1,25 +1,28 @@
 {
   "stateVersion": 1,
-  "revision": 8,
-  "checkpointId": "cp-2026-11-12-release-2-0-prep",
+  "revision": 9,
+  "checkpointId": "cp-2026-11-19-finances-honest-dashboard",
   "projectId": "cortex",
   "repository": "https://github.com/WasteOfADrumBum/cortex-brain-task",
   "hub": "https://github.com/WasteOfADrumBum/one-small-engineering",
   "recorded": {
-    "branch": "claude/release-2.0.0",
-    "commit": "8772de53e303b81f5668fe0d3091b3a52439eeda",
-    "recordedAt": "2026-11-12T12:48:19Z"
+    "branch": "feat/finances-honest-dashboard",
+    "commit": "354330b8f4d28c2acb0911420d6225a97d300c16",
+    "recordedAt": "2026-11-19T22:39:51Z"
   },
   "development": {
     "milestone": "Cortex v2 (after 1.0)",
-    "activeTask": null,
-    "workingBranch": "claude/release-2.0.0",
-    "activePr": null,
+    "activeTask": {
+      "id": "finances-honest-dashboard",
+      "title": "Rebuild the Finances tab to read the J&M P&L sheet honestly"
+    },
+    "workingBranch": "feat/finances-honest-dashboard",
+    "activePr": 50,
     "lastCompleted": [
-      "Cortex 2.0.0 release prep: CHANGELOG, version 2.0.0, footer and docs on branch claude/release-2.0.0; hub release package and registry record prepared. npm test 52/52 locally."
+      "Finances rebuild: src/finance-model.js (money rules), wider sheet reader, seven views, docs/finances.md; PR #50 open, CI green (tests, axe, checkpoint)."
     ],
     "inProgress": [],
-    "nextAction": "Joshua Small reviews the hub Cortex 2.0 release package, does the listed checks and signs off; then merge the release PR and record the approval in the hub."
+    "nextAction": "Joshua Small checks /finances signed in with the real sheet on the Vercel preview or after merge, then decides whether to merge PR #50."
   },
   "decisions": {
     "made": [
@@ -39,25 +42,27 @@
       {
         "command": "npm test",
         "result": "pass",
-        "commit": "59c2b290905114c1e5e5431502e427746e7ccacf",
-        "at": "2026-11-11T05:38:16Z",
+        "commit": "354330b8f4d28c2acb0911420d6225a97d300c16",
+        "at": "2026-11-19T22:39:51Z",
         "ciRunUrl": null
       }
     ],
-    "unverifiedChanges": []
+    "unverifiedChanges": [
+      "Finances with the real sheet (needs the owner's Google sign-in); tab links depend on the Sheets API or config tab ids"
+    ]
   },
   "handoff": {
     "lastAgent": {
       "tool": "Claude Code",
       "model": null
     },
-    "checkpointedAt": "2026-11-12T12:48:19Z",
+    "checkpointedAt": "2026-11-19T22:39:51Z",
     "unfinished": [],
     "blockers": [
-      "Release approval belongs to Joshua Small",
-      "Live checks of Finances saving, approvals and Ops data need his Google token (drive.file, calendar.events) and GITHUB_TOKEN in Vercel, and the briefing routine set up"
+      "Merge approval belongs to Joshua Small",
+      "Live Finances check needs his Google sign-in"
     ],
-    "continuation": "Joshua Small reviews the hub Cortex 2.0 release package, does the listed checks and signs off; then merge the release PR and record the approval in the hub.",
+    "continuation": "Joshua Small checks /finances with the real sheet, then decides on merging PR #50.",
     "uncommittedWorkOutsideCheckpoint": "none",
     "persistedBy": "local-file"
   },

@@ -82,7 +82,8 @@ export function sheetGrid(/** @type {string} */ xml, /** @type {string[]} */ sha
     else if (type === "inlineStr") value = runs(body);
     else if (type === "str") value = v != null ? unescapeXml(v) : null;
     else if (type === "b") value = v === "1";
-    else if (type === "e") value = null;
+    // Formula errors keep their text ("#REF!") so the Finances page can point at the cell instead of using a number.
+    else if (type === "e") value = v != null ? unescapeXml(v) : "#ERROR!";
     else if (v != null && v !== "") value = Number(v);
     if (value === "" || value == null) continue;
     const [r, col] = at;

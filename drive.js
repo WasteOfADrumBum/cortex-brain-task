@@ -249,10 +249,16 @@ const Drive = (() => {
   async function sheetInfo(id) {
     return request(`${API}/files/${encodeURIComponent(id)}?fields=name,modifiedTime,webViewLink&supportsAllDrives=true`);
   }
+  // Tab ids (gids) for links straight to a tab and range. Uses the Sheets API with the same read-only Drive sign-in;
+  // if that API isn't enabled for the Google project this fails quietly and Finances falls back to config.js.
+  async function sheetTabs(id) {
+    const data = await request(`https://sheets.googleapis.com/v4/spreadsheets/${encodeURIComponent(id)}?fields=sheets.properties(sheetId,title)`);
+    return Object.fromEntries((data.sheets || []).map((s) => [s.properties.title, s.properties.sheetId]));
+  }
   async function exportXlsx(id) {
     const mime = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
     return request(`${API}/files/${encodeURIComponent(id)}/export?mimeType=${encodeURIComponent(mime)}`, "bytes");
   }
 
-  return { init, signIn, signOut, linked, hasSession, readReturn, error: () => lastError, loadBrain, storage, searchContent, readFile, briefings, sheetInfo, exportXlsx, configured };
+  return { init, signIn, signOut, linked, hasSession, readReturn, error: () => lastError, loadBrain, storage, searchContent, readFile, briefings, sheetInfo, sheetTabs, exportXlsx, configured };
 })();

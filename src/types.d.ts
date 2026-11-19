@@ -205,14 +205,19 @@ export interface SavedFinanceMonth extends FinanceMonth { savedAt: string }
 /** GET /api/finance?year=YYYY: every saved month of the year, oldest first. */
 export interface FinanceYear { year: number; months: SavedFinanceMonth[] }
 
-// ---------- Finances from the J&M P&L Google Sheet (read in the browser; src/finance-sheet.js) ----------
-export interface SheetAmountRow { label: string; amount: number | null; /** The unlabelled total row. */ total: boolean }
-export interface SheetSnapshotRow { label: string; payPeriod: number | null; monthly: number | null; yearly: number | null; kind: "income" | "out" | "left" }
+// ---------- Finances from the J&M P&L Google Sheet (read in the browser; src/finance-sheet.js, src/finance-model.js) ----------
+/** Where a value lives in the workbook, for links: tab name and A1 range. */
+export interface SheetRef { tab: string; range: string }
+export interface SheetNote { text: string; /** Latest full date written in the note, "YYYY-MM-DD". Not a balance date. */ date: string | null; ref: SheetRef }
+export interface SheetAmountRow { label: string; amount: number | null; /** The unlabelled total row. */ total: boolean; ref?: SheetRef }
+export interface SheetSnapshotRow { label: string; payPeriod: number | null; monthly: number | null; yearly: number | null; kind: "income" | "out" | "left"; ref?: SheetRef }
 export interface SheetAllocation { category: string; actual: number | null; actualShare: number | null; target: number | null; targetShare: number | null }
 export interface SheetBill {
   name: string;
   /** The Recurring Expenses table it came from, e.g. "Home & Utilities". */
   section: string;
+  subcategory: string;
+  owner: string;
   kind: "Need" | "Want" | "";
   /** Each time it's paid. */
   amount: number | null;
@@ -221,27 +226,66 @@ export interface SheetBill {
   due: string;
   monthly: number | null;
   yearly: number | null;
+  status: string;
+  renewal: string;
+  /** Payment account, account digits removed. */
+  account: string;
+  /** Notes / Source, with account digits, links and long numbers removed. */
+  note: string;
+  /** A formula error in the amount or monthly cell. */
+  error: boolean;
+  ref: SheetRef;
 }
-export interface SheetLoan { name: string; type: string; balance: number | null; monthly: number | null; due: string; status: string }
-export interface SheetCard { name: string; balance: number; /** Fraction, 0.2374 for 23.74%. */ apr: number | null; due: string; status: string }
-export interface SheetAccount { name: string; purpose: string; balance: number | null; group: string }
+export interface SheetLoan { name: string; group: string; type: string; balance: number | null; payment: number | null; frequency: string; monthly: number | null; due: string; status: string; note: string; ref: SheetRef }
+export interface SheetCard { name: string; group: string; /** null = unknown; 0 only when the card is marked paid off. */ balance: number | null; /** Fraction, 0.2374 for 23.74%. */ apr: number | null; limit: number | null; due: string; status: string; note: string; ref: SheetRef }
+export interface SheetAccount { name: string; purpose: string; balance: number | null; deposit: number | null; group: string; ref: SheetRef }
+export interface SheetLabelled { section: string; label: string; value: string | number | boolean | null; b: string; c: string; d: string; e: string; ref: SheetRef }
 export interface SheetFinance {
   snapshot: SheetSnapshotRow[];
   debt: SheetAmountRow[];
   savings: SheetAmountRow[];
   safetyNet: SheetAmountRow[];
   allocation: SheetAllocation[];
-  /** Net income the 50/30/20 shares are measured against. */
+  /** Net income the Summary 50/30/20 shares are measured against. */
   allocationBase: number | null;
+  allocationRef: SheetRef | null;
   bills: SheetBill[];
+  planned: SheetBill[];
   loans: SheetLoan[];
   cards: SheetCard[];
+  debtSummary: { label: string; amount: number | null; ref: SheetRef }[];
+  debtNotes: SheetNote[];
   accounts: SheetAccount[];
+  investments: { name: string; type: string; perPeriod: number | null; monthly: number | null; status: string; note: string; ref: SheetRef }[];
+  separateCash: { name: string; balance: number | null; kind: string; ref: SheetRef }[];
+  separateCashDate: string | null;
+  savingsNotes: SheetNote[];
+  dashboard: SheetLabelled[];
+  estimates: SheetLabelled[];
+  incomeSources: { name: string; type: string; include: boolean; netPerPeriod: number | null; grossPerPeriod: number | null; netMonthly: number | null; grossMonthly: number | null; netYearly: number | null; grossYearly: number | null; ref: SheetRef }[];
+  routing: { account: string; purpose: string; perPeriod: number | null; monthly: number | null; savings: boolean; ref: SheetRef }[];
+  incomeNotes: SheetNote[];
+  scenarios: { name: string; include: boolean; grossMonthly: number | null; ref: SheetRef }[];
+  paychecks: {
+    /** Pay date of the dated paystub, "YYYY-MM-DD". */ anchor: string | null; anchorRef: SheetRef | null;
+    periodDays: number | null; netPerCheck: number | null;
+    salaryHistory: { date: string | null; reason: string; annual: number | null; ref: SheetRef }[];
+    deposits: { account: string; current: number | null; pending: number | null; ref: SheetRef }[];
+  };
+  reserves: { name: string; category: string; kind: "Need" | "Want" | ""; annual: number | null; monthly: number | null; status: string; timing: string; note: string; ref: SheetRef }[];
+  oneTime: { name: string; group: string; category: string; estimate: number | null; date: string | null; payment: string; note: string; noteDate: string | null; ref: SheetRef }[];
+  netWorth: { date: string | null; cash: number | null; home: number | null; retirement: number | null; mortgage: number | null; otherDebt: number | null; netWorth: number | null; basis: string; ref: SheetRef }[];
+  billTrends: { service: string; points: { month: string; amount: number | null; ref: SheetRef }[] }[];
+  water: { date: string | null; amount: number | null; ref: SheetRef }[];
+  layoff: { asOf: string | null; essentials: number | null; ref: SheetRef | null };
+  errors: { tab: string; range: string; value: string }[];
   /** Tabs Cortex looked for and didn't find. */
   missing: string[];
 }
+export type FinStatus = "confirmed" | "recorded" | "reported" | "estimate" | "unknown" | "conflict" | "computed";
+export interface FinAttention { id: string; level: "high" | "medium" | "low"; kind: "missing" | "conflict" | "undated" | "unresolved" | "change"; title: string; text: string; ref: SheetRef | null }
 /** What the Finances tab and Home get: the model plus where it came from. */
-export interface SheetFinanceResult { finance: SheetFinance; modifiedTime: string | null; url: string; name: string }
+export interface SheetFinanceResult { finance: SheetFinance; modifiedTime: string | null; url: string; name: string; /** Tab name -> sheet gid, for links to a tab and range. */ gids?: Record<string, number> }
 
 // ---------- News (phase 5): RSS headlines ----------
 export interface NewsItem {

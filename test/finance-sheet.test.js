@@ -122,13 +122,13 @@ const SAVINGS = [
 
 test("parseWorkbook finds every section by its labels and drops account digits and notes", () => {
   const f = parseWorkbook({ Summary: SUMMARY, "Recurring Expenses": RECURRING, "Debt & Loans": DEBT, Savings: SAVINGS });
-  assert.deepEqual(f.missing, []);
+  assert.deepEqual(f.missing.slice(0, 1), ["Dashboard Data"], "the four basic tabs are found; the optional ones are named as missing");
   assert.deepEqual(f.snapshot.map((r) => [r.label, r.kind, r.monthly]), [
     ["Pat's Net Income (estimated)", "income", 4333.33], ["Recurring Expenses", "out", 1733.33], ["Debt / Loan Payments", "out", 1300],
     ["Occasional Cost Reserve", "out", null], ["Left over", "left", 1300],
   ]);
   assert.deepEqual(f.debt.map((d) => [d.label, d.amount]), [["Total Debt", 150000], ["Credit Card Debt", 1500]]);
-  assert.deepEqual(f.savings.at(-1), { label: "Total savings", amount: 21000, total: true });
+  assert.deepEqual(f.savings.at(-1), { label: "Total savings", amount: 21000, total: true, ref: { tab: "Summary", range: "A17:F17" } });
   assert.equal(f.safetyNet.length, 2);
   assert.deepEqual(f.allocation.map((a) => [a.category, a.actualShare, a.targetShare]), [["Needs", 0.577, 0.5], ["Wants", 0.1538, 0.3], ["Savings", 0.115, 0.2]]);
   assert.equal(f.allocationBase, 52000);
@@ -138,14 +138,18 @@ test("parseWorkbook finds every section by its labels and drops account digits a
     ["Property Tax", "Home & Utilities", "Need", "Jan 31", 25],
     ["Streaming", "Subscriptions", "Want", "", 15],
   ], "planned, cancelled and total rows are skipped; codes in brackets are dropped; date serials become dates");
-  assert.deepEqual(f.loans, [{ name: "Mortgage", type: "Mortgage", balance: 148500, monthly: 1300, due: "1st", status: "Active" }]);
+  assert.deepEqual(f.loans.map((l) => [l.name, l.type, l.balance, l.monthly, l.due, l.status, l.ref.range]), [["Mortgage", "Mortgage", 148500, 1300, "1st", "Active", "A3:K3"]]);
+  assert.equal(f.bills[0].note, "private note", "notes are kept (scrubbed) so dated prices and sources can be read");
+  assert.equal(f.bills[0].account, "Reserve", "account digits are dropped from the payment account");
+  assert.equal(f.bills[0].ref.range, "A6:N6");
+  assert.deepEqual(f.planned.map((b) => b.name), ["Therapy"], "planned rows are kept apart");
   assert.deepEqual(f.cards.map((c) => [c.name, c.balance, c.apr, c.due, c.status]), [
     ["Points Card", 0, 0.215, "9th", "Paid Off"],
     ["Cash Card", 1500, 0.1999, "Nov 13, 2026", ""],
   ], "the summary table after the cards is not read as cards; long status notes are dropped");
   assert.deepEqual(f.accounts.map((a) => a.name), ["Joint Reserve", "Kid's Savings"]);
   const text = JSON.stringify(f);
-  for (const secret of ["1234", "1111", "2222", "9999", "private note", "12345678", "ABC-0001"]) assert.ok(!text.includes(secret), secret);
+  for (const secret of ["1234", "1111", "2222", "9999", "12345678", "ABC-0001"]) assert.ok(!text.includes(secret), secret);
 
   const m = monthly(f);
   assert.equal(m.income, 4333.33);
@@ -155,7 +159,7 @@ test("parseWorkbook finds every section by its labels and drops account digits a
 
 test("missing tabs leave their parts empty and are named", () => {
   const f = parseWorkbook({ Summary: SUMMARY });
-  assert.deepEqual(f.missing, ["Recurring Expenses", "Debt & Loans", "Savings"]);
+  assert.deepEqual(f.missing.slice(0, 3), ["Recurring Expenses", "Debt & Loans", "Savings"]);
   assert.deepEqual(f.bills, []);
   assert.deepEqual(parseWorkbook({}).snapshot, []);
 });

@@ -259,8 +259,10 @@ const HomeDesk = (() => {
   }
 
   // ---------- Money this month ----------
-  // model: { body: { income, out, left, soon, billCount, modifiedTime } } from home.js (the J&M P&L sheet), or { message }.
-  const fmtMoney = (n) => n.toLocaleString([], { style: "currency", currency: "USD", maximumFractionDigits: 0 });
+  // model: { body: { income, out, left, leftLabel, complete, attention, soon, billCount, modifiedTime } } from home.js
+  // (the J&M P&L sheet via src/finance-model.js), or { message }. "Left" is only "unallocated in the recorded plan"
+  // until the plan is complete, so it never gets a green tick.
+  const fmtMoney = (n) => (n == null ? "unknown" : n.toLocaleString([], { style: "currency", currency: "USD", maximumFractionDigits: 0 }));
   function money(model) {
     const host = $("d-money");
     const meta = $("d-money-meta");
@@ -269,9 +271,10 @@ const HomeDesk = (() => {
     const soonText = b.soon.map((x) => `${x.name} (${x.date.toLocaleDateString([], { weekday: "short" })})`).join(", ");
     meta.textContent = b.modifiedTime ? `Sheet edited ${Brain.ago(b.modifiedTime)}` : "";
     host.innerHTML = `
-      <p class="hd-big">In ${fmtMoney(b.income)} · <span class="hd-accent">Out ${fmtMoney(b.out)}</span></p>
+      <p class="hd-big">In ${fmtMoney(b.income)} · <span class="hd-accent">Planned ${fmtMoney(b.out)}</span></p>
       <ul class="hd-checks">
-        <li>${b.left >= 0 ? ICON_OK : ICON_WARN}<span>${b.left >= 0 ? `${fmtMoney(b.left)} left over a month` : `${fmtMoney(-b.left)} short each month`}</span></li>
+        <li>${b.left == null || b.left < 0 ? ICON_WARN : b.complete ? ICON_OK : ICON_OPEN}<span>${b.left != null && b.left < 0 ? `${fmtMoney(-b.left)} over the recorded plan` : `${fmtMoney(b.left)} ${esc((b.leftLabel || "unallocated").toLowerCase())}`}${b.complete ? "" : " (incomplete)"}</span></li>
+        ${b.attention ? `<li>${ICON_WARN}<span>${b.attention} important ${b.attention === 1 ? "item" : "items"} to check on Finances</span></li>` : ""}
         <li>${b.soon.length ? ICON_OPEN : ICON_OK}<span>${b.soon.length ? `Due in 7 days: ${esc(soonText)}` : "Nothing due in the next 7 days"}</span></li>
         <li>${ICON_OK}<span>${b.billCount} recurring ${b.billCount === 1 ? "bill" : "bills"} tracked</span></li>
       </ul>`;

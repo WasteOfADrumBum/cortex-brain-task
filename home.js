@@ -160,12 +160,12 @@
   // ---------- Money this month (desktop Home): the J&M P&L sheet, read in this browser like the Finances tab ----------
   async function loadMoney(fresh = false) {
     try {
-      const [{ loadSheetFinance }, { monthly, upcoming }] = await Promise.all([import("/finance-source.js"), import("/src/finance-sheet.js")]);
+      const [{ loadSheetFinance }, { upcoming }, { buildModel }] = await Promise.all([import("/finance-source.js"), import("/src/finance-sheet.js"), import("/src/finance-model.js")]);
       const r = await loadSheetFinance({ fresh });
       if ("message" in r) { HomeDesk.money({ message: r.message }); return; }
       const f = r.result.finance;
-      const m = monthly(f);
-      HomeDesk.money({ body: { income: m.income, out: m.out, left: m.left, soon: upcoming(f, new Date(), 7), billCount: f.bills.length, modifiedTime: r.result.modifiedTime } });
+      const m = buildModel(f, new Date());
+      HomeDesk.money({ body: { income: m.income.net, out: m.commitments.total + (m.allocation.recorded.savings || 0), left: m.unallocated.recorded, leftLabel: m.unallocated.label, complete: m.unallocated.complete, attention: m.attention.filter((a) => a.level === "high").length, soon: upcoming(f, new Date(), 7), billCount: f.bills.length, modifiedTime: r.result.modifiedTime } });
     } catch {
       HomeDesk.money({ message: "Couldn't read the finance sheet." });
     }

@@ -10,7 +10,7 @@ Six tabs in the shared top bar, one clean URL each (`vercel.json` turns on `clea
 | --- | --- | --- |
 | Home | `/` | Today strip (date, time, weather with today's high and low), today's schedule with the largest open block, Top 3 priorities ranked by rules with a short why, the morning briefing with the first two approvals, Second Brain summary, links to every tab and your quick links |
 | Planner | `/planner` | Tasks, today, this week and this month (see below) |
-| Finances | `/finances` | Read straight from the J&M P&L Google Sheet (`financeSheetId` in `config.js`) in the browser: each month (take-home, out, left over), bills and debt payments due in the next 14 days, the 50/30/20 split against its targets, bills by section, debt, and savings against the safety net. Nothing to paste; the numbers never reach the Cortex server |
+| Finances | `/finances` | Read straight from the J&M P&L Google Sheet (`financeSheetId` in `config.js`) in the browser: an overview (take-home, commitments, unallocated in the recorded plan, emergency coverage), what needs attention in the sheet, paydays and bills for the next 31 days, the monthly plan against 50/30/20, savings buckets and runway, debt, trends, and every bill. Each figure says whether it's recorded, an estimate, confirmed or unknown; see [docs/finances.md](docs/finances.md). Nothing to paste; the numbers never reach the Cortex server |
 | News | `/news` | Headlines from the free RSS feeds in `config/news-feeds.json`, one section per category, with a filter bar (All, Work, Life, each category). Broken feeds are skipped and named. Home shows the newest 3 Work headlines |
 | Vault | `/vault` | Every note with its title and one-line summary (frontmatter `name` and `description`), type tag, filters, search and an in-app reader |
 | Briefing | `/briefing` | Not a tab; linked from Home. Today's briefing in full (summary, needs attention, email) from `/Cortex/briefings/YYYY-MM-DD.md` in Drive, and every proposal from it as a card with **Approve** and **Reject**. Reschedules and moves get a 10-second **Undo**. Actions Cortex doesn't run are shown read-only as "Not supported" |
@@ -67,7 +67,7 @@ Google's iCal feed can lag your live calendar by minutes to a few hours.
 | `index.html`, `home.js` | Home tab |
 | `vault.html`, `vault.js` | Vault tab |
 | `ops.html`, `ops.js` | Ops tab |
-| `finances.html`, `finances.js` | Finances tab, read from the budget sheet by `finance-source.js` (Drive export as .xlsx), `src/xlsx-lite.js` and `src/finance-sheet.js` |
+| `finances.html`, `finances.js` | Finances tab, read from the budget sheet by `finance-source.js` (Drive export as .xlsx), `src/xlsx-lite.js` and `src/finance-sheet.js`, worked out by `src/finance-model.js` |
 | `news.html`, `news.js` | News tab |
 | `briefing.html`, `briefing.js`, `home-assistant.js`, `assistant-ui.js` | Briefing page and Home's briefing panel: reading the briefing, approval cards, Undo (rules in `src/briefing-lib.js`, `src/approvals-lib.js`) |
 | `config/priorities.json`, `src/priorities-lib.js` | Home's Top 3 rules and weights |
