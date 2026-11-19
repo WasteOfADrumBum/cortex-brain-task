@@ -282,7 +282,7 @@ export interface SheetFinance {
   /** Tabs Cortex looked for and didn't find. */
   missing: string[];
 }
-export type FinStatus = "confirmed" | "recorded" | "estimate" | "unknown" | "conflict" | "computed";
+export type FinStatus = "confirmed" | "recorded" | "reported" | "estimate" | "unknown" | "conflict" | "computed";
 export interface FinAttention { id: string; level: "high" | "medium" | "low"; kind: "missing" | "conflict" | "undated" | "unresolved" | "change"; title: string; text: string; ref: SheetRef | null }
 /** What the Finances tab and Home get: the model plus where it came from. */
 export interface SheetFinanceResult { finance: SheetFinance; modifiedTime: string | null; url: string; name: string; /** Tab name -> sheet gid, for links to a tab and range. */ gids?: Record<string, number> }

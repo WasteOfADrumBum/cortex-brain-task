@@ -14,7 +14,7 @@ const signed = (n) => (n == null ? "Unknown" : n < 0 ? `−${money(-n)}` : money
 const pct = (f) => (f == null ? "Unknown" : `${Math.round(f * 1000) / 10}%`);
 const monthsText = (n) => (n == null ? "Unknown" : `${(Math.round(n * 10) / 10).toFixed(1)} months`);
 const SECTIONS = ["fin-overview", "fin-attention", "fin-timeline", "fin-allocation", "fin-safety", "fin-debt", "fin-trends", "fin-bills", "fin-sources"];
-const ICON = { confirmed: "✓", recorded: "•", estimate: "≈", unknown: "?", conflict: "!", computed: "=" };
+const ICON = { confirmed: "✓", recorded: "•", reported: "•", estimate: "≈", unknown: "?", conflict: "!", computed: "=" };
 
 /** A status word with a shape, never colour alone. */
 const badge = (status, text = STATUS[status]) => `<span class="fin-badge b-${esc(status)}"><span aria-hidden="true">${ICON[status] || "•"}</span> ${esc(text)}</span>`;
@@ -83,11 +83,11 @@ function render({ finance: f, modifiedTime, url, name, gids }) {
 }
 
 // ---------- 1. Overview ----------
-function card(title, value, status, lines, extra = "") {
+function card(title, value, status, lines, extra = "", statusText = undefined) {
   return `<li class="fin-card panel">
     <h3 class="fin-card-title">${esc(title)}</h3>
     <p class="fin-card-value">${value}</p>
-    <p class="fin-card-status">${badge(status)}</p>
+    <p class="fin-card-status">${badge(status, statusText)}</p>
     ${lines.filter(Boolean).map((l) => `<p class="fin-card-line">${l}</p>`).join("")}
     ${extra}
   </li>`;
@@ -115,7 +115,7 @@ function renderOverview(m) {
       u.complete ? "" : `<strong>Incomplete.</strong> Not in the plan: ${esc(u.missing.map((x) => MISSING_WORD[x.key] || x.key).join(", "))}.`,
       u.afterEstimates != null && !u.complete ? `After sheet estimates: <strong>${signed(u.afterEstimates)}</strong> ${badge("estimate")}${u.afterEstimates < 0 ? " That's more going out than estimated take-home." : ""}` : "",
       "Not money to spend: the sheet has no dated cash balance or unpaid-bills list.",
-    ])}
+    ], "", u.complete ? undefined : "Incomplete")}
     ${card("Emergency coverage", cov.valid ? `About ${monthsText(cov.normal)}` : "Unknown", cov.valid ? (cov.confirmed ? "confirmed" : "estimate") : "unknown", cov.valid ? [
       `Job loss: about ${monthsText(cov.jobLoss)}${cov.insurance != null ? ", with replacement health insurance" : ""}.`,
       `Cash counted: ${money(cov.cash)}${cov.cashDate ? `, ${cov.cashDateKind === "report" ? "report date" : "as of"} ${esc(shortDate(cov.cashDate))}` : ", undated"}.${cov.cashDateKind === "report" ? " Not a bank balance date." : ""}`,
@@ -174,7 +174,7 @@ function renderAllocation(m) {
   $("fin-allocation").innerHTML = `
     <p class="fin-lead">Out of <strong>${money(a.income)}</strong> take-home a month ${badge(m.income.status)}</p>
     <div class="fin-bars">
-      <p class="fin-bar-label">Recorded plan ${badge("recorded")}</p>${stack(recParts, base)}
+      <p class="fin-bar-label">Recorded plan</p>${stack(recParts, base)}
       <p class="fin-bar-label">Plan + sheet estimates ${badge("estimate")}${over ? ` <strong class="fin-over">Over by ${money(over)}</strong>` : ""}</p>${stack(estParts, base)}
       <p class="fin-bar-label">Actual</p>
       ${a.actual.available ? stack([{ key: "needs", amount: a.actual.needs }, { key: "wants", amount: a.actual.wants }, { key: "savings", amount: a.actual.savings }, { key: "left", amount: Math.max(0, a.actual.income - a.actual.needs - a.actual.wants - a.actual.savings) }], Math.max(base, a.actual.income)) : `<p class="fin-unavailable">${badge("unknown", "Unavailable")} ${esc(a.actual.reason)}</p>`}
@@ -229,7 +229,7 @@ function renderDebt(m) {
     <p class="fin-lead">Required each month: <strong>${money(d.requiredMonthly)}</strong> ${badge("recorded")}${d.cardPayments ? ` + card minimums ${money(d.cardPayments.amount)} ${badge(d.cardPayments.status)}` : ""}</p>
     ${d.mortgages.map((l) => `<h3 class="fin-h3">${esc(l.name)}</h3>
       <dl class="fin-facts">
-        <div><dt>Balance</dt><dd>${money(l.balance)} ${badge("recorded")}${l.date ? ` <span class="fin-date">note dated ${esc(shortDate(l.date))}</span>` : ""}</dd></div>
+        <div><dt>Balance</dt><dd>${money(l.balance)} ${badge("reported")}${l.date ? ` <span class="fin-date">note dated ${esc(shortDate(l.date))}</span>` : ""}</dd></div>
         ${l.estimatePrincipal != null ? `<div><dt>Estimated now</dt><dd>${money(l.estimatePrincipal)} ${badge("estimate")}</dd></div>` : ""}
         <div><dt>Payment</dt><dd>${money(l.monthly, true)} a month${escrow ? ", with escrow" : ""}</dd></div>
         <div><dt>APR</dt><dd>${l.apr != null ? pct(l.apr) : "Not recorded"}</dd></div>

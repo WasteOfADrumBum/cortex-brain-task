@@ -28,6 +28,7 @@ import { amount, percent, isoDate, noteDate, nextDue } from './finance-sheet.js'
 export const STATUS = /** @type {const} */ ({
   confirmed: 'Confirmed',
   recorded: 'Recorded plan',
+  reported: 'Reported',
   estimate: 'Estimate',
   unknown: 'Unknown',
   conflict: 'Conflict',
@@ -282,11 +283,11 @@ export function buildModel(f, today) {
   const knownTotal = (/** @type {{ balance: number | null }[]} */ xs) => (xs.length && xs.every((x) => x.balance != null) ? sum(xs.map((x) => x.balance)) : xs.length ? null : 0);
   const otherTotal = knownTotal(otherHousehold);
   const buckets = [
-    { key: 'bills', label: 'Bills reserve', amount: knownTotal(billsAccounts), status: /** @type {FinStatus} */ ('recorded'), accounts: billsAccounts.map((a) => a.name), date: savingsNoteDate, dateKind: 'note', note: 'Pays upcoming bills. Not emergency cash.', ref: billsAccounts[0]?.ref || null },
+    { key: 'bills', label: 'Bills reserve', amount: knownTotal(billsAccounts), status: /** @type {FinStatus} */ ('reported'), accounts: billsAccounts.map((a) => a.name), date: savingsNoteDate, dateKind: 'note', note: 'Pays upcoming bills. Not emergency cash.', ref: billsAccounts[0]?.ref || null },
     { key: 'emergency', label: 'Set aside for emergencies', amount: overrides.cash, status: /** @type {FinStatus} */ (overrides.cash != null ? 'confirmed' : 'unknown'), accounts: [], date: overrides.asOf, dateKind: overrides.asOf ? 'source' : 'none', note: overrides.cash != null ? 'Confirmed on Dashboard Data.' : 'Not designated in the sheet yet (Dashboard Data override is blank).', ref: ovCash?.ref || null },
-    { key: 'other', label: 'Other household savings', amount: otherTotal == null ? null : Math.max(0, otherTotal - (overrides.cash ?? 0)), status: /** @type {FinStatus} */ ('recorded'), accounts: otherHousehold.map((a) => a.name), date: savingsNoteDate, dateKind: 'note', note: overrides.cash == null ? 'The coverage estimate counts these as available.' : 'After the amount set aside for emergencies.', ref: otherHousehold[0]?.ref || null },
-    { key: 'children', label: "Children's savings", amount: knownTotal(children), status: /** @type {FinStatus} */ ('recorded'), accounts: children.map((a) => a.name), date: savingsNoteDate, dateKind: 'note', note: "The kids' money. Not household cash.", ref: children[0]?.ref || null },
-    { key: 'retirement', label: 'Retirement', amount: amount(eVerified?.value), status: /** @type {FinStatus} */ (eVerified ? 'recorded' : 'unknown'), accounts: [], date: eVerifiedDate, dateKind: eVerifiedDate ? 'source' : 'none', note: 'Locked up for retirement. Not emergency cash.', ref: eVerified?.ref || payrollRef },
+    { key: 'other', label: 'Other household savings', amount: otherTotal == null ? null : Math.max(0, otherTotal - (overrides.cash ?? 0)), status: /** @type {FinStatus} */ ('reported'), accounts: otherHousehold.map((a) => a.name), date: savingsNoteDate, dateKind: 'note', note: overrides.cash == null ? 'The coverage estimate counts these as available.' : 'After the amount set aside for emergencies.', ref: otherHousehold[0]?.ref || null },
+    { key: 'children', label: "Children's savings", amount: knownTotal(children), status: /** @type {FinStatus} */ ('reported'), accounts: children.map((a) => a.name), date: savingsNoteDate, dateKind: 'note', note: "The kids' money. Not household cash.", ref: children[0]?.ref || null },
+    { key: 'retirement', label: 'Retirement', amount: amount(eVerified?.value), status: /** @type {FinStatus} */ (eVerified ? 'reported' : 'unknown'), accounts: [], date: eVerifiedDate, dateKind: eVerifiedDate ? 'source' : 'none', note: 'Locked up for retirement. Not emergency cash.', ref: eVerified?.ref || payrollRef },
   ];
 
   // ----- Emergency coverage -----

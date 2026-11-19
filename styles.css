@@ -265,7 +265,7 @@ button, input { font: inherit; color: inherit; }
 /* Status badges: a shape plus a word. */
 .fin-badge { display: inline-flex; align-items: center; gap: 4px; padding: 1px 9px; border-radius: 12px; font-size: 0.82em; font-weight: 700; line-height: 1.5; white-space: nowrap; border: 1px solid currentColor; vertical-align: 0.1em; }
 .b-confirmed { color: #7dffc0; }
-.b-recorded { color: #9fe8ff; }
+.b-recorded, .b-reported { color: #9fe8ff; }
 .b-estimate { color: #ffd08a; border-style: dashed; }
 .b-unknown { color: #d7d0ff; border-style: dotted; }
 .b-conflict { color: #ffa3ab; }
@@ -338,7 +338,7 @@ button, input { font: inherit; color: inherit; }
 .fin-table .num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
 .fin-table tbody th { font-weight: 700; }
 .fin-total th, .fin-total td { font-weight: 700; color: #f2fcff; border-top: 1px solid var(--line-strong); }
-.fin-scroll { max-height: none; margin-top: 12px; overflow-x: auto; }
+.fin-readable .fin-scroll { max-height: none; margin-top: 12px; overflow-x: auto; overflow-y: visible; }
 .fin-scroll:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
 .fin-row-note { font-weight: 400; font-size: 0.9em; margin-top: 4px; max-width: 48ch; }
 .fin-row-note summary { cursor: pointer; color: var(--cyan-soft); min-height: 24px; }
