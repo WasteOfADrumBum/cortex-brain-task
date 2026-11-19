@@ -9,7 +9,7 @@ const MISS = { status: 404, headers: { 'content-type': 'text/plain', 'cache-cont
 
 /** The screenshot's image bytes and type, or null. Exported for tests. */
 export async function screenshot(/** @type {string} */ site) {
-  const api = `https://api.microlink.io/?${new URLSearchParams({ url: site, screenshot: 'true', meta: 'false', 'viewport.width': '1280', 'viewport.height': '800', waitUntil: 'networkidle2' })}`;
+  const api = `https://api.microlink.io/?${new URLSearchParams({ url: site, screenshot: 'true', meta: 'false', 'viewport.width': '1280', 'viewport.height': '800', 'viewport.deviceScaleFactor': '1', waitUntil: 'networkidle2' })}`;
   try {
     const res = await fetch(api, { headers: { accept: 'application/json' }, signal: AbortSignal.timeout(20000) });
     if (!res.ok) return null;

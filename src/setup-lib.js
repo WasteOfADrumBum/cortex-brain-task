@@ -30,7 +30,7 @@ export const CONNECTIONS = [
     id: 'ingest',
     label: 'Finance automation',
     vars: ['CORTEX_INGEST_TOKEN'],
-    unlocks: 'Only for the older monthly finance JSON import. Finances now reads your budget sheet directly. Optional.',
+    unlocks: 'Only for the older monthly finance JSON import. Finances now reads your budget sheet directly.',
     optional: true,
   },
 ];

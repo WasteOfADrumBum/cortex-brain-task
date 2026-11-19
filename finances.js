@@ -84,7 +84,8 @@ function renderSplit(f) {
   const max = Math.max(...f.allocation.flatMap((a) => [a.actualShare ?? 0, a.targetShare ?? 0]), 0.01);
   $("fin-split").innerHTML = `<ul class="fin-split-list">${f.allocation.map((a) => {
     const diff = a.actualShare != null && a.targetShare != null ? a.actualShare - a.targetShare : null;
-    const words = diff == null ? "" : Math.abs(diff) < 0.005 ? "On target." : diff > 0 ? `${pct(diff)} over the target.` : `${pct(-diff)} under the target.`;
+    const pts = (d) => `${Math.round(d * 1000) / 10} ${Math.round(d * 1000) === 10 ? "point" : "points"}`;
+    const words = diff == null ? "" : Math.abs(diff) < 0.005 ? "On target." : diff > 0 ? `${pts(diff)} over the target.` : `${pts(-diff)} under the target.`;
     const savingsLike = /sav/i.test(a.category);
     const good = diff == null ? "" : (savingsLike ? diff >= 0 : diff <= 0) ? "good" : "warn";
     return `<li>
