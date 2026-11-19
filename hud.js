@@ -62,5 +62,35 @@ const HUD = (() => {
     host.replaceChildren(svg);
   }
 
-  return { ringClock, bars };
+  // ---------- Horizontal bars ----------
+  // rows: [{ label, value, text, tone }]. Each row writes its label and its number as text; the bar only repeats the
+  // number and is hidden from screen readers, so the list reads the same with or without seeing the bars.
+  // max: the value that fills a bar (defaults to the largest value). tone: "", "good", "warn" or "bad".
+  function hbars(host, rows, max) {
+    const top = max ?? Math.max(1, ...rows.map((r) => r.value || 0));
+    const ul = document.createElement("ul");
+    ul.className = "hbars";
+    for (const r of rows) {
+      const li = document.createElement("li");
+      li.className = `hbar${r.tone ? ` hbar-${r.tone}` : ""}`;
+      const name = document.createElement("span");
+      name.className = "hbar-label";
+      name.textContent = r.label;
+      const track = document.createElement("span");
+      track.className = "hbar-track";
+      track.setAttribute("aria-hidden", "true");
+      const fill = document.createElement("span");
+      fill.className = "hbar-fill";
+      fill.style.width = `${Math.max(r.value > 0 ? 2 : 0, Math.min(100, Math.round(((r.value || 0) / top) * 100)))}%`;
+      track.append(fill);
+      const val = document.createElement("span");
+      val.className = "hbar-value";
+      val.textContent = r.text;
+      li.append(name, track, val);
+      ul.append(li);
+    }
+    host.replaceChildren(ul);
+  }
+
+  return { ringClock, bars, hbars };
 })();

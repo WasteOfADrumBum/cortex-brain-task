@@ -2,7 +2,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { validateFinance, shrinkWarnings, summarize } from "../src/finance-lib.js";
-import demo from "../src/demo/index.js";
 
 const sample = () => ({
   month: "2026-10", periodStart: "2026-10-01", periodEnd: "2026-10-13", source: "chatgpt", generatedAt: "2026-10-13T07:00:00-04:00",
@@ -61,11 +60,6 @@ test("shrink warnings and the summary", () => {
   assert.deepEqual(late.overdue.map((b) => b.name), ["Electric"]);
 });
 
-test("the demo year is valid month by month", () => {
-  const y = demo.finances(new Date());
-  assert.ok(y.months.length >= 1);
-  for (const m of y.months) { const { savedAt, ...month } = m; assert.equal(validateFinance(month).ok, true, `${m.month}: ${validateFinance(month).message}`); }
-});
 
 // A fake Drive: files by id with name, parents and content; enough of the REST API for api/_drive.js.
 function fakeDrive() {

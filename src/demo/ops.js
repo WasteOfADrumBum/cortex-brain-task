@@ -1,6 +1,6 @@
 // Sample Ops data for /demo: four made-up projects, one of them with a failed deploy so the demo shows every state.
 // Same shape as /api/ops (src/types.d.ts), built with the same helpers so the totals and chart add up.
-import { weeks, totals } from "../ops-lib.js";
+import { weeks, totals, slug } from "../ops-lib.js";
 /** @typedef {import("../types").OpsResponse} OpsResponse */
 /** @typedef {import("../types").OpsProject} OpsProject */
 
@@ -32,6 +32,7 @@ export function ops(now) {
         { title: "Fix focus ring on the dark theme", mergedAt: merged["Atlas Notes"][2], summary: "Focus outline now meets 3:1 contrast.", url: "https://example.com/pr/3" },
       ],
       openPrs: 2, failedLast7Days: 0, npm: null,
+      slug: slug("Atlas Notes"), builds: { total: 15, failed: 0 }, check: { up: true, status: 200, ms: 184 },
     },
     {
       name: "Pixel Kit", repo: "example/pixel-kit", url: "https://example.com/pixel-kit",
@@ -42,6 +43,7 @@ export function ops(now) {
         { title: "Docs: colour tokens", mergedAt: merged["Pixel Kit"][2], summary: "", url: "https://example.com/pr/6" },
       ],
       openPrs: 1, failedLast7Days: 1, npm: { name: "pixel-kit", version: "2.3.1" },
+      slug: slug("Pixel Kit"), builds: { total: 9, failed: 2 }, check: { up: true, status: 200, ms: 412 },
     },
     {
       name: "Trail Journal", repo: "example/trail-journal", url: "https://example.com/trail",
@@ -52,6 +54,7 @@ export function ops(now) {
         { title: "Larger tap targets", mergedAt: merged["Trail Journal"][2], summary: "Every control is at least 24 by 24 pixels.", url: "https://example.com/pr/9" },
       ],
       openPrs: 0, failedLast7Days: 0, npm: null,
+      slug: slug("Trail Journal"), builds: { total: 7, failed: 1 }, check: { up: false, status: 503, ms: 96 },
     },
     {
       name: "Helper CLI", repo: "example/helper-cli", url: null, deploy: null,
@@ -61,15 +64,24 @@ export function ops(now) {
         { title: "Shell completions", mergedAt: merged["Helper CLI"][2], summary: "Bash and zsh completions.", url: "https://example.com/pr/12" },
       ],
       openPrs: 3, failedLast7Days: 0, npm: { name: "helper-cli", version: "1.4.0" },
+      slug: slug("Helper CLI"), builds: null, check: null,
     },
   ];
   const deploys = { "Atlas Notes": [ago(0, 4), ago(1), ago(2), ago(4)], "Pixel Kit": [ago(0, 9), ago(3)], "Trail Journal": [ago(0, 0.1), ago(1.5)], "Helper CLI": [] };
+  // Production deploys over 12 weeks (days ago), for the deploys-per-week chart.
+  const quarter = {
+    "Atlas Notes": [0.2, 1, 2, 4, 5, 8, 10, 15, 17, 22, 29, 31, 36, 44, 50, 57, 63, 71, 78],
+    "Pixel Kit": [0.4, 3, 9, 13, 20, 27, 41, 48, 69],
+    "Trail Journal": [0.1, 1.5, 6, 19, 26, 40, 54],
+    "Helper CLI": [],
+  };
   const rows = projects.map((p) => ({ merged: merged[p.name], deploys: deploys[/** @type {keyof typeof deploys} */ (p.name)], failed: p.failedLast7Days }));
   return {
     generatedAt: now.toISOString(),
     projects,
     totals: totals(rows, now),
     weeks: weeks(projects.map((p) => ({ name: p.name, merged: merged[p.name] })), now),
+    deployWeeks: weeks(projects.map((p) => ({ name: p.name, merged: quarter[/** @type {keyof typeof quarter} */ (p.name)].map((d) => ago(d)) })), now),
     warnings: [],
   };
 }

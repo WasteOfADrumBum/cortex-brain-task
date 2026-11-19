@@ -1,12 +1,13 @@
 // GET /api/ops -> OpsResponse (src/types.d.ts): one card per project in config/ops.json, a totals strip and
-// merged PRs per week for the last 12 weeks. Reads GitHub (production deployments that Vercel reports, pull
+// merged PRs and production deploys per week for the last 12 weeks, build success from the newest deploys, and
+// whether each live site answers right now (and how fast). Reads GitHub (production deployments that Vercel reports, pull
 // requests) and the public npm registry on request; stores nothing. Answers are cached for 5 minutes per instance.
 // Env: DASH_KEY (same as /api/tasks). GITHUB_TOKEN is optional but needed in practice: a fine-grained, read-only
 // token (Metadata, Contents, Deployments, Pull requests) for the listed repos. Without it GitHub allows 60 calls an
 // hour per server address, which a full refresh can use up.
 import { readFileSync } from 'node:fs';
 import { keyMatches } from './_key.js';
-import { deployState, firstLine, weeks, totals } from '../src/ops-lib.js';
+import { deployState, firstLine, weeks, totals, slug, buildRate } from '../src/ops-lib.js';
 
 /** @typedef {import('../src/types').OpsProject} OpsProject */
 /** @typedef {import('../src/types').OpsResponse} OpsResponse */
@@ -53,20 +54,34 @@ async function npmVersion(/** @type {string} */ name) {
   }
 }
 
+/** Is the live site up right now, and how long did it take to answer? Never throws. */
+async function ping(/** @type {string} */ url) {
+  const start = Date.now();
+  try {
+    const res = await fetch(url, { headers: { 'user-agent': 'cortex-ops/1.0 (uptime check)' }, redirect: 'follow', signal: AbortSignal.timeout(8000) });
+    const ms = Date.now() - start;
+    res.body?.cancel().catch(() => {});
+    return { up: res.status < 400, status: res.status, ms };
+  } catch {
+    return { up: false, status: null, ms: null };
+  }
+}
+
 /**
  * One project card plus the raw times the totals and chart need.
  * @param {OpsConfigProject} p
  * @param {Date} now
- * @returns {Promise<{ card: OpsProject, merged: string[], deploys: string[], failed: number | null }>}
+ * @returns {Promise<{ card: OpsProject, merged: string[], deploys: string[], quarter: string[], failed: number | null }>}
  */
 async function project(p, now) {
   const repo = encodeURI(p.repo);
   /** @type {OpsProject} */
-  const card = { name: p.name, repo: p.repo, url: p.url, deploy: null, mergedPrs: [], openPrs: null, failedLast7Days: null, npm: p.npm ? { name: p.npm, version: null } : null };
+  const card = { name: p.name, repo: p.repo, url: p.url, deploy: null, mergedPrs: [], openPrs: null, failedLast7Days: null, npm: p.npm ? { name: p.npm, version: null } : null, slug: slug(p.name), builds: null, check: null };
   const npm = p.npm ? npmVersion(p.npm) : Promise.resolve(null);
+  const check = p.url ? ping(p.url) : Promise.resolve(null);
   try {
     const [deploys, closed, open] = await Promise.all([
-      gh(`/repos/${repo}/deployments?environment=Production&per_page=30`),
+      gh(`/repos/${repo}/deployments?environment=Production&per_page=100`),
       gh(`/repos/${repo}/pulls?state=closed&sort=updated&direction=desc&per_page=100`),
       gh(`/repos/${repo}/pulls?state=open&per_page=100`),
     ]);
@@ -75,9 +90,13 @@ async function project(p, now) {
     card.openPrs = open.length;
 
     const week = deploys.filter((/** @type {any} */ d) => now.getTime() - Date.parse(d.created_at) < 7 * DAY);
-    // The newest status of the latest deploy and of each deploy in the last 7 days (at most 10).
-    const recent = [deploys[0], ...week.slice(0, 10).filter((/** @type {any} */ d) => d !== deploys[0])].filter(Boolean);
-    const states = await Promise.all(recent.map(async (/** @type {any} */ d) => (await gh(`/repos/${repo}/deployments/${d.id}/statuses?per_page=1`))[0]));
+    const quarter = deploys.filter((/** @type {any} */ d) => now.getTime() - Date.parse(d.created_at) < 84 * DAY);
+    // The newest status of the latest deploy, each deploy in the last 7 days (at most 10) and the newest 15 in the
+    // last 12 weeks (for the build success chart), each read once.
+    const recent = [...new Set([deploys[0], ...week.slice(0, 10), ...quarter.slice(0, 15)].filter(Boolean))];
+    // One unreadable status leaves that deploy as "unknown" rather than failing the whole card.
+    const states = await Promise.all(recent.map(async (/** @type {any} */ d) => (await gh(`/repos/${repo}/deployments/${d.id}/statuses?per_page=1`).catch(() => []))[0]));
+    const stateOf = new Map(recent.map((d, i) => [d.id, deployState(states[i]?.state)]));
     if (deploys[0]) {
       const latest = states[0];
       const commit = await gh(`/repos/${repo}/commits/${deploys[0].sha}`).catch(() => null);
@@ -88,14 +107,16 @@ async function project(p, now) {
         url: latest?.environment_url || p.url,
       };
     }
-    const weekIds = new Set(week.slice(0, 10).map((/** @type {any} */ d) => d.id));
-    card.failedLast7Days = recent.filter((d, i) => weekIds.has(d.id) && deployState(states[i]?.state) === 'failed').length;
+    card.failedLast7Days = week.slice(0, 10).filter((/** @type {any} */ d) => stateOf.get(d.id) === 'failed').length;
+    card.builds = buildRate(quarter.slice(0, 15).map((/** @type {any} */ d) => stateOf.get(d.id) ?? 'unknown'));
+    card.check = await check;
     card.npm = p.npm ? { name: p.npm, version: await npm } : null;
-    return { card, merged: merged.map((/** @type {any} */ pr) => pr.merged_at), deploys: week.map((/** @type {any} */ d) => d.created_at), failed: card.failedLast7Days };
+    return { card, merged: merged.map((/** @type {any} */ pr) => pr.merged_at), deploys: week.map((/** @type {any} */ d) => d.created_at), quarter: quarter.map((/** @type {any} */ d) => d.created_at), failed: card.failedLast7Days };
   } catch (e) {
     card.error = e instanceof GitHubError ? e.message : 'Could not read this project';
     card.npm = p.npm ? { name: p.npm, version: await npm } : null;
-    return { card, merged: [], deploys: [], failed: null };
+    card.check = await check;
+    return { card, merged: [], deploys: [], quarter: [], failed: null };
   }
 }
 
@@ -104,7 +125,8 @@ export async function build(list, now) {
   const rows = await Promise.all(list.map((p) => project(p, now)));
   const named = rows.map((r) => ({ name: r.card.name, merged: r.merged }));
   const warnings = rows.filter((r) => r.card.error).map((r) => `${r.card.name}: ${r.card.error}`);
-  return { generatedAt: now.toISOString(), projects: rows.map((r) => r.card), totals: totals(rows, now), weeks: weeks(named, now), warnings };
+  const deployed = rows.map((r) => ({ name: r.card.name, merged: r.quarter }));
+  return { generatedAt: now.toISOString(), projects: rows.map((r) => r.card), totals: totals(rows, now), weeks: weeks(named, now), deployWeeks: weeks(deployed, now), warnings };
 }
 
 export async function GET(/** @type {Request} */ request) {

@@ -144,6 +144,12 @@ export interface OpsProject {
   npm: { name: string; version: string | null } | null;
   /** Why the card has no GitHub data. */
   error?: string;
+  /** Logo file name in /assets/projects, without the extension. */
+  slug: string;
+  /** The newest production deploys (at most 15, last 12 weeks) that finished, and how many failed. */
+  builds: { total: number; failed: number } | null;
+  /** The live site answered right now: up (status under 400), status code and time to answer in ms. */
+  check: { up: boolean; status: number | null; ms: number | null } | null;
 }
 export interface OpsWeek {
   /** Monday of the week, "YYYY-MM-DD" (UTC). */
@@ -167,6 +173,8 @@ export interface OpsResponse {
   totals: OpsTotals;
   /** The last 12 weeks, oldest first. */
   weeks: OpsWeek[];
+  /** Production deploys per week over the same 12 weeks, per project name. */
+  deployWeeks: OpsWeek[];
   warnings: string[];
 }
 

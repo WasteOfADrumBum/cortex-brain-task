@@ -23,14 +23,14 @@ export const CONNECTIONS = [
     id: 'google',
     label: 'Google Drive and Calendar (server)',
     vars: ['GOOGLE_CLIENT_ID', 'GOOGLE_CLIENT_SECRET', 'GOOGLE_REFRESH_TOKEN'],
-    unlocks: 'Saving months in Finances, approving briefing proposals, and the audit log.',
+    unlocks: 'Approving briefing proposals and the audit log. Finances reads your budget sheet in the browser and does not need this.',
     optional: false,
   },
   {
     id: 'ingest',
     label: 'Finance automation',
     vars: ['CORTEX_INGEST_TOKEN'],
-    unlocks: 'Lets a routine send the monthly finance JSON without pasting it. Optional.',
+    unlocks: 'Only for the older monthly finance JSON import. Finances now reads your budget sheet directly. Optional.',
     optional: true,
   },
 ];

@@ -270,7 +270,7 @@
   // ---------- Go to: every tab, plus quick links ----------
   const TABS = [
     ["/planner", "Planner", "Schedule, open hours and task buckets", ""],
-    ["/finances", "Finances", "This month in detail, plus the year", ""],
+    ["/finances", "Finances", "Each month, bills due, debt and savings", ""],
     ["/briefing", "Briefing", "This morning's briefing and approvals", ""],
     ["/news", "News", "Headlines by category", ""],
     ["/vault", "Vault", "Notes you can understand and find", ""],

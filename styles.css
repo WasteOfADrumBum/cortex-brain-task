@@ -158,6 +158,35 @@ button, input { font: inherit; color: inherit; }
 .project-state .check-icon { flex: none; }
 .project-facts { margin-top: 8px; color: var(--muted); }
 .project-sub { margin: 14px 0 6px; font-family: var(--font-display); font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--muted); }
+.project-card { display: flex; flex-direction: column; }
+.project-preview { position: relative; margin: -4px -6px 14px; aspect-ratio: 16 / 10; overflow: hidden; border-radius: 4px; border: 1px solid var(--line); background: linear-gradient(160deg, #0d2236, #04080e); }
+.preview-shot { width: 100%; height: 100%; object-fit: cover; object-position: top center; display: block; }
+.project-preview.is-logo .preview-shot { object-fit: contain; object-position: center; }
+.preview-logo { position: absolute; left: 10px; bottom: 10px; width: 64px; height: 40px; object-fit: cover; border-radius: 4px; border: 1px solid var(--line-strong); background: var(--bg); box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5); }
+.preview-initials { display: flex; width: 100%; height: 100%; align-items: center; justify-content: center; font-family: var(--font-display); font-size: 40px; font-weight: 800; letter-spacing: 0.08em; color: var(--cyan-soft); }
+.project-actions { list-style: none; margin: auto 0 0; padding: 14px 0 0; display: flex; flex-wrap: wrap; gap: 8px; border-top: 1px dashed var(--line); }
+.project-card .pr-list, .project-card .panel-note { margin-bottom: 4px; }
+.project-actions .btn { display: inline-flex; align-items: center; min-height: 44px; padding: 0 14px; text-decoration: none; }
+.project-actions .btn:focus-visible { outline: 2px solid var(--cyan); outline-offset: 2px; }
+.trends-panel { margin-bottom: var(--gap); }
+.trends-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px 28px; }
+.trend .project-sub { margin-top: 0; }
+@media (max-width: 900px) { .trends-grid { grid-template-columns: minmax(0, 1fr); } }
+/* Horizontal bars (HUD.hbars): the label and the number are text; the bar is aria-hidden. */
+.hbars { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.hbar { display: grid; grid-template-columns: minmax(7em, 30%) minmax(60px, 1fr) auto; gap: 10px; align-items: center; }
+.hbar-label { font-weight: 600; overflow-wrap: anywhere; }
+.hbar-track { display: block; height: 10px; background: rgba(67, 217, 255, 0.1); border-radius: 5px; overflow: hidden; }
+.hbar-fill { display: block; height: 100%; background: var(--cyan); border-radius: 5px; }
+.hbar-good .hbar-fill { background: var(--green); }
+.hbar-warn .hbar-fill { background: var(--amber); }
+.hbar-bad .hbar-fill { background: repeating-linear-gradient(135deg, var(--red) 0 5px, #b34552 5px 10px); }
+.hbar-value { font-family: var(--font-mono); font-size: 13px; color: var(--text); white-space: nowrap; }
+.hbar-bad .hbar-value { color: #ffb3ba; }
+@media (max-width: 560px) {
+  .hbar { grid-template-columns: minmax(0, 1fr) auto; }
+  .hbar-track { grid-column: 1 / -1; grid-row: 2; }
+}
 .pr-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
 .pr-list li { display: flex; flex-direction: column; }
 .pr-list a { font-weight: 700; min-height: 24px; }
