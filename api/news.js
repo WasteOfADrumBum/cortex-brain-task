@@ -1,10 +1,11 @@
 // GET /api/news -> NewsResponse (src/types.d.ts): headlines from the free RSS and Atom feeds in
 // config/news-feeds.json, newest first, at most `perCategory` per category, duplicates removed. A feed that
-// fails is skipped and named in `failed`. No API keys and no storage; answers are cached 30 minutes per instance.
+// fails is skipped and named in `failed`. Each headline has a short summary and a picture from the feed, or else from
+// the article page's own preview tags. No API keys and no storage; answers are cached 30 minutes per instance.
 // Env: DASH_KEY (same as /api/tasks).
 import { readFileSync } from 'node:fs';
 import { keyMatches } from './_key.js';
-import { parseFeed, merge } from '../src/news-lib.js';
+import { parseFeed, merge, pageMeta } from '../src/news-lib.js';
 
 /** @typedef {import('../src/types').NewsResponse} NewsResponse */
 /** @typedef {{ name: string, group: 'Work' | 'Life', feeds: string[] }} FeedCategory */
@@ -28,6 +29,52 @@ async function get(/** @type {string} */ url) {
   }
 }
 
+const PAGE_LOOKUPS = 48;
+/** The article page's preview picture and description, or null when it doesn't answer within 4 seconds. */
+async function page(/** @type {string} */ url) {
+  try {
+    const res = await fetch(url, { headers: { accept: 'text/html', 'user-agent': 'Mozilla/5.0 (compatible; cortex-news/1.0)' }, redirect: 'follow', signal: AbortSignal.timeout(4000) });
+    if (!res.ok || !/html/i.test(res.headers.get('content-type') || '')) return null;
+    // The <head> is near the top; stop reading after about 200 KB.
+    const reader = res.body?.getReader();
+    if (!reader) return null;
+    let html = '';
+    const dec = new TextDecoder();
+    while (html.length < 200_000) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      html += dec.decode(value, { stream: true });
+      if (/<\/head>/i.test(html)) break;
+    }
+    reader.cancel().catch(() => {});
+    return pageMeta(html, res.url || url);
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Fills in a picture and a summary from the article's own page for headlines whose feed had neither: at most
+ * PAGE_LOOKUPS pages, twelve at a time, and none started after 8 seconds, so the route answers in time. Exported for tests.
+ * @param {NewsResponse['items']} items
+ */
+export async function enrich(items, budgetMs = 8000) {
+  const todo = items.filter((i) => !i.image || !i.summary).slice(0, PAGE_LOOKUPS);
+  const stop = Date.now() + budgetMs;
+  let next = 0;
+  async function worker() {
+    while (next < todo.length && Date.now() < stop) {
+      const item = todo[next++];
+      const meta = await page(item.url);
+      if (!meta) continue;
+      if (!item.image) item.image = meta.image;
+      if (!item.summary) item.summary = meta.summary;
+    }
+  }
+  await Promise.all(Array.from({ length: 12 }, worker));
+  return items;
+}
+
 /** Builds the full answer. Exported for tests. @param {{ categories: FeedCategory[], perCategory: number, homeGroups: ('Work' | 'Life')[] }} config @returns {Promise<NewsResponse>} */
 export async function build(config) {
   const jobs = config.categories.flatMap((c) => c.feeds.map((feed) => ({ category: c.name, group: c.group, feed })));
@@ -39,7 +86,7 @@ export async function build(config) {
   return {
     generatedAt: new Date().toISOString(),
     categories: config.categories.map(({ name, group }) => ({ name, group })),
-    items: merge(results.flatMap((r) => r.items), config.perCategory),
+    items: await enrich(merge(results.flatMap((r) => r.items), config.perCategory)),
     failed: results.filter((r) => !r.ok).map((r) => ({ category: r.j.category, feed: new URL(r.j.feed).hostname.replace(/^www\./, '') })),
     homeGroups: config.homeGroups,
   };

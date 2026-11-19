@@ -23,7 +23,7 @@
   <main id="main" class="page ops">
     <div class="page-head">
       <h1>Ops</h1>
-      <p class="page-lede">Is everything I run healthy, and what shipped: each project's live deploy and latest pull requests, then the Second Brain checks.</p>
+      <p class="page-lede">Is everything I run healthy, and what shipped: each project's site, live deploy and latest pull requests, trends over 12 weeks, then the Second Brain checks.</p>
     </div>
 
     <section class="panel totals-panel" aria-labelledby="h-totals">
@@ -52,6 +52,40 @@
           </table>
         </div>
       </details>
+    </section>
+
+    <section class="panel trends-panel" aria-labelledby="h-trends">
+      <h2 class="panel-title" id="h-trends">Trends</h2>
+      <div class="trends-grid">
+        <section class="trend" aria-labelledby="h-deploys">
+          <h3 class="project-sub" id="h-deploys">Live deploys per week</h3>
+          <div class="activity" id="deploys-chart"></div>
+          <p class="activity-caption" id="deploys-caption"></p>
+          <details class="data-table" id="deploys-table-wrap" hidden>
+            <summary>Show as a table</summary>
+            <div class="table-scroll" tabindex="0" role="region" aria-labelledby="deploys-table-caption">
+              <table id="deploys-table">
+                <caption id="deploys-table-caption">Live deploys per week, by project</caption>
+                <thead></thead>
+                <tbody></tbody>
+              </table>
+            </div>
+          </details>
+        </section>
+        <section class="trend" aria-labelledby="h-builds">
+          <h3 class="project-sub" id="h-builds">Build success, newest 15 deploys</h3>
+          <div id="builds-chart"><p class="panel-note">Loading…</p></div>
+        </section>
+        <section class="trend" aria-labelledby="h-prs-by">
+          <h3 class="project-sub" id="h-prs-by">Pull requests merged, last 12 weeks</h3>
+          <div id="prs-chart"><p class="panel-note">Loading…</p></div>
+        </section>
+        <section class="trend" aria-labelledby="h-up">
+          <h3 class="project-sub" id="h-up">Sites right now</h3>
+          <div id="up-chart"><p class="panel-note">Loading…</p></div>
+          <p class="activity-caption" id="up-caption"></p>
+        </section>
+      </div>
     </section>
 
     <div class="ops-grid">

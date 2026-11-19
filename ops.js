@@ -1,5 +1,5 @@
-// Cortex Ops: project cards (live deploy, open and latest merged pull requests, npm version) from /api/ops, the
-// shipping totals and 12-week chart, then the Second Brain checklist (health checks from Todoist, inbox from Drive),
+// Cortex Ops: project cards (site preview, live deploy, open and latest merged pull requests, npm version, links to the
+// site and GitHub) from /api/ops, the shipping totals, the 12-week charts and trends, then the Second Brain checklist (health checks from Todoist, inbox from Drive),
 // recent note activity and Drive storage.
 (() => {
   const CFG = window.CORTEX_CONFIG;
@@ -42,6 +42,36 @@
       : { body });
   }
 
+  // The top of each card: a screenshot of the live site (/api/preview, cached a day) with the project's logo in the
+  // corner, or the logo full size when there is no site. Logos are /assets/projects/<slug>.png, else the .svg
+  // placeholder, else the project's initials. Both pictures are decoration: the card's heading names the project.
+  const logoSrcs = (p) => [`/assets/projects/${p.slug}.png`, `/assets/projects/${p.slug}.svg`];
+  const initials = (name) => (name.match(/[A-Z0-9]+[a-z]*|[a-z]+/g) || ["?"]).slice(0, 2).map((w) => w[0].toUpperCase()).join("");
+  const img = (srcs, cls, name) => `<img class="${cls}" src="${esc(srcs[0])}" alt="" loading="lazy" decoding="async" data-next="${esc(srcs.slice(1).join("|"))}" data-name="${esc(name)}">`;
+  function preview(p) {
+    const logos = logoSrcs(p);
+    const shot = p.url && !Demo.on ? `/api/preview?project=${encodeURIComponent(p.name)}` : null;
+    return `<div class="project-preview${shot ? "" : " is-logo"}" aria-hidden="true">
+      ${shot ? img([shot, ...logos], "preview-shot", p.name) : img(logos, "preview-shot", p.name)}
+      ${shot ? img(logos, "preview-logo", p.name) : ""}
+    </div>`;
+  }
+  // When a picture fails, try the next source; after the last, show initials (or nothing for the corner logo).
+  document.addEventListener("error", (e) => {
+    const el = e.target;
+    if (!(el instanceof HTMLImageElement) || !el.closest(".project-preview")) return;
+    const [next, ...rest] = (el.dataset.next || "").split("|").filter(Boolean);
+    if (next) {
+      // A failed screenshot falls back to the logo, shown full size.
+      if (el.classList.contains("preview-shot") && !el.src.includes("/assets/")) el.closest(".project-preview").classList.add("is-logo");
+      el.dataset.next = rest.join("|");
+      el.src = next;
+      return;
+    }
+    if (el.classList.contains("preview-logo")) { el.remove(); return; }
+    el.outerHTML = `<span class="preview-initials">${esc(initials(el.dataset.name || ""))}</span>`;
+  }, true);
+
   function card(p) {
     const [icon, word, cls] = DEPLOY[p.deploy ? p.deploy.state : "none"];
     const deployLine = p.error ? esc(p.error)
@@ -52,6 +82,7 @@
       `${plural(p.failedLast7Days ?? 0, "failed deploy")} in the last 7 days`,
     ];
     if (p.npm) facts.push(`npm ${p.npm.name} ${p.npm.version ? `v${p.npm.version}` : "(version unavailable)"}`);
+    if (p.check) facts.push(p.check.up ? `site up${p.check.ms != null ? `, answered in ${p.check.ms} ms` : ""}` : `site not answering${p.check.status ? ` (error ${p.check.status})` : ""}`);
     const prs = p.mergedPrs.map((pr) => `<li>
         <a href="${esc(pr.url)}" target="_blank" rel="noopener">${esc(pr.title)}<span class="visually-hidden"> (opens in a new tab)</span></a>
         <span class="pr-meta">merged ${esc(day(pr.mergedAt))}</span>
@@ -60,12 +91,19 @@
     const name = p.url
       ? `<a href="${esc(p.url)}" target="_blank" rel="noopener">${esc(p.name)}<span class="visually-hidden"> (live site, opens in a new tab)</span></a>`
       : esc(p.name);
+    const gh = `https://github.com/${esc(p.repo)}`;
+    const newTab = `<span class="visually-hidden"> (opens in a new tab)</span>`;
     return `<li class="panel project-card">
+      ${preview(p)}
       <h3 class="project-name">${name}</h3>
       <p class="project-state check-${cls}"><span class="check-icon" aria-hidden="true">${icon}</span><span><strong>${word}.</strong> ${deployLine}</span></p>
       ${facts.length ? `<p class="project-facts">${facts.map(esc).join(" · ")}</p>` : ""}
       ${prs ? `<h4 class="project-sub">Last merged</h4><ul class="pr-list">${prs}</ul>` : p.error ? "" : '<p class="panel-note">No merged pull requests yet.</p>'}
-      <p class="panel-link"><a href="https://github.com/${esc(p.repo)}" target="_blank" rel="noopener">Open on GitHub<span class="visually-hidden"> (opens in a new tab)</span></a></p>
+      <ul class="project-actions" aria-label="${esc(p.name)} links">
+        ${p.url ? `<li><a class="btn btn-primary" href="${esc(p.url)}" target="_blank" rel="noopener">Open site${newTab}</a></li>` : ""}
+        <li><a class="btn" href="${gh}" target="_blank" rel="noopener">GitHub repo${newTab}</a></li>
+        <li><a class="btn" href="${gh}/pulls" target="_blank" rel="noopener">Pull requests${newTab}</a></li>
+      </ul>
     </li>`;
   }
 
@@ -78,6 +116,7 @@
       $("ships").replaceChildren();
       $("ships-table-wrap").hidden = true;
       note.hidden = true;
+      renderTrends(null, model.message);
       return;
     }
     const { projects, totals: t, weeks, warnings } = model.body;
@@ -102,6 +141,66 @@
     table.tHead.innerHTML = `<tr><th scope="col">Week of</th>${names.map((n) => `<th scope="col">${esc(n)}</th>`).join("")}<th scope="col">Total</th></tr>`;
     table.tBodies[0].innerHTML = weeks.map((w, i) => `<tr><th scope="row">${esc(day(w.start))}</th>${names.map((n) => `<td>${w.counts[n] || 0}</td>`).join("")}<td>${sums[i]}</td></tr>`).reverse().join("");
     $("ships-table-wrap").hidden = false;
+    renderTrends(model.body);
+  }
+
+  // ---------- Trends: deploys per week, build success, merged PRs per project, sites right now ----------
+  function renderTrends(body, message) {
+    if (!body) {
+      for (const id of ["builds-chart", "prs-chart", "up-chart"]) $(id).innerHTML = `<p class="panel-note">${esc(message)}</p>`;
+      $("deploys-chart").replaceChildren();
+      $("deploys-caption").textContent = message;
+      $("up-caption").textContent = "";
+      $("deploys-table-wrap").hidden = true;
+      return;
+    }
+    const { projects, weeks, deployWeeks = [] } = body;
+    const names = projects.map((p) => p.name);
+
+    if (deployWeeks.length) {
+      const sums = deployWeeks.map((w) => names.reduce((n, k) => n + (w.counts[k] || 0), 0));
+      HUD.bars($("deploys-chart"), sums, [[0, day(deployWeeks[0].start)], [6, day(deployWeeks[6].start)], [11, "This week"]]);
+      const total = sums.reduce((a, b) => a + b, 0);
+      const peak = sums.indexOf(Math.max(...sums));
+      const avg = Math.round((total / sums.length) * 10) / 10;
+      $("deploys-caption").textContent = `${plural(total, "live deploy")} in the last 12 weeks, about ${avg} a week${total ? `. Busiest week: ${day(deployWeeks[peak].start)} with ${sums[peak]}.` : "."}`;
+      const t = $("deploys-table");
+      t.tHead.innerHTML = `<tr><th scope="col">Week of</th>${names.map((n) => `<th scope="col">${esc(n)}</th>`).join("")}<th scope="col">Total</th></tr>`;
+      t.tBodies[0].innerHTML = deployWeeks.map((w, i) => `<tr><th scope="row">${esc(day(w.start))}</th>${names.map((n) => `<td>${w.counts[n] || 0}</td>`).join("")}<td>${sums[i]}</td></tr>`).reverse().join("");
+      $("deploys-table-wrap").hidden = false;
+    } else {
+      $("deploys-chart").replaceChildren();
+      $("deploys-caption").textContent = "No deploy history yet.";
+      $("deploys-table-wrap").hidden = true;
+    }
+
+    const withBuilds = projects.filter((p) => p.builds);
+    if (withBuilds.length) {
+      HUD.hbars($("builds-chart"), withBuilds.map((p) => {
+        const ok = p.builds.total - p.builds.failed;
+        const rate = ok / p.builds.total;
+        return { label: p.name, value: rate, text: `${Math.round(rate * 100)}% (${ok} of ${p.builds.total} built)`, tone: rate >= 0.95 ? "good" : rate >= 0.8 ? "warn" : "bad" };
+      }), 1);
+    } else $("builds-chart").innerHTML = '<p class="panel-note">No finished deploys in the last 12 weeks.</p>';
+
+    const merged = names.map((n) => ({ n, c: weeks.reduce((a, w) => a + (w.counts[n] || 0), 0) })).sort((a, b) => b.c - a.c);
+    HUD.hbars($("prs-chart"), merged.map(({ n, c }) => ({ label: n, value: c, text: plural(c, "pull request") })));
+
+    const live = projects.filter((p) => p.check);
+    if (live.length) {
+      const slowest = Math.max(1000, ...live.map((p) => p.check.ms || 0));
+      HUD.hbars($("up-chart"), live.map((p) => ({
+        label: p.name,
+        value: p.check.up ? p.check.ms || 0 : slowest,
+        text: p.check.up ? `Up · ${p.check.ms} ms` : `Down${p.check.status ? ` · error ${p.check.status}` : " · no answer"}`,
+        tone: !p.check.up ? "bad" : p.check.ms > 1500 ? "warn" : "good",
+      })), slowest);
+      const down = live.filter((p) => !p.check.up);
+      $("up-caption").textContent = `${down.length ? `${plural(down.length, "site")} not answering: ${down.map((p) => p.name).join(", ")}.` : `All ${live.length} sites answered.`} Checked ${Brain.ago(body.generatedAt)}; shorter bars are faster.`;
+    } else {
+      $("up-chart").innerHTML = '<p class="panel-note">No live sites to check.</p>';
+      $("up-caption").textContent = "";
+    }
   }
 
   // ---------- Connections from /api/setup (which Vercel variables are set; names only) ----------
@@ -188,27 +287,27 @@
     };
   }
 
-  // ---------- Finance freshness: the newest saved month from /api/finance ----------
-  let finance = { state: "loading" }; // loading | ok { savedAt | null } | error { message }
+  // ---------- Finance freshness: when the J&M P&L sheet was last edited (Drive, read-only, in this browser) ----------
+  let finance = { state: "loading" }; // loading | ok { modifiedTime | null } | error { message }
   async function loadFinance() {
-    const y = new Date().getFullYear();
-    if (Demo.on) { const m = (await Demo.data()).finances(new Date()).months; finance = { state: "ok", savedAt: m[m.length - 1]?.savedAt || null }; renderChecklist(Brain.state); return; }
-    let key = "";
-    try { key = localStorage.getItem("dashKey") || ""; } catch { /* storage blocked */ }
-    let res = null, body = null;
-    try { res = await fetch(`/api/finance?year=${y}`, { headers: key ? { "x-dash-key": key } : {} }); } catch { /* offline */ }
-    try { body = await res?.json(); } catch { /* not JSON */ }
-    finance = res?.ok && body ? { state: "ok", savedAt: body.months.map((m) => m.savedAt).sort().pop() || null }
-      : { state: "error", message: body?.error || "Couldn't read finances." };
+    if (Demo.on) { finance = { state: "ok", modifiedTime: (await Demo.data()).finances(new Date()).modifiedTime }; renderChecklist(Brain.state); return; }
+    const id = (CFG.financeSheetId || "").trim();
+    if (!id || !Drive.linked()) { finance = { state: "error", message: id ? "Sign in with Google to check the sheet." : "No finance sheet is set in config.js." }; renderChecklist(Brain.state); return; }
+    try {
+      finance = { state: "ok", modifiedTime: (await Drive.sheetInfo(id)).modifiedTime || null };
+    } catch (e) {
+      finance = { state: "error", message: e.status === 404 || e.status === 403 ? "Cortex can't open the J&M P&L sheet with this Google account." : `Couldn't read the sheet: ${e.message}` };
+    }
     renderChecklist(Brain.state);
   }
   function financeItem() {
-    const label = "Finance data updated in the last 35 days";
-    if (finance.state === "loading") return { label, status: "unknown", detail: "Checking Finances…", link: ["/finances", "Open Finances"] };
-    if (finance.state === "error") return { label, status: "unknown", detail: finance.message, link: ["/finances", "Open Finances"] };
-    if (!finance.savedAt) return { label, status: "no", detail: "Nothing saved yet this year.", link: ["/finances", "Update finances"] };
-    const fresh = Date.now() - new Date(finance.savedAt).getTime() < 35 * DAY;
-    return { label, status: fresh ? "yes" : "no", detail: `Last saved ${Brain.ago(finance.savedAt)}.`, link: ["/finances", "Open Finances"] };
+    const label = "J&M P&L sheet updated in the last 35 days";
+    const link = ["/finances", "Open Finances"];
+    if (finance.state === "loading") return { label, status: "unknown", detail: "Checking the sheet…", link };
+    if (finance.state === "error") return { label, status: "unknown", detail: finance.message, link };
+    if (!finance.modifiedTime) return { label, status: "unknown", detail: "Drive didn't say when the sheet was last edited.", link };
+    const fresh = Date.now() - new Date(finance.modifiedTime).getTime() < 35 * DAY;
+    return { label, status: fresh ? "yes" : "no", detail: `Last edited ${Brain.ago(finance.modifiedTime)}.`, link };
   }
 
   // ---------- Briefing: whether /Cortex/briefings has today's file (read in the browser with the Drive link) ----------

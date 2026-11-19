@@ -6,9 +6,15 @@ All notable changes to Cortex. Versions follow [Semantic Versioning](https://sem
 
 ### Added
 
+- **Ops trends**: live deploys per week (12 weeks, with a table view), build success from each project's newest 15 deploys, pull requests merged per project, and whether each live site answers right now and how fast. Every bar has its number written beside it.
+- **Ops card previews**: a screenshot of each live site at the top of its card (`/api/preview`, Microlink's free tier, cached a day on Vercel's CDN), with the project logo in the corner; a logo full size when there is no site. Drop `<project>.png` into `assets/projects/` to replace a placeholder. Each card now has **Open site**, **GitHub repo** and **Pull requests** buttons.
+- **News summaries and pictures**: each headline has a summary of one paragraph or less and a small square picture on the left, from the feed or, when the feed has none, the article page's own preview tags; a tile with the source's initials stands in when there is no picture.
+
 - **Connections panel** on the Ops tab: which server connections are set up (Todoist and Calendar, GitHub, Google, finance automation), what each one unlocks, and the Vercel variable names still missing. `/api/setup` reports names and true/false only, never values.
 
 ### Changed
+
+- **Finances reads the J&M P&L Google Sheet directly** (`financeSheetId` in `config.js`), in the browser with the existing read-only Google sign-in: each month (take-home, out, left over), bills and debt payments due in the next 14 days, the 50/30/20 split against its targets, bills by section, debt, and savings against the safety net. The paste-the-JSON dialog is gone; numbers never reach the Cortex server. Home's Money panel and the Ops checklist read the same sheet. `/api/finance` and `/api/ingest/finance` are unchanged but no longer used by the pages.
 
 - **Sign-in goes to Google and back in the same tab** instead of a popup. Google's popup could finish without handing the sign-in back, which left Cortex on the sign-in screen with no message. The Google client now needs the site URL (with a trailing slash) under Authorized redirect URIs. Any sign-in failure now says why on the sign-in screen.
 - "Not set up yet" messages in Finances and approvals now name only the Google variables that are actually missing and point to the Connections panel.

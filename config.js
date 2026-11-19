@@ -7,6 +7,10 @@ window.CORTEX_CONFIG = {
   // The "Second Brain" folder in Google Drive.
   brainFolderId: "1IztK9-y6uuh6QQEH3y927MlVjYXeMUgo",
 
+  // The J&M P&L Google Sheet. Finances and Home read it straight from Drive in this browser (read-only), so the
+  // numbers never pass through the Cortex server. The id is the long part of the sheet's address.
+  financeSheetId: "17PgdaJg41rDKRJqWLj_GyhIPedyaA_OQZftyqnsR_5Y",
+
   // Default weather location. You can change it on the dashboard; that choice is saved in this browser.
   weather: {
     name: "Trinity, NC 27370",

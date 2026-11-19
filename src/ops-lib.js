@@ -61,3 +61,18 @@ export function totals(projects, now) {
     failedWeek: failed.some((f) => f == null) ? null : failed.reduce((n, f) => n + (f ?? 0), 0),
   };
 }
+
+/** "One Small Studio" -> "one-small-studio": the project's logo file name in /assets/projects. */
+export function slug(/** @type {string} */ name) {
+  return name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+}
+
+/**
+ * Build results from the newest deploys' states: how many finished and how many of those failed.
+ * Building or unknown deploys don't count either way. null when there were no finished deploys.
+ * @param {DeployState[]} states
+ */
+export function buildRate(states) {
+  const done = states.filter((s) => s === 'healthy' || s === 'failed');
+  return done.length ? { total: done.length, failed: done.filter((s) => s === 'failed').length } : null;
+}

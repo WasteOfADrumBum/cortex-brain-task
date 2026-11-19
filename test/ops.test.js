@@ -1,7 +1,7 @@
 // /api/ops and its helpers: deploy states, weekly buckets, totals, and one project read from mocked GitHub and npm.
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { deployState, firstLine, weekStart, weeks, totals } from "../src/ops-lib.js";
+import { deployState, firstLine, weekStart, weeks, totals, slug, buildRate } from "../src/ops-lib.js";
 import demo from "../src/demo/index.js";
 
 test("deploy states are words, and a replaced successful deploy still counts as healthy", () => {
@@ -45,9 +45,11 @@ test("/api/ops builds a card from GitHub deployments, pull requests and npm", as
     seen.push(u.host + u.pathname + u.search);
     const send = (b) => new Response(JSON.stringify(b));
     if (u.host === "registry.npmjs.org") return send({ version: "1.2.3" });
-    if (u.pathname.endsWith("/deployments")) return send([{ id: 2, sha: "bbb", created_at: iso(1) }, { id: 1, sha: "aaa", created_at: iso(30) }, { id: 0, sha: "zzz", created_at: iso(24 * 9) }]);
+    if (u.pathname.endsWith("/deployments")) return send([{ id: 2, sha: "bbb", created_at: iso(1) }, { id: 1, sha: "aaa", created_at: iso(30) }, { id: 0, sha: "zzz", created_at: iso(24 * 9) }, { id: -1, sha: "old", created_at: iso(24 * 90) }]);
     if (u.pathname.endsWith("/deployments/2/statuses")) return send([{ state: "success", created_at: iso(1), environment_url: "https://x.vercel.app" }]);
     if (u.pathname.endsWith("/deployments/1/statuses")) return send([{ state: "failure", created_at: iso(30) }]);
+    if (u.pathname.endsWith("/deployments/0/statuses")) return send([{ state: "success", created_at: iso(24 * 9) }]);
+    if (u.host === "demo.example") return new Response("ok", { status: 200 });
     if (u.pathname.endsWith("/commits/bbb")) return send({ commit: { message: "Ship the thing\n\nDetails" } });
     if (u.searchParams.get("state") === "open") return send([{}, {}]);
     if (u.searchParams.get("state") === "closed") return send([
@@ -73,7 +75,12 @@ test("/api/ops builds a card from GitHub deployments, pull requests and npm", as
     assert.equal(body.warnings.length, 0);
     assert.ok(seen.some((s) => s.includes("environment=Production")));
     assert.ok(seen.includes("registry.npmjs.org/@s%2Fpkg/latest"));
-    assert.ok(!seen.some((s) => s.includes("/deployments/0/")), "deploys older than 7 days are not read");
+    assert.ok(!seen.some((s) => s.includes("/deployments/-1/")), "deploys older than 12 weeks are not read");
+    assert.deepEqual(card.builds, { total: 3, failed: 1 }, "build success counts the newest deploys in 12 weeks");
+    assert.equal(card.slug, "demo");
+    assert.equal(card.check.up, true);
+    assert.equal(card.check.status, 200);
+    assert.equal(body.deployWeeks.reduce((n, w) => n + w.counts.Demo, 0), 3);
   } finally {
     globalThis.fetch = realFetch;
   }
@@ -107,4 +114,40 @@ test("the demo's Ops data adds up and names no real project", () => {
   const sum = d.weeks.reduce((n, w) => n + Object.values(w.counts).reduce((a, b) => a + b, 0), 0);
   assert.ok(sum > 20);
   assert.ok(!JSON.stringify(d).match(/WasteOfADrumBum|onesmall|One Small/i));
+  assert.equal(d.deployWeeks.length, 12);
+  assert.ok(d.projects.some((p) => p.check && !p.check.up), "demo shows a site that is down");
+});
+
+test("logo slugs and build rates", () => {
+  assert.equal(slug("One Small Studio"), "one-small-studio");
+  assert.equal(slug("OneSmallUI"), "onesmallui");
+  assert.deepEqual(buildRate(["healthy", "failed", "building", "unknown", "healthy"]), { total: 3, failed: 1 });
+  assert.equal(buildRate(["building"]), null);
+});
+
+test("/api/preview screenshots only listed projects and answers 404 with a short cache when it can't", async () => {
+  const real = globalThis.fetch;
+  const asked = [];
+  globalThis.fetch = async (url) => {
+    asked.push(String(url));
+    const u = new URL(url);
+    if (u.host === "api.microlink.io") return new Response(JSON.stringify({ data: { screenshot: { url: "https://cdn.microlink.test/shot.png" } } }));
+    if (u.host === "cdn.microlink.test") return new Response(new Uint8Array([137, 80]), { headers: { "content-type": "image/png" } });
+    return new Response("", { status: 404 });
+  };
+  try {
+    const { GET } = await import("../api/preview.js");
+    const ok = await GET(new Request("https://x/api/preview?project=Portfolio"));
+    assert.equal(ok.status, 200);
+    assert.equal(ok.headers.get("content-type"), "image/png");
+    assert.match(ok.headers.get("cache-control"), /s-maxage=86400/);
+    assert.ok(new URL(asked[0]).searchParams.get("url").startsWith("https://"));
+    const none = await GET(new Request("https://x/api/preview?project=Engineering%20Hub"));
+    assert.equal(none.status, 404, "a project with no site");
+    const other = await GET(new Request("https://x/api/preview?project=https://evil.test"));
+    assert.equal(other.status, 404, "anything not in config/ops.json");
+    assert.equal(asked.length, 2, "only the listed site was fetched");
+  } finally {
+    globalThis.fetch = real;
+  }
 });

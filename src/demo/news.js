@@ -9,6 +9,8 @@
  */
 export function news(now) {
   const ago = (/** @type {number} */ h) => new Date(now.getTime() - h * 3600000).toISOString();
+  // A made-up one-line summary for each headline; pictures are left out so the demo shows the fallback tile.
+  const summaryOf = (/** @type {string} */ title) => `A short sample summary for "${title}", the kind of paragraph the real feed or the article's own preview provides.`;
   /** @type {[string, string, string, NewsItem["group"], number][]} */
   const rows = [
     ["A practical guide to writing smaller pull requests", "Sample Dev Weekly", "Full-Stack Development", "Work", 2],
@@ -29,7 +31,7 @@ export function news(now) {
       { name: "Software Careers", group: "Work" }, { name: "Gaming & Technology", group: "Life" }, { name: "Photography", group: "Life" },
       { name: "Music & Audio", group: "Life" },
     ],
-    items: rows.map(([title, source, category, group, h], i) => ({ title, url: `https://example.com/demo-news-${i + 1}`, source, category, group, publishedAt: ago(h) }))
+    items: rows.map(([title, source, category, group, h], i) => ({ title, url: `https://example.com/demo-news-${i + 1}`, source, category, group, publishedAt: ago(h), summary: i % 4 === 3 ? "" : summaryOf(title), image: "" }))
       .sort((a, b) => b.publishedAt.localeCompare(a.publishedAt)),
     failed: [{ category: "Cloud & DevOps", feed: "example.org" }],
     homeGroups: ["Work"],

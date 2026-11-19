@@ -10,7 +10,7 @@ Six tabs in the shared top bar, one clean URL each (`vercel.json` turns on `clea
 | --- | --- | --- |
 | Home | `/` | Today strip (date, time, weather with today's high and low), today's schedule with the largest open block, Top 3 priorities ranked by rules with a short why, the morning briefing with the first two approvals, Second Brain summary, links to every tab and your quick links |
 | Planner | `/planner` | Tasks, today, this week and this month (see below) |
-| Finances | `/finances` | This month (in, out, net, bills by due date with overdue called out in words, money in), this year (one row per month, expandable), when the numbers were last saved, and **Update finances**: paste the JSON from the ChatGPT Finances report, check it, then save it to Drive |
+| Finances | `/finances` | Read straight from the J&M P&L Google Sheet (`financeSheetId` in `config.js`) in the browser: each month (take-home, out, left over), bills and debt payments due in the next 14 days, the 50/30/20 split against its targets, bills by section, debt, and savings against the safety net. Nothing to paste; the numbers never reach the Cortex server |
 | News | `/news` | Headlines from the free RSS feeds in `config/news-feeds.json`, one section per category, with a filter bar (All, Work, Life, each category). Broken feeds are skipped and named. Home shows the newest 3 Work headlines |
 | Vault | `/vault` | Every note with its title and one-line summary (frontmatter `name` and `description`), type tag, filters, search and an in-app reader |
 | Briefing | `/briefing` | Not a tab; linked from Home. Today's briefing in full (summary, needs attention, email) from `/Cortex/briefings/YYYY-MM-DD.md` in Drive, and every proposal from it as a card with **Approve** and **Reject**. Reschedules and moves get a 10-second **Undo**. Actions Cortex doesn't run are shown read-only as "Not supported" |
@@ -67,7 +67,7 @@ Google's iCal feed can lag your live calendar by minutes to a few hours.
 | `index.html`, `home.js` | Home tab |
 | `vault.html`, `vault.js` | Vault tab |
 | `ops.html`, `ops.js` | Ops tab |
-| `finances.html`, `finances.js` | Finances tab (paste import uses `src/finance-lib.js`, the same rules as the save routes) |
+| `finances.html`, `finances.js` | Finances tab, read from the budget sheet by `finance-source.js` (Drive export as .xlsx), `src/xlsx-lite.js` and `src/finance-sheet.js` |
 | `news.html`, `news.js` | News tab |
 | `briefing.html`, `briefing.js`, `home-assistant.js`, `assistant-ui.js` | Briefing page and Home's briefing panel: reading the briefing, approval cards, Undo (rules in `src/briefing-lib.js`, `src/approvals-lib.js`) |
 | `config/priorities.json`, `src/priorities-lib.js` | Home's Top 3 rules and weights |
@@ -86,7 +86,8 @@ Google's iCal feed can lag your live calendar by minutes to a few hours.
 | `api/tasks.js` | Todoist tasks, labels, projects and sections for the Planner and Home (needs `DASH_KEY`) |
 | `api/ops.js` | Ops project cards, totals and 12-week chart from GitHub (production deployments Vercel reports, pull requests) and npm; cached 5 minutes (needs `DASH_KEY`; `GITHUB_TOKEN` recommended) |
 | `api/news.js` | News headlines from `config/news-feeds.json` (RSS and Atom parsed by `src/news-lib.js`), cached 30 minutes (needs `DASH_KEY`). `npm run check:feeds` lists which feeds work; CI runs it for information only |
-| `api/finance.js` | Finances: GET a year of saved months, POST a pasted month (needs `DASH_KEY` and the Drive variables) |
+| `api/finance.js` | Older JSON finance months in Drive (GET a year, POST a month); the Finances tab no longer uses it |
+| `api/preview.js` | A cached screenshot of a listed project's live site for its Ops card (Microlink free tier, no key) |
 | `api/ingest/finance.js` | Finance ingest for automation: POST one month with `Authorization: Bearer <CORTEX_INGEST_TOKEN>`; 422 names a bad field, 20 calls an hour |
 | `api/_drive.js`, `api/_finance-store.js` | Drive access with the `drive.file` scope; months saved as `/Cortex/finance/YYYY-MM.json` with the replaced copy as `.prev.json`, and a counts-only log in `/Cortex/logs/` |
 | `api/approvals.js` | Approvals: GET which proposals were decided, POST approve, reject or undo (needs `DASH_KEY`, `TODOIST_TOKEN` and the Google variables). The decision logic is `api/_approvals-run.js`; Todoist and Calendar calls are `api/_todoist.js` and `api/_gcal.js`; state and audit log are `api/_approvals-store.js` |

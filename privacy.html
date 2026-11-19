@@ -30,8 +30,8 @@
     <section class="panel" aria-labelledby="h-google">
       <h2 class="panel-title" id="h-google">What Cortex does with Google data</h2>
       <ul>
-        <li><strong>Google Drive, only files Cortex creates</strong> (<code>drive.file</code>): Cortex saves its own files in the owner's Drive, such as monthly finance summaries under <code>/Cortex/finance</code>, the state of approvals and a log of approved changes. It cannot see or change any other Drive file through this access.</li>
-        <li><strong>Google Drive, read-only in the browser</strong> (<code>drive.readonly</code>): when the owner links Drive, the browser reads the owner's notes and morning briefings to show them on the dashboard. Nothing is changed.</li>
+        <li><strong>Google Drive, only files Cortex creates</strong> (<code>drive.file</code>): Cortex saves its own files in the owner's Drive, such as the state of approvals and a log of approved changes. It cannot see or change any other Drive file through this access.</li>
+        <li><strong>Google Drive, read-only in the browser</strong> (<code>drive.readonly</code>): when the owner links Drive, the browser reads the owner's notes, morning briefings and budget sheet to show them on the dashboard. The budget numbers stay in the browser and are never sent to the Cortex server. Nothing is changed.</li>
         <li><strong>Google Calendar events</strong> (<code>calendar.events</code>): used only when the owner approves a proposed change, to add or move that one event. Cortex never deletes events.</li>
       </ul>
     </section>
