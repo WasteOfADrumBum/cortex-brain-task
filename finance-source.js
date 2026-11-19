@@ -18,6 +18,8 @@ async function read() {
   if (!id) return { message: "No finance sheet is set. Add its id as financeSheetId in config.js." };
   if (!Drive.linked()) return { message: "Sign in with Google to read the J&M P&L sheet." };
   let info, bytes;
+  // Tab ids for links; optional, so a failure here never stops the page.
+  const gids = Drive.sheetTabs ? Drive.sheetTabs(id).catch(() => null) : Promise.resolve(null);
   try {
     [info, bytes] = await Promise.all([Drive.sheetInfo(id), Drive.exportXlsx(id)]);
   } catch (e) {
@@ -27,5 +29,6 @@ async function read() {
   let tabs;
   try { tabs = await readXlsx(bytes, TABS); } catch { return { message: "The J&M P&L sheet came back in a form Cortex couldn't read." }; }
   const finance = parseWorkbook(tabs);
-  return { result: { finance, modifiedTime: info.modifiedTime || null, url: info.webViewLink || `https://docs.google.com/spreadsheets/d/${id}/edit`, name: info.name || "J&M P&L" } };
+  const tabIds = (await gids) || window.CORTEX_CONFIG.financeSheetTabs || {};
+  return { result: { finance, gids: tabIds, modifiedTime: info.modifiedTime || null, url: `https://docs.google.com/spreadsheets/d/${id}/edit`, name: info.name || "J&M P&L" } };
 }

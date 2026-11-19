@@ -10,6 +10,16 @@ window.CORTEX_CONFIG = {
   // The J&M P&L Google Sheet. Finances and Home read it straight from Drive in this browser (read-only), so the
   // numbers never pass through the Cortex server. The id is the long part of the sheet's address.
   financeSheetId: "17PgdaJg41rDKRJqWLj_GyhIPedyaA_OQZftyqnsR_5Y",
+  // Tab ids in that sheet, so Finances can link straight to a tab and range. Only used when the Sheets API can't be
+  // reached; tab ids don't change when a tab is edited or renamed, only when it is deleted and made again.
+  financeSheetTabs: {
+    "Summary": 246036219, "Household Dashboard": 1900326001, "Trends Dashboard": 60102004, "Joshua Income": 1340560512,
+    "Joshua Paycheck History": 795551172, "Maggie Income": 1244205992, "Maggie Paycheck History": 925825144,
+    "Debt & Loans": 1501708750, "Recurring Expenses": 961971027, "Bill Trends": 60102001, "Subscription Trends": 60102002,
+    "Income Trends": 60102003, "Occasional Costs": 789313333, "Savings": 493986483, "Duke Energy": 1822032286,
+    "Davidson Water": 1221735853, "Dashboard Data": 1900326002, "Estimate Inputs": 1900326003,
+    "Net Worth History": 1900326004, "Layoff Plan": 1800660606,
+  },
 
   // Default weather location. You can change it on the dashboard; that choice is saved in this browser.
   weather: {

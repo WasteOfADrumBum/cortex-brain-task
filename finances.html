@@ -4,15 +4,15 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>Finances · Cortex</title>
-  <meta name="description" content="Cortex Finances: each month, bills coming up, debt and savings, from your budget sheet.">
+  <meta name="description" content="Cortex Finances: your plan from the budget sheet, with estimates, gaps and conflicts labelled.">
   <meta name="theme-color" content="#04080e">
   <link rel="icon" href="/favicon.svg" type="image/svg+xml">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;800&family=Rajdhani:wght@500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;800&family=Rajdhani:wght@500;600;700&family=JetBrains+Mono:wght@400;600&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/styles.css">
 </head>
-<body data-auth="pending">
+<body data-auth="pending" class="fin-page">
   <a class="skip-link" href="#main">Skip to content</a>
   <div class="backdrop" aria-hidden="true"></div>
 
@@ -20,51 +20,82 @@
 
   <p class="notice" id="notice" role="alert" hidden></p>
 
-  <main id="main" class="page finances">
+  <main id="main" class="page finances fin-readable">
     <div class="page-head">
       <h1>Finances</h1>
-      <p class="page-lede">Each month, what's coming up, debt and savings, read straight from your J&amp;M P&amp;L sheet in Google Drive. Nothing to paste: edit the sheet and refresh.</p>
+      <p class="page-lede">Your plan, read from the J&amp;M P&amp;L sheet. Each number says if it's <strong>recorded</strong> in the plan, an <strong>estimate</strong>, <strong>confirmed</strong>, or <strong>unknown</strong>.</p>
     </div>
 
     <div class="fin-bar">
-      <p class="panel-note" id="fin-updated" role="status">Loading…</p>
+      <p class="fin-updated" id="fin-updated" role="status">Loading…</p>
       <div class="fin-actions">
         <a class="btn" id="fin-sheet-link" href="#" target="_blank" rel="noopener" hidden>Open the sheet<span class="visually-hidden"> (opens in a new tab)</span></a>
         <button type="button" class="btn btn-primary" id="btn-refresh">Refresh</button>
       </div>
     </div>
 
-    <div class="fin-grid">
-      <section class="panel fin-month" aria-labelledby="h-month">
-        <h2 class="panel-title" id="h-month">Each month</h2>
-        <div id="fin-month"><p class="panel-note">Loading…</p></div>
+    <nav class="fin-nav" aria-label="Finances sections">
+      <ul>
+        <li><a href="#overview">Overview</a></li>
+        <li><a href="#attention">Needs attention</a></li>
+        <li><a href="#timeline">Next 31 days</a></li>
+        <li><a href="#allocation">Monthly plan</a></li>
+        <li><a href="#safety">Savings</a></li>
+        <li><a href="#debt">Debt</a></li>
+        <li><a href="#trends">Trends</a></li>
+        <li><a href="#bills">Bills</a></li>
+        <li><a href="#sources">Sources</a></li>
+      </ul>
+    </nav>
+
+    <section class="fin-section" id="overview" aria-labelledby="h-overview">
+      <h2 class="fin-h2" id="h-overview">Overview</h2>
+      <div id="fin-overview"><p class="panel-note">Loading…</p></div>
+    </section>
+
+    <div class="fin-two">
+      <section class="panel fin-section" id="attention" aria-labelledby="h-attention">
+        <h2 class="fin-h2" id="h-attention">Needs attention</h2>
+        <div id="fin-attention"><p class="panel-note">Loading…</p></div>
       </section>
 
-      <section class="panel fin-soon" aria-labelledby="h-soon">
-        <h2 class="panel-title" id="h-soon">Due in the next 14 days</h2>
-        <div id="fin-soon"><p class="panel-note">Loading…</p></div>
-      </section>
-
-      <section class="panel fin-split" aria-labelledby="h-split">
-        <h2 class="panel-title" id="h-split">Needs, wants and savings</h2>
-        <div id="fin-split"><p class="panel-note">Loading…</p></div>
-      </section>
-
-      <section class="panel fin-bills" aria-labelledby="h-bills">
-        <h2 class="panel-title" id="h-bills">Bills and subscriptions</h2>
-        <div id="fin-bills"><p class="panel-note">Loading…</p></div>
-      </section>
-
-      <section class="panel fin-debt" aria-labelledby="h-debt">
-        <h2 class="panel-title" id="h-debt">Debt</h2>
-        <div id="fin-debt"><p class="panel-note">Loading…</p></div>
-      </section>
-
-      <section class="panel fin-save" aria-labelledby="h-save">
-        <h2 class="panel-title" id="h-save">Savings and safety net</h2>
-        <div id="fin-save"><p class="panel-note">Loading…</p></div>
+      <section class="panel fin-section" id="timeline" aria-labelledby="h-timeline">
+        <h2 class="fin-h2" id="h-timeline">Next 31 days</h2>
+        <div id="fin-timeline"><p class="panel-note">Loading…</p></div>
       </section>
     </div>
+
+    <section class="panel fin-section" id="allocation" aria-labelledby="h-allocation">
+      <h2 class="fin-h2" id="h-allocation">Monthly plan</h2>
+      <div id="fin-allocation"><p class="panel-note">Loading…</p></div>
+    </section>
+
+    <div class="fin-two">
+      <section class="panel fin-section" id="safety" aria-labelledby="h-safety">
+        <h2 class="fin-h2" id="h-safety">Savings and safety net</h2>
+        <div id="fin-safety"><p class="panel-note">Loading…</p></div>
+      </section>
+
+      <section class="panel fin-section" id="debt" aria-labelledby="h-debt">
+        <h2 class="fin-h2" id="h-debt">Debt</h2>
+        <div id="fin-debt"><p class="panel-note">Loading…</p></div>
+      </section>
+    </div>
+
+    <section class="panel fin-section" id="trends" aria-labelledby="h-trends">
+      <h2 class="fin-h2" id="h-trends">Trends</h2>
+      <div id="fin-trends"><p class="panel-note">Loading…</p></div>
+    </section>
+
+    <section class="panel fin-section" id="bills" aria-labelledby="h-bills">
+      <h2 class="fin-h2" id="h-bills">Bills and subscriptions</h2>
+      <div id="fin-bills"><p class="panel-note">Loading…</p></div>
+    </section>
+
+    <section class="panel fin-section" id="sources" aria-labelledby="h-sources">
+      <h2 class="fin-h2" id="h-sources">Where the numbers come from</h2>
+      <div id="fin-sources"><p class="panel-note">Loading…</p></div>
+    </section>
   </main>
 
   <footer class="ticker">
