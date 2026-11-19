@@ -243,6 +243,10 @@ export interface NewsItem {
   category: string;
   group: "Work" | "Life";
   publishedAt: string;
+  /** One paragraph or less from the feed or the article's own preview ("" when neither has one). */
+  summary: string;
+  /** An https picture from the feed or the article's og:image ("" when there is none). */
+  image: string;
 }
 export interface NewsCategory { name: string; group: "Work" | "Life" }
 export interface NewsResponse {

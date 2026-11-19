@@ -1,5 +1,5 @@
 // Cortex News: headlines by category from /api/news (free RSS feeds in config/news-feeds.json, same dashboard key as
-// the Planner). A filter bar of toggle buttons (All, Work, Life, one per category) keeps nine categories from
+// the Planner), each with a small picture on the left and a summary of one paragraph or less. A filter bar of toggle buttons (All, Work, Life, one per category) keeps nine categories from
 // becoming one long scroll. Broken feeds are named in a small note. /demo uses sample headlines.
 (() => {
   const $ = (id) => document.getElementById(id);
@@ -24,6 +24,29 @@
     render();
   }
 
+  // The source's initials, shown when a headline has no picture or its picture fails to load.
+  const initials = (src) => (src.match(/[A-Za-z0-9]+/g) || ["?"]).filter((w) => !/^(the|a|of|and)$/i.test(w)).slice(0, 2).map((w) => w[0].toUpperCase()).join("");
+  const fallback = (src) => `<span class="news-fallback">${esc(initials(src))}</span>`;
+  // Pictures are decoration next to the headline (alt=""), so a screen reader reads the title, summary and source only.
+  function item(i) {
+    const thumb = i.image
+      ? `<img src="${esc(i.image)}" alt="" width="96" height="96" loading="lazy" decoding="async" referrerpolicy="no-referrer" data-source="${esc(i.source)}">`
+      : fallback(i.source);
+    return `<li class="news-item">
+      <span class="news-thumb" aria-hidden="true">${thumb}</span>
+      <div class="news-body">
+        <a class="news-title" href="${esc(i.url)}" target="_blank" rel="noopener">${esc(i.title)}<span class="visually-hidden"> (opens in a new tab)</span></a>
+        ${i.summary ? `<p class="news-summary">${esc(i.summary)}</p>` : ""}
+        <span class="news-meta">${esc(i.source)} · ${esc(Brain.ago(i.publishedAt))}</span>
+      </div>
+    </li>`;
+  }
+  // A picture that fails to load (blocked, moved, hotlink-protected) becomes the initials tile.
+  $("news-sections").addEventListener("error", (e) => {
+    const img = e.target;
+    if (img instanceof HTMLImageElement && img.closest(".news-thumb")) img.outerHTML = fallback(img.dataset.source || "");
+  }, true);
+
   function chips() {
     const options = ["All", "Work", "Life", ...data.categories.map((c) => c.name)];
     $("news-filters").innerHTML = options.map((o) => `<button type="button" class="chip" aria-pressed="${o === filter}" data-filter="${esc(o)}">${esc(o)}</button>`).join("");
@@ -39,10 +62,7 @@
       const id = `h-news-${slug(c.name)}`;
       return `<section class="panel news-section" aria-labelledby="${id}">
         <h2 class="panel-title" id="${id}">${esc(c.name)} <span class="code">${esc(c.group)}</span></h2>
-        ${items.length ? `<ul class="news-list">${items.map((i) => `<li>
-          <a href="${esc(i.url)}" target="_blank" rel="noopener">${esc(i.title)}<span class="visually-hidden"> (opens in a new tab)</span></a>
-          <span class="news-meta">${esc(i.source)} · ${esc(Brain.ago(i.publishedAt))}</span>
-        </li>`).join("")}</ul>` : '<p class="panel-note">No headlines from this category right now.</p>'}
+        ${items.length ? `<ul class="news-list">${items.map(item).join("")}</ul>` : '<p class="panel-note">No headlines from this category right now.</p>'}
       </section>`;
     }).join("");
   }
