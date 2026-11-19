@@ -157,19 +157,18 @@
       : { body });
   }
 
-  // ---------- Money this month (desktop Home): the Finances tab's route and the same dashboard key ----------
-  async function loadMoney() {
-    if (Demo.on) { HomeDesk.money({ body: (await Demo.data()).finances(new Date()) }); return; }
-    let key = "";
-    try { key = localStorage.getItem("dashKey") || ""; } catch { /* storage blocked */ }
-    let res = null, body = null;
-    try { res = await fetch(`/api/finance?year=${new Date().getFullYear()}`, { headers: key ? { "x-dash-key": key } : {} }); } catch { /* offline */ }
-    try { body = await res?.json(); } catch { /* not JSON */ }
-    HomeDesk.money(!res ? { message: "Couldn't reach Cortex (offline or blocked)." }
-      : res.status === 401 ? { message: "Enter your dashboard key in Top 3 to see this month's money." }
-      : res.status === 404 ? { message: "The finance route isn't deployed yet." }
-      : !res.ok || !body ? { message: `Finances unavailable: ${body?.error || `error ${res.status}`}.` }
-      : { body });
+  // ---------- Money this month (desktop Home): the J&M P&L sheet, read in this browser like the Finances tab ----------
+  async function loadMoney(fresh = false) {
+    try {
+      const [{ loadSheetFinance }, { monthly, upcoming }] = await Promise.all([import("/finance-source.js"), import("/src/finance-sheet.js")]);
+      const r = await loadSheetFinance({ fresh });
+      if ("message" in r) { HomeDesk.money({ message: r.message }); return; }
+      const f = r.result.finance;
+      const m = monthly(f);
+      HomeDesk.money({ body: { income: m.income, out: m.out, left: m.left, soon: upcoming(f, new Date(), 7), billCount: f.bills.length, modifiedTime: r.result.modifiedTime } });
+    } catch {
+      HomeDesk.money({ message: "Couldn't read the finance sheet." });
+    }
   }
 
   // ---------- Headlines (desktop Home): the News tab's route, newest 3 from Home's groups ----------
@@ -314,7 +313,7 @@
     loadNews();
     setInterval(loadNews, 30 * 60000);
     setInterval(() => Weather.refresh(wxHost), 15 * 60000);
-    setInterval(() => { loadSchedule(); loadTasks(); loadOps(); loadMoney(); }, 10 * 60000);
+    setInterval(() => { loadSchedule(); loadTasks(); loadOps(); loadMoney(true); }, 10 * 60000);
   }
   Brain.boot({
     onUpdate(state) {

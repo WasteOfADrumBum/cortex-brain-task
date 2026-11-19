@@ -41,7 +41,7 @@ const Demo = (() => {
     ],
   };
   // No Google client or folder id: the demo never talks to Drive.
-  Object.assign(window.CORTEX_CONFIG, profile, { googleClientId: "", brainFolderId: "" });
+  Object.assign(window.CORTEX_CONFIG, profile, { googleClientId: "", brainFolderId: "", financeSheetId: "" });
   document.documentElement.classList.add("is-demo");
 
   // ---------- Banner and "Demo only" message ----------

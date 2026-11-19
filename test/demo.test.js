@@ -75,7 +75,7 @@ test("the demo contains nothing personal from config.js", () => {
   const ctx = loadScript("config.js");
   const cfg = ctx.window.CORTEX_CONFIG;
   const personal = [
-    cfg.userName, cfg.weather.name, cfg.brainFolderId, cfg.googleClientId, cfg.spotifyPlaylistUrl.split("/").pop(),
+    cfg.userName, cfg.weather.name, cfg.brainFolderId, cfg.financeSheetId, cfg.googleClientId, cfg.spotifyPlaylistUrl.split("/").pop(),
     ...cfg.launchers.map((l) => l.url).filter((u) => /drive\.google\.com\/(file|drive\/folders)/.test(u)).map((u) => u.match(/[-\w]{25,}/)[0]),
     "WasteOfADrumBum", "cortex-brain-task", "Joshua", "One Small",
   ];

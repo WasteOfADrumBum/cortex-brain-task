@@ -151,12 +151,14 @@ const Drive = (() => {
   // Pages use it to pick the sign-in screen or the app on first paint.
   const hasSession = () => linked() || restoreSession();
 
-  async function request(url, asText = false) {
+  // as: "json" (default), "text" or "bytes" (an ArrayBuffer). A failed answer throws an Error with .status set.
+  async function request(url, as = "json") {
+    if (as === true) as = "text";
     if (!linked()) { dropToken(); onChange("expired"); throw new Error("Drive session expired. Link Drive again."); }
     const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
     if (res.status === 401) { dropToken(); onChange("expired"); throw new Error("Drive session expired. Link Drive again."); }
-    if (!res.ok) throw new Error(`Drive returned ${res.status}.`);
-    return asText ? res.text() : res.json();
+    if (!res.ok) throw Object.assign(new Error(`Drive returned ${res.status}.`), { status: res.status });
+    return as === "text" ? res.text() : as === "bytes" ? res.arrayBuffer() : res.json();
   }
 
   async function list(q) {
@@ -242,5 +244,15 @@ const Drive = (() => {
     return { files: [], folder: null };
   }
 
-  return { init, signIn, signOut, linked, hasSession, readReturn, error: () => lastError, loadBrain, storage, searchContent, readFile, briefings, configured };
+  // A Google Sheet for the Finances tab: its name, last change and link, then the whole workbook as .xlsx bytes.
+  // Both work with drive.readonly, so reading the sheet needs no extra Google setting or permission.
+  async function sheetInfo(id) {
+    return request(`${API}/files/${encodeURIComponent(id)}?fields=name,modifiedTime,webViewLink&supportsAllDrives=true`);
+  }
+  async function exportXlsx(id) {
+    const mime = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+    return request(`${API}/files/${encodeURIComponent(id)}/export?mimeType=${encodeURIComponent(mime)}`, "bytes");
+  }
+
+  return { init, signIn, signOut, linked, hasSession, readReturn, error: () => lastError, loadBrain, storage, searchContent, readFile, briefings, sheetInfo, exportXlsx, configured };
 })();

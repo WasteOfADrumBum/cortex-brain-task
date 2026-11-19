@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>Finances · Cortex</title>
-  <meta name="description" content="Cortex Finances: this month in detail, plus the year.">
+  <meta name="description" content="Cortex Finances: each month, bills coming up, debt and savings, from your budget sheet.">
   <meta name="theme-color" content="#04080e">
   <link rel="icon" href="/favicon.svg" type="image/svg+xml">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -23,39 +23,48 @@
   <main id="main" class="page finances">
     <div class="page-head">
       <h1>Finances</h1>
-      <p class="page-lede">This month in detail, plus the year. Numbers come from the ChatGPT Finances report you paste in.</p>
+      <p class="page-lede">Each month, what's coming up, debt and savings, read straight from your J&amp;M P&amp;L sheet in Google Drive. Nothing to paste: edit the sheet and refresh.</p>
     </div>
 
     <div class="fin-bar">
       <p class="panel-note" id="fin-updated" role="status">Loading…</p>
-      <button type="button" class="btn btn-primary" id="btn-update">Update finances</button>
+      <div class="fin-actions">
+        <a class="btn" id="fin-sheet-link" href="#" target="_blank" rel="noopener" hidden>Open the sheet<span class="visually-hidden"> (opens in a new tab)</span></a>
+        <button type="button" class="btn btn-primary" id="btn-refresh">Refresh</button>
+      </div>
     </div>
 
-    <section class="panel fin-month" aria-labelledby="h-month">
-      <h2 class="panel-title" id="h-month">This month</h2>
-      <div id="fin-month"><p class="panel-note">Loading…</p></div>
-    </section>
+    <div class="fin-grid">
+      <section class="panel fin-month" aria-labelledby="h-month">
+        <h2 class="panel-title" id="h-month">Each month</h2>
+        <div id="fin-month"><p class="panel-note">Loading…</p></div>
+      </section>
 
-    <section class="panel fin-year" aria-labelledby="h-year">
-      <h2 class="panel-title" id="h-year">This year</h2>
-      <div id="fin-year"><p class="panel-note">Loading…</p></div>
-    </section>
+      <section class="panel fin-soon" aria-labelledby="h-soon">
+        <h2 class="panel-title" id="h-soon">Due in the next 14 days</h2>
+        <div id="fin-soon"><p class="panel-note">Loading…</p></div>
+      </section>
 
-    <dialog class="fin-dialog" id="fin-dialog" aria-labelledby="fin-dlg-title">
-      <form method="dialog" id="fin-form">
-        <h2 class="panel-title" id="fin-dlg-title">Update finances</h2>
-        <label for="fin-json" class="fin-label">Paste the JSON block from the end of the ChatGPT Finances report</label>
-        <p class="panel-note" id="fin-json-hint">One month at a time. Saving replaces that month; the old copy is kept in Drive.</p>
-        <textarea id="fin-json" rows="10" spellcheck="false" aria-describedby="fin-json-hint fin-errors"></textarea>
-        <p class="fin-errors warn-text" id="fin-errors" role="alert"></p>
-        <div id="fin-preview" aria-live="polite"></div>
-        <div class="fin-buttons">
-          <button type="button" class="btn" id="btn-preview">Check it</button>
-          <button type="button" class="btn btn-primary" id="btn-save" data-write="Saving finances" disabled>Save to Drive</button>
-          <button type="button" class="btn" id="btn-cancel">Cancel</button>
-        </div>
-      </form>
-    </dialog>
+      <section class="panel fin-split" aria-labelledby="h-split">
+        <h2 class="panel-title" id="h-split">Needs, wants and savings</h2>
+        <div id="fin-split"><p class="panel-note">Loading…</p></div>
+      </section>
+
+      <section class="panel fin-bills" aria-labelledby="h-bills">
+        <h2 class="panel-title" id="h-bills">Bills and subscriptions</h2>
+        <div id="fin-bills"><p class="panel-note">Loading…</p></div>
+      </section>
+
+      <section class="panel fin-debt" aria-labelledby="h-debt">
+        <h2 class="panel-title" id="h-debt">Debt</h2>
+        <div id="fin-debt"><p class="panel-note">Loading…</p></div>
+      </section>
+
+      <section class="panel fin-save" aria-labelledby="h-save">
+        <h2 class="panel-title" id="h-save">Savings and safety net</h2>
+        <div id="fin-save"><p class="panel-note">Loading…</p></div>
+      </section>
+    </div>
   </main>
 
   <footer class="ticker">

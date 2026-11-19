@@ -188,27 +188,27 @@
     };
   }
 
-  // ---------- Finance freshness: the newest saved month from /api/finance ----------
-  let finance = { state: "loading" }; // loading | ok { savedAt | null } | error { message }
+  // ---------- Finance freshness: when the J&M P&L sheet was last edited (Drive, read-only, in this browser) ----------
+  let finance = { state: "loading" }; // loading | ok { modifiedTime | null } | error { message }
   async function loadFinance() {
-    const y = new Date().getFullYear();
-    if (Demo.on) { const m = (await Demo.data()).finances(new Date()).months; finance = { state: "ok", savedAt: m[m.length - 1]?.savedAt || null }; renderChecklist(Brain.state); return; }
-    let key = "";
-    try { key = localStorage.getItem("dashKey") || ""; } catch { /* storage blocked */ }
-    let res = null, body = null;
-    try { res = await fetch(`/api/finance?year=${y}`, { headers: key ? { "x-dash-key": key } : {} }); } catch { /* offline */ }
-    try { body = await res?.json(); } catch { /* not JSON */ }
-    finance = res?.ok && body ? { state: "ok", savedAt: body.months.map((m) => m.savedAt).sort().pop() || null }
-      : { state: "error", message: body?.error || "Couldn't read finances." };
+    if (Demo.on) { finance = { state: "ok", modifiedTime: (await Demo.data()).finances(new Date()).modifiedTime }; renderChecklist(Brain.state); return; }
+    const id = (CFG.financeSheetId || "").trim();
+    if (!id || !Drive.linked()) { finance = { state: "error", message: id ? "Sign in with Google to check the sheet." : "No finance sheet is set in config.js." }; renderChecklist(Brain.state); return; }
+    try {
+      finance = { state: "ok", modifiedTime: (await Drive.sheetInfo(id)).modifiedTime || null };
+    } catch (e) {
+      finance = { state: "error", message: e.status === 404 || e.status === 403 ? "Cortex can't open the J&M P&L sheet with this Google account." : `Couldn't read the sheet: ${e.message}` };
+    }
     renderChecklist(Brain.state);
   }
   function financeItem() {
-    const label = "Finance data updated in the last 35 days";
-    if (finance.state === "loading") return { label, status: "unknown", detail: "Checking Finances…", link: ["/finances", "Open Finances"] };
-    if (finance.state === "error") return { label, status: "unknown", detail: finance.message, link: ["/finances", "Open Finances"] };
-    if (!finance.savedAt) return { label, status: "no", detail: "Nothing saved yet this year.", link: ["/finances", "Update finances"] };
-    const fresh = Date.now() - new Date(finance.savedAt).getTime() < 35 * DAY;
-    return { label, status: fresh ? "yes" : "no", detail: `Last saved ${Brain.ago(finance.savedAt)}.`, link: ["/finances", "Open Finances"] };
+    const label = "J&M P&L sheet updated in the last 35 days";
+    const link = ["/finances", "Open Finances"];
+    if (finance.state === "loading") return { label, status: "unknown", detail: "Checking the sheet…", link };
+    if (finance.state === "error") return { label, status: "unknown", detail: finance.message, link };
+    if (!finance.modifiedTime) return { label, status: "unknown", detail: "Drive didn't say when the sheet was last edited.", link };
+    const fresh = Date.now() - new Date(finance.modifiedTime).getTime() < 35 * DAY;
+    return { label, status: fresh ? "yes" : "no", detail: `Last edited ${Brain.ago(finance.modifiedTime)}.`, link };
   }
 
   // ---------- Briefing: whether /Cortex/briefings has today's file (read in the browser with the Drive link) ----------

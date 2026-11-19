@@ -197,6 +197,44 @@ export interface SavedFinanceMonth extends FinanceMonth { savedAt: string }
 /** GET /api/finance?year=YYYY: every saved month of the year, oldest first. */
 export interface FinanceYear { year: number; months: SavedFinanceMonth[] }
 
+// ---------- Finances from the J&M P&L Google Sheet (read in the browser; src/finance-sheet.js) ----------
+export interface SheetAmountRow { label: string; amount: number | null; /** The unlabelled total row. */ total: boolean }
+export interface SheetSnapshotRow { label: string; payPeriod: number | null; monthly: number | null; yearly: number | null; kind: "income" | "out" | "left" }
+export interface SheetAllocation { category: string; actual: number | null; actualShare: number | null; target: number | null; targetShare: number | null }
+export interface SheetBill {
+  name: string;
+  /** The Recurring Expenses table it came from, e.g. "Home & Utilities". */
+  section: string;
+  kind: "Need" | "Want" | "";
+  /** Each time it's paid. */
+  amount: number | null;
+  frequency: string;
+  /** As written: "6" (a day each month), "Jan 31" (each year) or "". */
+  due: string;
+  monthly: number | null;
+  yearly: number | null;
+}
+export interface SheetLoan { name: string; type: string; balance: number | null; monthly: number | null; due: string; status: string }
+export interface SheetCard { name: string; balance: number; /** Fraction, 0.2374 for 23.74%. */ apr: number | null; due: string; status: string }
+export interface SheetAccount { name: string; purpose: string; balance: number | null; group: string }
+export interface SheetFinance {
+  snapshot: SheetSnapshotRow[];
+  debt: SheetAmountRow[];
+  savings: SheetAmountRow[];
+  safetyNet: SheetAmountRow[];
+  allocation: SheetAllocation[];
+  /** Net income the 50/30/20 shares are measured against. */
+  allocationBase: number | null;
+  bills: SheetBill[];
+  loans: SheetLoan[];
+  cards: SheetCard[];
+  accounts: SheetAccount[];
+  /** Tabs Cortex looked for and didn't find. */
+  missing: string[];
+}
+/** What the Finances tab and Home get: the model plus where it came from. */
+export interface SheetFinanceResult { finance: SheetFinance; modifiedTime: string | null; url: string; name: string }
+
 // ---------- News (phase 5): RSS headlines ----------
 export interface NewsItem {
   title: string;
@@ -240,7 +278,7 @@ export interface DemoData {
   checks(now: Date, titles: string[]): ChecksResponse;
   calendar(from: Date, to: Date): CalendarResponse;
   weather(today: Date): WeatherResult;
-  finances(today: Date): FinanceYear;
+  finances(today: Date): SheetFinanceResult;
   news(now: Date): NewsResponse;
   ops(now: Date): OpsResponse;
   briefing(now: Date): BriefingFile[];
