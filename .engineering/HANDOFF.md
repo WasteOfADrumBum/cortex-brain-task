@@ -1,16 +1,16 @@
-<!-- generated from .engineering/state.json (revision 8) -->
+<!-- generated from .engineering/state.json (revision 9) -->
 
 # Handoff: cortex
 
 Read this, then **verify against GitHub** (branch head, open PRs, CI) before continuing. Nothing below is independently verified.
 
-- Checkpoint: revision 8, `cp-2026-11-12-release-2-0-prep`, 2026-11-12T12:48:19Z by Claude Code
+- Checkpoint: revision 9, `cp-2026-11-19-finances-honest-dashboard`, 2026-11-19T22:39:51Z by Claude Code
 - Written by: a local edit that the agent then pushed; confirm the branch head matches
 - Uncommitted work outside this checkpoint: **none**
 
 ## Continue with
 
-Joshua Small reviews the hub Cortex 2.0 release package, does the listed checks and signs off; then merge the release PR and record the approval in the hub.
+Joshua Small checks /finances with the real sheet, then decides on merging PR #50.
 
 ## Unfinished
 
@@ -18,8 +18,8 @@ _none recorded_
 
 ## Blockers
 
-- Release approval belongs to Joshua Small
-- Live checks of Finances saving, approvals and Ops data need his Google token (drive.file, calendar.events) and GITHUB_TOKEN in Vercel, and the briefing routine set up
+- Merge approval belongs to Joshua Small
+- Live Finances check needs his Google sign-in
 
 ## Decisions
 

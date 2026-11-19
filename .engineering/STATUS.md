@@ -1,22 +1,22 @@
-<!-- generated from .engineering/state.json (revision 8); edit state.json through a checkpoint, not this file -->
+<!-- generated from .engineering/state.json (revision 9); edit state.json through a checkpoint, not this file -->
 
 # cortex: development status
 
 All values are **agent-reported**, not independently verified. Check GitHub before relying on them.
 
 - Milestone: Cortex v2 (after 1.0)
-- Active task: none recorded
-- Branch: `claude/release-2.0.0`
-- Recorded commit: `8772de5` on `claude/release-2.0.0`
-- Last checkpoint: 2026-11-12T12:48:19Z by Claude Code
+- Active task: finances-honest-dashboard: Rebuild the Finances tab to read the J&M P&L sheet honestly
+- Branch: `feat/finances-honest-dashboard` · PR #50
+- Recorded commit: `354330b` on `feat/finances-honest-dashboard`
+- Last checkpoint: 2026-11-19T22:39:51Z by Claude Code
 
 ## Next action
 
-Joshua Small reviews the hub Cortex 2.0 release package, does the listed checks and signs off; then merge the release PR and record the approval in the hub.
+Joshua Small checks /finances signed in with the real sheet on the Vercel preview or after merge, then decides whether to merge PR #50.
 
 ## Completed
 
-- Cortex 2.0.0 release prep: CHANGELOG, version 2.0.0, footer and docs on branch claude/release-2.0.0; hub release package and registry record prepared. npm test 52/52 locally.
+- Finances rebuild: src/finance-model.js (money rules), wider sheet reader, seven views, docs/finances.md; PR #50 open, CI green (tests, axe, checkpoint).
 
 ## In progress
 
@@ -24,8 +24,8 @@ _none recorded_
 
 ## Tests (agent-reported)
 
-- `npm test`: pass at `59c2b29`, 2026-11-11T05:38:16Z
+- `npm test`: pass at `354330b`, 2026-11-19T22:39:51Z
 
 ## Unverified changes
 
-_none recorded_
+- Finances with the real sheet (needs the owner's Google sign-in); tab links depend on the Sheets API or config tab ids
